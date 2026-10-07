@@ -112,7 +112,10 @@ const accounts = process.env.DEPLOYER_PRIVATE_KEY
   : [];
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.28",
+  solidity: {
+    version: "0.8.28",
+    settings: { evmVersion: "cancun" },
+  },
   networks: {
     baseSepolia: {
       url: process.env.BASE_SEPOLIA_RPC_URL ?? "https://sepolia.base.org",
@@ -129,7 +132,7 @@ export default config;
 | `import "@nomicfoundation/hardhat-toolbox"` | Turns on the toolbox plugins (tests, TypeScript types, gas reports). |
 | `dotenv.config()` | Loads the values from `.env` into `process.env`. |
 | `accounts` | Uses your deployer key if one is set, otherwise an empty list so compile and test still work without a key. |
-| `solidity: "0.8.28"` | The Solidity compiler version for our contracts. OpenZeppelin v5 needs 0.8.20 or newer. |
+| `solidity: { version, settings }` | The Solidity compiler version for our contracts (OpenZeppelin v5 needs 0.8.20 or newer) and the EVM target. `evmVersion: "cancun"` is required because current OpenZeppelin code uses an instruction only available in that version. |
 | `networks.baseSepolia` | Defines the testnet we'll deploy to. |
 
 ---
@@ -160,10 +163,10 @@ git commit -m "chore: scaffold ZiwaChain (Hardhat + TypeScript + OpenZeppelin)"
 npx hardhat compile                                  # rebuild after editing contracts
 npx hardhat test                                     # run all tests
 npx hardhat node                                     # start a local blockchain you can deploy to
-npx hardhat ignition deploy ignition/modules/Lock.ts --network baseSepolia   # deploy to the testnet
+npx hardhat ignition deploy ignition/modules/ZiwaChain.ts --network baseSepolia   # deploy to the testnet
 ```
 
-(`Lock.ts` is the sample module. We'll replace it with a ZiwaChain deployment module.)
+(`ZiwaChain.ts` is the deployment module. Before using it, delete the sample files `contracts/Lock.sol`, `test/Lock.ts` and `ignition/modules/Lock.ts`.)
 
 ---
 
