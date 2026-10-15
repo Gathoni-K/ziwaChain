@@ -1,0 +1,221 @@
+# ZiwaChain: Project Context and Technical Handoff
+
+This file is written for an AI assistant that is continuing the build. Read it fully before doing anything. It covers who you are working with, the hackathon, what the product is, the architecture, every decision made so far, repo state, and what to do next.
+
+Last updated: Oct 15, 2026.
+
+---
+
+## 1. How to work with the project owner
+
+- The owner is the founder and lead developer of ZiwaClear. She is strong in TypeScript and new to Solidity, and works under a hard deadline.
+- She wants to stay an **active participant** and understand the work, but cannot learn everything. Explain what each command or piece of code does. Offer teach-back checks on the parts that matter (the state machine, what is on-chain vs off-chain, trust assumptions).
+- **Do not make assumptions on product decisions.** Lay out options, how each affects the product, and your advice. Ask all open decision questions together in one batch, never one at a time. She decides, then you advise.
+- **Submission documents are for the judges.** Write them in the project's own voice. Never address her, never write them as if for her, no working notes inside them.
+- Be honest about limits. Do not claim the chain proves "undeniable" truth: it proves a record existed and was not altered, not that the underlying facts were true. Do not call work credits carbon credits.
+- Tone: warm, direct, informal. She pushes back when she disagrees, and honest pushback is welcome.
+
+---
+
+## 2. The hackathon
+
+- **IEEE Global ClimateChain Hackathon 2026** (organised by IEEE Blockchain Türkiye Group with IEEE partners). Online hackathon on Devpost. Winners are announced around UN COP31.
+- **Track entered:** Sustainable Supply Chains and Circular Economy (Track 3). It covers lifecycle tracking, waste and recycling traceability, sustainable sourcing verification, and circular-economy incentive structures.
+- **Deadline:** official submission closes **Oct 25, 2026, 11:59 PM UTC** (2:59 AM Oct 26 in Kenya). **Internal deadline: Oct 24.** Do not move it.
+- **Feature freeze: Oct 21.**
+- **Scoring:** the page gave conflicting breakdowns. One says 70% technical innovation and blockchain implementation; another is a weighted list with climate impact and blockchain implementation at 30% each. Either way, blockchain implementation weighs most. This is why the project keeps a full contract and does not use thin hash-anchoring.
+- **Required deliverables:**
+  - Working prototype (testnet is fine)
+  - Repo with documentation
+  - Architecture diagram and technical spec
+  - 3-minute demo video
+  - Security and data integrity assessment
+  - 2-page problem and solution overview
+  - Climate impact assessment with carbon reduction projections (label estimates and cite sources)
+  - Adoption strategy and scalability roadmap
+  - User testing results, if any
+- **Unverified (check the Devpost rules page):** whether a pre-existing project is allowed or work must be built during Oct 5–25 (frame ZiwaChain as new work started in the window); eligibility for Kenya; any chain or testnet requirements; what finalists must do at COP31.
+- Related but separate deadlines for the same owner: **ZiwaVision submission Oct 22** and an **OctalFoundry add-on API submission Oct 25**. These are different projects. Reuse work between them where possible, but do not let them derail ZiwaChain.
+
+---
+
+## 3. Background: ZiwaClear and ZiwaVision
+
+- **ZiwaClear:** a climate-smart biomass marketplace and early-warning platform for water hyacinth on Lake Victoria. SMS/USSD harvester intake, buyer dashboard, M-Pesa payouts.
+- **ZiwaVision:** the satellite-based intelligence and forecasting component for hotspots. It is a separate deliverable, due Oct 22.
+- **ZiwaChain** is an extension of ZiwaClear, not a new product. It must **not depend on ZiwaVision**. Hotspots are off-chain and referenced by hash with a plain `source` label (for example `ziwaclear-v1`), so ZiwaVision can plug in later without contract changes.
+
+---
+
+## 4. What ZiwaChain does
+
+**Chain of custody:** Hotspot → Harvest → Verification → Buyer → Processing → End use.
+
+**Product framing: harvester-first proof on top of the full chain.** Harvesters do the work and carry the risk but have no portable proof of what they delivered, what was verified, or what they were paid. ZiwaChain records each step on-chain, enforces the process rules in a contract, and gives each harvester a **certificate** they can hold and a **public verify page** anyone can use without logging in. Buyer-facing features are roadmap, but buyers stay in the chain because their on-chain acceptance and payment create the proof of settlement.
+
+**What the proof is used for (be honest about adoption):**
+1. Settling disputes (underpayment, short weight, "we never received it"). Works now because the buyer is already in ZiwaClear.
+2. Building a verifiable track record for lenders such as SACCOs. Depends on lenders accepting it, so it is a pilot or roadmap claim.
+3. Qualifying for results-based payments from NGOs or donors. Same dependency.
+
+**Two-sided agreement:** the certificate carries the buyer's on-chain acceptance (their own wallet) and the harvester's SMS confirmation.
+
+---
+
+## 5. Architecture
+
+```
+Harvester (SMS/USSD)         ZiwaClear backend                Chain (Base Sepolia)
+        │                          │                                  │
+        │  report harvest ───────► │  logHarvest (via relayer) ─────► │ ZiwaChain.sol
+        │                          │                                  │
+Verifier wallet ─────────────────────────────  verifyBatch ─────────► │
+Buyer wallet ────────────────────────────────  acceptBatch ─────────► │
+        │  ◄─ confirmation code ── │  (M-Pesa payout happens off-chain)
+        │  YES 4821 ─────────────► │  confirmSettlement (relayer) ──► │
+Processor wallet ────────────────────────────  recordProcessing ────► │
+Processor wallet ────────────────────────────  recordEndUse ────────► │ mints work credits
+                                   │
+                                   └─► certificate generator ─► harvester (SMS/PDF/QR)
+                                                        │
+                      Verify page (static, in-browser) ◄┘  recomputes hash, reads chain directly
+```
+
+### Components
+
+1. **Smart contract** (`contracts/ZiwaChain.sol`): ✅ complete and tested.
+2. **Off-chain ZiwaClear service:** database, relayer wallet, SMS parsing, canonical hashing. **Not yet built** (Task 2).
+3. **Certificate generator:** not yet built (Task 3).
+4. **Verify page:** not yet built (Task 5). Static page, no login, recomputes the hash in the browser and reads the chain via a public RPC.
+
+### Contract summary
+
+- Solidity 0.8.28, evmVersion `cancun`, OpenZeppelin v5 (`ERC1155`, `AccessControl`).
+- **Roles:** `RELAYER_ROLE`, `VERIFIER_ROLE`, `BUYER_ROLE`, `PROCESSOR_ROLE`; `DEFAULT_ADMIN_ROLE` grants roles. The admin can later be handed to a multisig with no code change.
+- **Stages:** None → Harvested → Verified | Rejected (terminal) → Accepted → Processed → EndUse.
+- **Functions:**
+  - `logHarvest(batchId, harvesterId, hotspotRef, quantityKg, evidenceHash, payloadHash)`: relayer only
+  - `verifyBatch(batchId, approved, evidenceHash, payloadHash)`: verifier only; a verifier cannot hold the relayer role
+  - `acceptBatch(batchId, acceptedKg, paymentRefHash, payloadHash)`: buyer only
+  - `confirmSettlement(batchId, confirmationHash, payloadHash)`: relayer only; after acceptance; once per batch; does not change stage and does not gate credits
+  - `recordProcessing(batchId, processType, inputKg, outputUnits, payloadHash)`: processor only
+  - `recordEndUse(batchId, endUseType, endUseKg, outputUnits, payloadHash)`: the batch's own processor; may be called several times; mints credits
+  - `correctRecord(batchId, supersededHash, newHash, reasonHash)`: only the original author of a hash; evidence and payload hashes only
+  - `getBatch(batchId)`, `workCreditsOf(harvesterId)`, `supersededBy(batchId, hash)`
+- **Mass balance:** accepted ≤ harvested; processed input ≤ accepted; total end-use kg ≤ processed input.
+- **Credits:** ERC-1155 token ID 1 (`WORK_CREDIT`), one per kg reaching end use, **non-transferable** (enforced via `_update` hook — only minting from address(0) is allowed), minted to the relayer as custodian and tracked per pseudonymous ID in `workCreditsOf`. They are not carbon credits.
+- **Events:** `HarvestLogged`, `BatchVerified`, `BatchAccepted`, `SettlementConfirmed`, `BatchProcessed`, `EndUseRecorded`, `RecordCorrected`, `CreditsIssued`.
+- `processType` and `endUseType` are `bytes32` labels, so the taxonomy lives off-chain.
+
+### On-chain vs off-chain
+
+- **On-chain:** `batchId`, stage, role/actor addresses, per-batch pseudonym, quantities, hashes, credit balances.
+- **Off-chain:** photos, names, phone numbers, exact GPS, satellite data, M-Pesa details, salts.
+
+### Identity and hashing (specified, not yet implemented)
+
+- Harvester identity is a **new pseudonym per batch**: `HMAC(server_secret, groupId || batchId)`. Never use a plain hash of a phone number (low entropy, brute-forceable). Per-batch pseudonyms keep batches unlinkable on a public chain, so the harvester controls who sees their history.
+- **Canonical payload format:** deterministic serialisation (fixed field order, normalised timestamps, fixed number formats) plus a per-record random salt, so the verify page can recompute the exact same hash. Test this early, because most "verification failed" bugs come from serialisation.
+- **Settlement co-sign:** at settlement ZiwaClear texts the harvester a code; their reply ("YES 4821") goes through the existing SMS parsing; the hash of that confirmation is recorded with `confirmSettlement`.
+
+### Certificate and verify page (to build)
+
+- Certificate (JSON, QR code, short code; PDF only if time allows) contains the canonical payload, salt, M-Pesa reference, on-chain transaction reference, and a verification code. It must be usable without ZiwaClear's database.
+- Verify page: static, no login, in-browser recomputation, reads the chain directly.
+- The "PROOF" SMS request (harvester texts PROOF and receives the code and link) is **simulated in the demo**.
+- Do not build a public "list everything for group X" endpoint.
+
+---
+
+## 6. Decisions log
+
+| # | Decision | Notes |
+|---|---|---|
+| 1 | Verifiers, buyers and processors sign with own wallets; harvesters go through a relayer | Harvesters on SMS/USSD hold no wallets |
+| 2 | Stage, hashes and quantities on-chain with mass balance | Heaviest scoring area |
+| 3 | Single verifier role | 2-of-N is roadmap |
+| 4 | Payments off-chain (M-Pesa), hash reference on-chain | Simulated on-chain settlement is roadmap |
+| 5 | Credit token | Work credits only; buyer impact certificate moved to roadmap |
+| 6 | Hotspots off-chain, referenced by hash | Keeps independence from ZiwaVision |
+| 7 | Demo includes a public page reading the chain | Now the certificate verify page |
+| 8 | Base Sepolia | Check Devpost rules for chain requirements |
+| C1 | Credits non-transferable (enforced via `_update` hook) | Minting only; transfers always revert |
+| C2 | One buyer and one processor per batch | Splitting is roadmap |
+| C3 | Rejected batch is terminal | |
+| C4 | Admin is a single wallet for now | Multisig handover needs no code change |
+| A | Harvester-first product on top of the full chain | Keep the contract for the blockchain score |
+| B | New pseudonym per batch | Privacy is the harvester-first selling point |
+| C | Settlement confirmation by SMS, recorded on-chain, no effect on credits | |
+| D | Corrections for evidence and payload hashes only; quantities fixed | Wrong quantity: reject and re-log |
+| E | Certificate (JSON, QR, short code) plus in-browser verify page; PROOF flow simulated; PDF if time allows | |
+| F | Buyer impact certificate removed from the contract, kept on the roadmap | One mint line to restore |
+| G | Hash correction: msg.sender when hash is first written is the author; only author can supersede | Role-based restriction was rejected |
+| H | `confirmSettlement` allowed at Accepted, Processed or EndUse; once per batch; no stage change | |
+| I | `recordEndUse` accumulates (partial calls allowed); credits minted per call | |
+| J | Non-transferability enforced via `_update` override, not by overriding safeTransferFrom | Cleaner; also blocks burn |
+
+---
+
+## 7. Repo state (as of Oct 15, 2026)
+
+```
+ziwachain/
+  PROJECT_CONTEXT.md              ← this file
+  contracts/ZiwaChain.sol         ← complete, 42 tests passing
+  test/ZiwaChain.ts               ← 42 tests, all passing
+  ignition/modules/ZiwaChain.ts   ← deploys with account 0 as admin
+  hardhat.config.ts               ← Hardhat 2, TypeScript, solidity 0.8.28, evmVersion cancun, baseSepolia + sepolia networks
+  docs/architecture/eventSchema.md ← judge-facing; reflects current design
+  docs/internal/PROGRESS.md       ← working notes log
+  docs/Learn/Setup.md             ← developer setup guide (working notes)
+  docs/Learn/Errors.md            ← error log (working notes)
+  src/hashing/                    ← directory created; index.ts not yet written (Task 2)
+  src/certificate/                ← directory created; index.ts not yet written (Task 3)
+  src/sms/                        ← directory created; index.ts not yet written (Task 2)
+  .env                            ← DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL (never commit)
+```
+
+- **Test run:** `npx hardhat test` → 42 passing.
+- **Not yet done:** deployment to Base Sepolia (needs a testnet-only wallet and faucet funds), canonical hashing module, certificate generator, verify page, seed/demo script, written deliverables, demo video.
+
+---
+
+## 8. Next steps (in order)
+
+1. **Task 2:** Build the TypeScript hashing module (`src/hashing/index.ts`, `src/sms/index.ts`): HMAC pseudonyms, canonical serialisation, salted payload hash. Browser-safe. With tests. Node-only HMAC code in a separate file.
+2. **Task 3:** Build the certificate generator (`src/certificate/index.ts`): JSON, QR, short code.
+3. **Task 4:** Deploy to Base Sepolia and write a seed script that runs one full batch for the demo, including a tampered certificate that fails verification and a correction event.
+4. **Task 5:** Build the static verify page (`web/`): in-browser hash recomputation, read-only chain access.
+5. **Task 6:** Simulate the SMS PROOF flow for the demo.
+6. **Task 7:** Write the deliverables: architecture diagram, security and data integrity assessment, impact assessment (estimates labelled and cited), adoption strategy, 2-page problem and solution, scalability roadmap, 3-minute video.
+7. **Feature freeze Oct 21.** Spend Oct 21–23 on polish and docs. Internal deadline Oct 24; official close Oct 25 11:59 PM UTC.
+
+---
+
+## 9. Roadmap
+
+Buyer-facing tools (impact certificates, dashboards, reports); 2-of-N verification; adjustment events for quantity errors after acceptance; simulated on-chain settlement reconciled with M-Pesa; redemption for work credits; lender statement bundles (Merkle root over chosen certificates); end-use-weighted credits; splitting a batch across buyers and processors; multisig admin; mapping to recognised carbon-market methodologies.
+
+---
+
+## 10. Known limitations (state these openly in the submission)
+
+- Harvester submissions go through a relayer, so harvester-level non-repudiation depends on ZiwaClear's key custody.
+- The SMS confirmation is a code-based agreement logged by ZiwaClear and the SMS provider, not a cryptographic signature.
+- One verifier is a trust point.
+- A quantity error found after acceptance cannot be fixed in this version.
+- Buyers need wallets; the prototype uses test wallets.
+- Credits are recorded but not yet redeemable.
+- The prototype runs on a testnet.
+
+---
+
+## 11. Working with the IDE agent
+
+- Build prompts live in `PROMPTS.md` (Prompt 0 is the standing context; Prompts 1–8 are the tasks in order). If you are continuing the build, use them or check which have been completed in `docs/internal/PROGRESS.md`.
+- The agent keeps `docs/internal/PROGRESS.md` (append-only log), `docs/Learn/Errors.md` (errors and fixes), and this file up to date.
+- Judge-facing documents: `docs/architecture/`, `docs/security/`, `docs/impact/`, `docs/overview.md`, `docs/adoption-and-scalability.md`, `docs/demo-script.md`. Written in the project's own voice; no working notes inside them.
+- Working notes: `docs/internal/` and `docs/Learn/`. May address the owner directly.
+- Function names in the contract are fixed: `logHarvest`, `verifyBatch`, `acceptBatch`, `confirmSettlement`, `recordProcessing`, `recordEndUse`, `correctRecord`.
+- `learning/` directory: do not touch.
+- `web/` directory: do not touch until Task 5.
