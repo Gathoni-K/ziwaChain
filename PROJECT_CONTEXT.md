@@ -199,8 +199,8 @@ ziwachain/
 ## 8. Next steps (in order)
 
 1. **Task 6 (complete):** Build simulated SMS settlement and PROOF flow in `src/sms/`, with tests and a `demo:sms` script (completed, 85/85 tests passing).
-2. **Task 7 (current):** Remaining judge-facing documents: final review, synchronization, and completeness check across all judge-facing documentation.
-3. **Task 8:** Skeptical review. Read every judge-facing document as a skeptical judge would. Flag any claim that outpaces the code, any missing limitation, any inconsistency. No new code. Fix prose only.
+2. **Task 7 (complete):** Draft and synchronize all judge-facing documents in `docs/` and root `README.md` (completed, all 7 core documents drafted with consistent schemas, test counts, and citations).
+3. **Task 8 (current):** Skeptical review. Read every judge-facing document as a skeptical judge would. Flag any claim that outpaces the code, any missing limitation, any inconsistency. No new code. Fix prose only.
 4. **Manual steps (owner does these, not tasks):** Base Sepolia deployment (`npx hardhat run scripts/seed.ts --network baseSepolia`), demo video recording following `docs/demo-script.md`, hosting public static verify page, Devpost submission. Internal deadline Oct 24; official close Oct 25 11:59 PM UTC.
 
 ---

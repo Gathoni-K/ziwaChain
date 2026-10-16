@@ -58,6 +58,16 @@ npx hardhat run scripts/seed.ts
 ```
 Outputs are written to `demo/demo-data.json`.
 
+### Build & Open Public Verify Page
+Compile the zero-framework verification engine with esbuild and open the static client:
+```bash
+npm run web:build
+```
+Open `web/dist/index.html` directly in any web browser (no local server or internet backend needed), or run the local development server:
+```bash
+npm run web:dev
+```
+
 ### Deploy & Seed on Base Sepolia
 To deploy and seed on Base Sepolia testnet:
 1. Copy `.env.example` to `.env`.
@@ -77,13 +87,14 @@ Judges can review the complete hackathon evaluation documentation via the links 
 
 | Document | Description |
 |---|---|
-| [Technical Specification & Architecture](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/spec.md) | System components, state machine, on-chain rules, and test proofs |
-| [Event Schema & Data Model](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/eventSchema.md) | On-chain vs off-chain boundary, canonical serialization, and event envelope |
-| [Security & Data Integrity Assessment](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/security/assessment.md) | Threat model, access control, mass balance, privacy via HMAC, and auditability |
-| [Problem & Solution Overview](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/overview.md) | 2-page overview of the circular bioeconomy model on Lake Victoria |
-| [Climate Impact Assessment](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/impact/impact-assessment.md) | Sourced methane-avoidance projections with low/high ranges and clear assumptions |
-| [Adoption Strategy & Scalability Roadmap](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/adoption-and-scalability.md) | Field rollout, SACCO integration, and technical scaling path |
-| [Demo Script](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/demo-script.md) | Step-by-step 3-minute video demonstration script |
+| [System Architecture Specification](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/architecture.md) | Component architecture, Mermaid diagrams, on-chain vs off-chain boundary, and roles matrix |
+| [Security & Data Integrity Assessment](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/security/security-and-data-integrity.md) | Threat modeling, RBAC, mass balance preservation, HMAC privacy, and 85-test suite |
+| [Climate Impact Assessment](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/impact/climate-impact-assessment.md) | Methane avoidance projections, fuel displacement models, IPCC sources, and clear estimate labels |
+| [Problem & Solution Overview](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/overview.md) | 2-page overview of the circular bioeconomy model and informal harvester precarity on Lake Victoria |
+| [Adoption Strategy & Scalability Roadmap](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/adoption-and-scalability.md) | Three-tiered proof acceptance pathway, Kisumu pilot plan, scaling horizons, and field findings placeholder |
+| [Demo Video Script](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/demo-script.md) | 3-minute video presentation script with timestamps, visual cues, and voiceover text |
+| [Technical Specification & Test Proofs](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/spec.md) | Supplementary deep dive into smart contract rules and unit test mappings |
+| [Event Schema & Data Model](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/eventSchema.md) | Supplementary canonical event envelope and data dictionary |
 
 ---
 
@@ -117,12 +128,15 @@ ziwachain/
 │   └── dist/                          # Bundled distribution (esbuild output, no CDN)
 ├── docs/
 │   ├── architecture/
-│   │   ├── spec.md                    # Full technical spec and architecture diagram
+│   │   ├── architecture.md            # Primary architecture doc with Mermaid diagrams and tables
+│   │   ├── spec.md                    # Detailed technical spec and test rule mapping
 │   │   └── eventSchema.md             # Canonical event envelope and data dictionary
 │   ├── security/
-│   │   └── assessment.md              # Security, data integrity, and threat analysis
+│   │   ├── security-and-data-integrity.md # Primary threat model, RBAC, and integrity analysis
+│   │   └── assessment.md              # Detailed security assessment and test logs
 │   ├── impact/
-│   │   └── impact-assessment.md       # Carbon-reduction projections and climate rationale
+│   │   ├── climate-impact-assessment.md   # Primary climate model and carbon projections
+│   │   └── impact-assessment.md       # Supplementary impact calculations
 │   ├── overview.md                    # 2-page problem and solution overview
 │   ├── adoption-and-scalability.md    # Adoption strategy and scaling roadmap
 │   ├── demo-script.md                 # 3-minute video presentation script

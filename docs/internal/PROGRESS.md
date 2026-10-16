@@ -4,6 +4,27 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 16, 2026, Task 7: Draft Hackathon Submission Documents in docs/ for Judges
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `README.md` | Updated: 3-sentence summary, problem overview, comprehensive Quick Start (install, test, seed, build and open verify page, run SMS demo), documentation directory table linking all judge documents, folder layout, built vs roadmap breakdown, and honest limitations |
+| `docs/architecture/architecture.md` | Created: Primary architecture document with 3 Mermaid diagrams (system components, stage state machine, settlement confirmation sequence), on-chain vs off-chain boundary matrix, and roles access control matrix |
+| `docs/security/security-and-data-integrity.md` | Created: Primary threat model and data integrity assessment analyzing 9 specific threats (relayer key compromise, colluding verifiers, identity brute-forcing, forged certificates, mass inflation, canonicalization drift, privacy/PII leaks, credit trading, admin keys), referencing contract rules and tests, with honest limitations |
+| `docs/impact/climate-impact-assessment.md` | Created: Primary climate impact assessment with clearly labeled emissions avoidance estimates per wet ton (0.18 to 0.73 t CO2e/t wet hyacinth combining avoided anaerobic decomposition and displaced woodfuel/charcoal), IPCC/ICRAF citations, co-benefits, and explanation of why work credits are not carbon credits |
+| `docs/adoption-and-scalability.md` | Updated: Detailed three-tiered proof acceptance pathway (dispute settlement now, SACCO lending next, results-based funding later), Winam Gulf pilot plan (Dunga, Usenge, Kendu Bay), 3-horizon scaling roadmap, and clearly marked "Field findings" section with `[TO BE ADDED AFTER KISUMU]` |
+| `docs/overview.md` | Updated: 2-page problem and solution overview detailing Lake Victoria crisis, informal harvester precarity, asymmetric architecture, 6 core pillars, prototype vs roadmap, and updated test suite count (85 tests) |
+| `docs/demo-script.md` | Updated: Precise 3-minute video presentation script with timestamps (0:00-0:30 problem, 0:30-1:30 harvest to end use run, 1:30-2:00 certificate and QR, 2:00-2:45 verify page and tamper detection, 2:45-3:00 roadmap and limits), visual layout, narration, and presenter pacing guidelines |
+
+### Verification and Consistency
+- All documents written in the project's own voice (we/ZiwaChain), never addressed to the owner.
+- Every figure requiring empirical confirmation marked with `[TO BE CONFIRMED]`.
+- All emissions projections clearly labeled as estimates with explicit formulas and assumptions.
+- Punctuation audited: zero em dashes across all judge-facing documentation (commas used).
+
+---
+
 ## Oct 16, 2026, Task 6: Build Simulated SMS Settlement and Proof Flow in src/sms/ with Tests
 
 ### Files added or updated
@@ -189,8 +210,8 @@ None.
 
 ### Open questions and risks
 - **Deployment wallet:** Base Sepolia deployment needs a fresh testnet-only wallet and faucet funds. Manual step by project owner.
-- **Feature freeze Oct 21:** Tasks 1, 2, 3, 4, 5, and 6 are all built and tested. Task 7 (remaining judge-facing documents) and Task 8 (skeptical review, no code changes) remain. Manual steps (demo video, Base Sepolia deployment, hosting, Devpost submission) will be completed by the owner.
+- **Feature freeze Oct 21:** Tasks 1 through 7 are completed. Task 8 (skeptical review, no code changes) remains. Manual steps (demo video, Base Sepolia deployment, hosting, Devpost submission) will be completed by the owner.
 - **Canonical serialisation:** RFC 8785 canonical JSON serialisation ensures deterministic hash parity between backend and frontend verify page.
 
 ### Next step
-**Task 7:** Remaining judge-facing documents: final review, synchronization, and completeness check across all judge-facing documentation before the Task 8 skeptical review.
+**Task 8:** Skeptical review. Read every judge-facing document as a skeptical judge would. Flag any claim that outpaces the code, any missing limitation, any inconsistency. No new code. Fix prose only.

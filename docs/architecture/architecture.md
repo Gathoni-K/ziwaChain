@@ -1,0 +1,166 @@
+# ZiwaChain: System Architecture Specification
+
+**Track:** Sustainable Supply Chains & Circular Economy  
+**Target Deployment:** Base Sepolia (Solidity 0.8.28, EVM Cancun)  
+
+---
+
+## 1. System Overview & Component Architecture
+
+ZiwaChain is an on-chain provenance and custody tracking protocol designed specifically for informal water hyacinth harvesting across Lake Victoria. We recognize that rural harvesters operating in lakeside landing beaches do not possess smartphones, Web3 wallets, or crypto assets to pay gas. Consequently, ZiwaChain implements an asymmetric architecture: informal workers interact purely through standard SMS and USSD telecom rails, while commercial buyers, field verifiers, and bio-processors interact via authenticated EVM smart contract transactions.
+
+```mermaid
+flowchart TD
+    subgraph InformalHarvester["1. Informal Harvester Sector (Feature Phones)"]
+        H[Lake Harvester] -->|2G SMS / USSD Harvest Dispatch| GW[SmsGateway / Telecom Operator]
+        GW -->|SMS Delivery| H
+    end
+
+    subgraph ZiwaClearBackend["2. ZiwaClear Relayer & Engine"]
+        GW -->|Webhook Ingestion| ZC[ZiwaClear Server Engine]
+        ZC -->|Derive HMAC Pseudonym & Canonical Hash| REL[Relayer Signer Wallet]
+        ZC -->|Offline Evidence, Photos, Salts| DB[(Off-Chain Encrypted Storage)]
+        ZC -->|Generate Portable Proof| CG[Certificate Generator]
+    end
+
+    subgraph SmartContract["3. Base Sepolia Blockchain (ZiwaChain.sol)"]
+        REL -->|logHarvest / confirmSettlement| SC[ZiwaChain.sol Core Contract]
+        V[Accredited Field Verifier] -->|verifyBatch| SC
+        B[Commercial Buyer] -->|acceptBatch & M-Pesa Hash| SC
+        P[Industrial Processor] -->|recordProcessing & recordEndUse| SC
+        SC -->|Mints Non-Transferable Token ID 1| CRED[WORK_CREDIT Vault]
+    end
+
+    subgraph PublicVerification["4. Public In-Browser Verification Layer"]
+        CG -->|Short Code Crockford Base32| H
+        CG -->|URL Fragment #c=base64url| VP[Static Verify Page web/dist]
+        VP -.->|Direct RPC Event & Mass-Balance Queries| SC
+        AUD[Auditor / SACCO Loan Officer] -->|Presents QR or Short Code| VP
+    end
+```
+
+### Component Breakdown
+
+1. **Harvester Interface (SMS/USSD):** Harvesters report deliveries (bags, harvest location, group identifier) using 2G/3G basic phones. They receive SMS notifications upon commercial acceptance and confirm payment receipts via two-way SMS codes.
+2. **ZiwaClear Relayer (`RELAYER_ROLE`):** Ingests harvest dispatches, derives per-batch un-linkable pseudonyms, formats canonical RFC 8785 JSON payloads, generates cryptographic salts, and broadcasts `logHarvest` transactions on Base Sepolia. The relayer sponsors all network gas fees.
+3. **Field Verifiers (`VERIFIER_ROLE`):** Independent inspectors stationed at landing beaches (e.g. Kenya Marine and Fisheries Research Institute, KMFRI) who physically inspect weed quality, moisture, and absence of soil contaminants. They sign `verifyBatch` transactions with their own EVM wallets.
+4. **Commercial Biomass Buyers (`BUYER_ROLE`):** Commercial off-takers purchasing weed for bio-energy, briquettes, or compost. They weigh deliveries, submit `acceptBatch` on-chain, and record the hash of the off-chain M-Pesa mobile money payout.
+5. **Industrial Processors (`PROCESSOR_ROLE`):** Biogas, pyrolysis, or organic fertilizer plants. They log biomass conversion through `recordProcessing` and `recordEndUse`, triggering the on-chain minting of work credits.
+6. **Smart Contract (`ZiwaChain.sol`):** Deployed on Base Sepolia, enforcing role permissions, irreversible linear stage transitions, conservation of mass balance, non-transferable credit issuance, and append-only hash supersessions.
+7. **Certificate Generator (`src/certificate/`):** Generates portable Version 1 JSON certificates containing canonical payloads, salts, on-chain transaction references, Crockford Base32 short codes, and self-verifying QR codes.
+8. **Public Verify Page (`web/`):** A zero-backend static client bundled with esbuild. Queries Base Sepolia directly via public JSON-RPC to recompute hashes and audit batches with zero server tracking.
+
+---
+
+## 2. On-Chain State Machine
+
+A batch progresses through an irreversible linear sequence of stages. No stage can be skipped, and stage regressions are strictly barred by the contract:
+
+```mermaid
+stateDiagram-v2
+    [*] --> None
+    None --> Harvested: logHarvest(RELAYER_ROLE)
+    Harvested --> Verified: verifyBatch(approved=true, VERIFIER_ROLE)
+    Harvested --> Rejected: verifyBatch(approved=false, VERIFIER_ROLE)
+    Rejected --> [*]: Terminal State (No Further Actions)
+    Verified --> Accepted: acceptBatch(BUYER_ROLE)
+    Accepted --> Processed: recordProcessing(PROCESSOR_ROLE)
+    Processed --> EndUse: recordEndUse(Batch Processor)
+    EndUse --> [*]: Mints WORK_CREDIT (ERC-1155)
+
+    note right of Accepted
+        confirmSettlement(RELAYER_ROLE)
+        Allowed at Accepted, Processed, or EndUse.
+        Does NOT change stage.
+    end note
+```
+
+### Stage Definitions
+
+| Stage | Enum Value | Permitted Role | Description | Next Valid Stage |
+|---|---|---|---|---|
+| `None` | 0 | Public | Initial empty state for un-initialized batch identifier | `Harvested` |
+| `Harvested` | 1 | `RELAYER_ROLE` | Harvest weight, hotspot reference, and harvester pseudonym anchored | `Verified` or `Rejected` |
+| `Verified` | 2 | `VERIFIER_ROLE` | Physical moisture and contamination check passed | `Accepted` |
+| `Rejected` | 3 | `VERIFIER_ROLE` | Quality failure or contamination. Terminal state, batch cannot advance | *None (Terminal)* |
+| `Accepted` | 4 | `BUYER_ROLE` | Commercial off-taker accepted mass, anchors M-Pesa payment hash | `Processed` |
+| `Processed` | 5 | `PROCESSOR_ROLE` | Biomass accepted into conversion process (e.g., anaerobic digestion) | `EndUse` |
+| `EndUse` | 6 | Assigned Processor | Conversion complete into biochar, briquettes, or compost. Mints work credits | *None (Accumulative)* |
+
+---
+
+## 3. Settlement Confirmation Sequence
+
+Disputes in informal supply chains frequently occur when buyers claim payment was sent but harvesters never received it, or when buyers underpay agreed weights. ZiwaChain settles this through a two-sided cryptographic co-signing sequence:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor H as Harvester (+2547****678)
+    participant GW as SMS Gateway (SmsGateway)
+    participant ZC as ZiwaClear Relayer Service
+    participant SC as ZiwaChain.sol (Base Sepolia)
+    actor B as Commercial Buyer (EVM Wallet)
+
+    Note over B,SC: Buyer inspects biomass at weighing bridge
+    B->>SC: acceptBatch(batchId, acceptedKg, paymentRefHash, payloadHash)
+    SC-->>ZC: Event BatchAccepted emitted
+    Note over ZC: Off-chain M-Pesa payment executed to harvester
+    ZC->>ZC: Generate 4-digit OTP (e.g. 4821)
+    ZC->>GW: Outbound SMS: "Your batch was accepted. Reply YES 4821..."
+    GW-->>H: SMS delivered to feature phone
+
+    H->>GW: Inbound SMS: "YES 4821" (whitespace and case tolerant)
+    GW->>ZC: handleIncoming(from, text)
+    ZC->>ZC: Verify OTP match & attempt count (<= 3 retries)
+    ZC->>ZC: Generate fresh salt, compute hashConfirmation(code, salt)
+    ZC->>SC: confirmSettlement(batchId, confirmationHash, payloadHash)
+    SC->>SC: Check stage in [Accepted, Processed, EndUse] & !settled
+    SC->>SC: Store settled=true, settlementConfirmation=confirmationHash
+    SC-->>ZC: Event SettlementConfirmed emitted
+    ZC->>GW: Outbound SMS: "Confirmed. Tx: 0x... Reply PROOF to get certificate."
+    GW-->>H: SMS confirmation delivered
+
+    opt Harvester requests certificate link
+        H->>GW: Inbound SMS: "PROOF"
+        GW->>ZC: handleIncoming(from, "PROOF")
+        ZC->>GW: Outbound SMS: "Your certificate code is TR8NZ-A9VC5. Verify at: https://..."
+        GW-->>H: SMS with short code and verification link
+    end
+```
+
+---
+
+## 4. On-Chain vs Off-Chain Data Boundary
+
+We maintain a strict boundary between public blockchain state and private off-chain operational data to ensure zero personal identifiable information (PII) leaks onto Base Sepolia:
+
+| Data Element | Storage Location | Privacy & Integrity Mechanism |
+|---|---|---|
+| `batchId` | On-Chain (`bytes32`) | Unique keccak256 hash derived from harvest intake timestamp, landing site, and batch sequence. |
+| Stage & Lifecycle Status | On-Chain (`enum Stage`) | Strictly monotonic state machine enforced by smart contract logic. |
+| Harvested Mass (`quantityKg`) | On-Chain (`uint256`) | Whole integer kilograms recorded at harvest intake. |
+| Accepted Mass (`acceptedKg`) | On-Chain (`uint256`) | Enforced by mass-balance invariant: `acceptedKg <= harvestedKg`. |
+| Processed Intake (`processedKg`) | On-Chain (`uint256`) | Enforced by mass-balance invariant: `processedKg <= acceptedKg`. |
+| End-Use Mass (`endUseKgTotal`) | On-Chain (`uint256`) | Enforced by mass-balance invariant: `sum(endUseKg) <= processedKg`. |
+| Harvester Identity | On-Chain (`bytes32` Pseudonym) | Per-batch HMAC-SHA256 (`HMAC(secret, groupId || batchId)`). Un-linkable across batches. |
+| Harvester Phone Number | Off-Chain Only | Masked in all logs (`+2547****678`). Never written to contract storage or event logs. |
+| Field Evidence Photos & Lab Tests | Off-Chain (Stored in DB/IPFS) | Keccak256 evidence hash anchored on-chain (`evidenceHash`). |
+| Stage Metadata (Timestamps, Geolocation) | Off-Chain (JSON in Certificate) | RFC 8785 canonical JSON combined with random 128-bit salt and hashed on-chain (`payloadHash`). |
+| M-Pesa Mobile Money Reference | Off-Chain (In Certificate) | Plain text reference kept off-chain, `keccak256(paymentRef)` anchored on-chain (`paymentRefHash`). |
+| Settlement Confirmation OTP | Off-Chain Memory (Temporary) | `keccak256(canonicalJson({type, code, salt}))` anchored on-chain (`confirmationHash`). |
+| Work Credits (`WORK_CREDIT`) | On-Chain (`ERC-1155 Token 1`) | Non-transferable token minted 1:1 per kilogram reaching verified end use. |
+
+---
+
+## 5. System Roles & Access Control
+
+Operational permissions are managed through OpenZeppelin Contracts v5 `AccessControl`. All administrative operations can transition to a community multi-signature vault without smart contract redeployment:
+
+| Role Identifier | Assigned Entity | Responsibilities & Authorized Functions | Constraints & Security Controls |
+|---|---|---|---|
+| `DEFAULT_ADMIN_ROLE` | Deployer (Multi-Sig Roadmap) | Grants and revokes roles; emergency governance. | Does not execute operational lifecycle transactions. |
+| `RELAYER_ROLE` | ZiwaClear Relayer Key | Calls `logHarvest` to ingest SMS reports; calls `confirmSettlement` upon harvester OTP reply; holds custodian work credits. | Cryptographically prohibited from acting as verifier (`VerifierCannotBeRelayer`). |
+| `VERIFIER_ROLE` | Independent Biological Verifiers (e.g. KMFRI) | Calls `verifyBatch(batchId, approved, evidenceHash, payloadHash)` after physical moisture/contamination inspection. | Cannot hold `RELAYER_ROLE`. Can mark batch terminal `Rejected`. |
+| `BUYER_ROLE` | Commercial Off-Takers (Biogas, Fertilizer, Briquettes) | Calls `acceptBatch(batchId, acceptedKg, paymentRefHash, payloadHash)`. | Cannot accept mass greater than `harvestedKg`. Requires verified stage. |
+| `PROCESSOR_ROLE` | Conversion Plants | Calls `recordProcessing(batchId, processType, inputKg, outputUnits, payloadHash)`. | Assigned processor exclusively controls subsequent `recordEndUse` calls for that batch. |
