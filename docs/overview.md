@@ -18,7 +18,7 @@ Informal harvesting communities manually clear thousands of metric tons of weed 
 ## 2. The Problem: The Triple Breakdown on Lake Victoria
 
 ### A. Ecological & Climate Hazard
-Water hyacinth is one of the world's fastest-multiplying freshwater weeds, with biomass doubling in as little as 5 to 15 days under nutrient-rich conditions. When unmanaged, millions of tons of biomass die, sink to the lakebed, and decay anaerobically. This produces severe localized deoxygenation (killing fish nurseries) and releases substantial quantities of biogenic methane—a greenhouse gas with over 28 times the 100-year global warming potential of carbon dioxide ($CO_2$).
+Water hyacinth is one of the world's fastest-multiplying freshwater weeds, with biomass doubling in as little as 5 to 15 days under nutrient-rich conditions. When unmanaged, millions of tons of biomass die, sink to the lakebed, and decay anaerobically. This produces severe localized deoxygenation (killing fish nurseries) and releases substantial quantities of biogenic methane, a greenhouse gas with over 28 times the 100-year global warming potential of carbon dioxide ($CO_2$).
 
 ### B. Harvester Precarity & Credit Invisibility
 The manual removal of hyacinth is physically hazardous, exposing workers to waterborne parasites, snakebites, and equipment hazards. Despite performing critical ecological restoration, harvesters face severe structural handicaps:
@@ -58,8 +58,8 @@ ZiwaChain does not impose complex crypto-native friction on informal workers. In
    This guarantees that volume cannot be synthetically inflated at any intermediate stage.
 4. **Two-Sided Settlement Attestation:**
    Commercial buyers sign acceptance using their EVM wallet, committing the hash of the off-chain M-Pesa transaction reference. The harvester confirms payment receipt via a two-way SMS code ("YES 4821"), permanently locking the settlement attestation on-chain.
-5. **Portable Harvester Proof:**
-   Upon settlement, the harvester receives a portable certificate containing canonical payload metadata, random salts, and on-chain event references. This certificate can be verified by any third party (such as a SACCO loan officer) using a static, browser-based verification interface that directly queries the blockchain without intermediate database dependencies.
+5. **Portable Harvester Proof (Certificates & Short Codes):**
+   Upon settlement, the harvester receives a portable certificate containing canonical payload metadata, random salts, and on-chain event references (`src/certificate/build.ts`). Harvesters receive a 10-character Crockford Base32 short code (e.g. `TR8NZ-A9VC5`) via SMS or a printable QR code. This certificate can be verified by any third party (such as a SACCO loan officer) using a static, browser-based verification interface that directly queries the blockchain without intermediate database dependencies.
 6. **Incentivizing Circular Outcomes (Work Credits):**
    Biomass diverted into verified circular processing mints non-transferable ERC-1155 `WORK_CREDIT` tokens (1 credit per kilogram reaching final end use). These tokens reward proven circularity without introducing secondary market speculation.
 

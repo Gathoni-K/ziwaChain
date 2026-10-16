@@ -34,22 +34,34 @@ npx hardhat clean && npx hardhat compile
 ```
 
 ### Run Test Suite
-Run the full automated test suite (42 unit tests covering all state transitions, role authorizations, mass-balance invariant checks, non-transferability, and hash corrections):
+Run the full automated test suite (60 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, RFC 8785 canonical serialization, and HMAC pseudonyms):
 ```bash
 npx hardhat test
 ```
 
 ### Typecheck TypeScript Code
-Verify TypeScript types across contracts and tests:
+Verify TypeScript types across contracts, off-chain modules, and tests:
 ```bash
 npx tsc --noEmit
 ```
 
-### Local Deployment (Hardhat Ignition)
-Deploy the contract to an in-memory Hardhat node or local network:
+### Seed Demo Batches (Local In-Memory Network)
+Run the automated seed script to deploy the contract and execute 3 real demo batches (Batch A full journey, Batch B quality rejection, Batch C hash correction):
 ```bash
-npx hardhat ignition deploy ignition/modules/ZiwaChain.ts
+npx hardhat run scripts/seed.ts
 ```
+Outputs are written to `demo/demo-data.json`.
+
+### Deploy & Seed on Base Sepolia
+To deploy and seed on Base Sepolia testnet:
+1. Copy `.env.example` to `.env`.
+2. Configure `DEPLOYER_PRIVATE_KEY` and fund that address with Base Sepolia testnet ETH.
+3. Set `PSEUDONYM_SECRET` to a private server secret.
+4. Run the seed script targeting Base Sepolia:
+```bash
+npx hardhat run scripts/seed.ts --network baseSepolia
+```
+The script automatically generates and funds 4 ephemeral testnet wallets (relayer, verifier, buyer, processor), grants on-chain roles, executes all 3 demo batches, and writes output metadata to `demo/demo-data.json`.
 
 ---
 
@@ -75,11 +87,17 @@ Judges can review the complete hackathon evaluation documentation via the links 
 ziwachain/
 ├── contracts/
 │   └── ZiwaChain.sol                 # Core smart contract (ERC-1155, AccessControl, Mass Balance)
+├── scripts/
+│   └── seed.ts                       # End-to-end deployment & demo batch seed runner
 ├── test/
-│   └── ZiwaChain.ts                  # Comprehensive automated test suite (42 unit tests)
+│   ├── ZiwaChain.ts                  # Core smart contract test suite (42 unit tests)
+│   └── hashing.test.ts               # Off-chain hashing, RFC 8785, and pseudonym suite (18 unit tests)
+├── demo/
+│   └── demo-data.json                # Seeded demo batch records, tx hashes, salts, and payloads
 ├── ignition/
 │   └── modules/
 │       └── ZiwaChain.ts              # Hardhat Ignition deployment module
+
 ├── docs/
 │   ├── architecture/
 │   │   ├── spec.md                   # Full technical spec & architecture diagram

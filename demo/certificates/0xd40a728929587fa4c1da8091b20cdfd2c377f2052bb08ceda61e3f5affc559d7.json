@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "chainId": "31337",
+  "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "batchId": "0xd40a728929587fa4c1da8091b20cdfd2c377f2052bb08ceda61e3f5affc559d7",
+  "pseudonym": "0x5458909c76f173eb523d12169aee08418663bb3771e19c422229b16090d8d4e7",
+  "deploymentBlock": 1,
+  "stages": {
+    "HARVEST_LOGGED": {
+      "eventType": "HARVEST_LOGGED",
+      "payload": {
+        "schemaVersion": 1,
+        "eventType": "HARVEST_LOGGED",
+        "batchId": "0xd40a728929587fa4c1da8091b20cdfd2c377f2052bb08ceda61e3f5affc559d7",
+        "hotspotRef": "0x678bc2d8912051a0ca00eaf1e2e21984028b5dc21a59a1311886ca9aca97ce65",
+        "quantityKg": 1000,
+        "harvestedAt": 1792137624,
+        "region": "Homa Bay",
+        "source": "ziwaclear-v1"
+      },
+      "salt": "0x71a83362ca64dcdfee197ba1afe1d888",
+      "payloadHash": "0xa629fc0d7c684160cd88828e769524bb56a16e770cb377e958b71604cd2345ff",
+      "txHash": "0x9ede7c2e6756159a3c899bff01418727bf5afe26ac36c22b61b3a9a065002f5e",
+      "blockNumber": 15
+    }
+  },
+  "paymentRef": "MPESA-QKH78219XZ-2026",
+  "settlementConfirmation": {
+    "code": "4821",
+    "salt": ""
+  },
+  "shortCode": "FW1NY-6GGB0",
+  "verifyUrl": "https://ziwachain.org/verify#c=eyJ2ZXJzaW9uIjoxLCJjaGFpbklkIjoiMzEzMzciLCJjb250cmFjdEFkZHJlc3MiOiIweDVGYkRCMjMxNTY3OGFmZWNiMzY3ZjAzMmQ5M0Y2NDJmNjQxODBhYTMiLCJiYXRjaElkIjoiMHhkNDBhNzI4OTI5NTg3ZmE0YzFkYTgwOTFiMjBjZGZkMmMzNzdmMjA1MmJiMDhjZWRhNjFlM2Y1YWZmYzU1OWQ3IiwicHNldWRvbnltIjoiMHg1NDU4OTA5Yzc2ZjE3M2ViNTIzZDEyMTY5YWVlMDg0MTg2NjNiYjM3NzFlMTljNDIyMjI5YjE2MDkwZDhkNGU3IiwiZGVwbG95bWVudEJsb2NrIjoxLCJzdGFnZXMiOnsiSEFSVkVTVF9MT0dHRUQiOnsiZXZlbnRUeXBlIjoiSEFSVkVTVF9MT0dHRUQiLCJwYXlsb2FkIjp7InNjaGVtYVZlcnNpb24iOjEsImV2ZW50VHlwZSI6IkhBUlZFU1RfTE9HR0VEIiwiYmF0Y2hJZCI6IjB4ZDQwYTcyODkyOTU4N2ZhNGMxZGE4MDkxYjIwY2RmZDJjMzc3ZjIwNTJiYjA4Y2VkYTYxZTNmNWFmZmM1NTlkNyIsImhvdHNwb3RSZWYiOiIweDY3OGJjMmQ4OTEyMDUxYTBjYTAwZWFmMWUyZTIxOTg0MDI4YjVkYzIxYTU5YTEzMTE4ODZjYTlhY2E5N2NlNjUiLCJxdWFudGl0eUtnIjoxMDAwLCJoYXJ2ZXN0ZWRBdCI6MTc5MjEzNzYyNCwicmVnaW9uIjoiSG9tYSBCYXkiLCJzb3VyY2UiOiJ6aXdhY2xlYXItdjEifSwic2FsdCI6IjB4NzFhODMzNjJjYTY0ZGNkZmVlMTk3YmExYWZlMWQ4ODgiLCJwYXlsb2FkSGFzaCI6IjB4YTYyOWZjMGQ3YzY4NDE2MGNkODg4MjhlNzY5NTI0YmI1NmExNmU3NzBjYjM3N2U5NThiNzE2MDRjZDIzNDVmZiIsInR4SGFzaCI6IjB4OWVkZTdjMmU2NzU2MTU5YTNjODk5YmZmMDE0MTg3MjdiZjVhZmUyNmFjMzZjMjJiNjFiM2E5YTA2NTAwMmY1ZSIsImJsb2NrTnVtYmVyIjoxNX19LCJwYXltZW50UmVmIjoiTVBFU0EtUUtINzgyMTlYWi0yMDI2Iiwic2V0dGxlbWVudENvbmZpcm1hdGlvbiI6eyJjb2RlIjoiNDgyMSIsInNhbHQiOiIifSwic2hvcnRDb2RlIjoiRlcxTlktNkdHQjAifQ"
+}

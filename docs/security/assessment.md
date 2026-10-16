@@ -105,6 +105,12 @@ Disputes in biomass trading typically center on whether payment was actually mad
 - The relayer records `confirmationHash = keccak256("YES 4821" || salt)` via `confirmSettlement`.
 - Both parties' attestations are permanently anchored to the batch on-chain.
 
+### 3.4 Portable Certificate Privacy and Integrity
+The Harvester Certificate (`src/certificate/build.ts`) packages the off-chain verification material into a portable JSON structure:
+- **Serverless Client Verification:** The certificate data is encoded into the URL fragment (`#c=<base64url>`). According to HTTP standards (RFC 3986), URL fragments are processed purely by the browser and are never transmitted in HTTP requests, preventing certificate payload logging on web servers.
+- **Transcription Error Resilience:** The human-readable short code utilizes Crockford Base32 (`src/certificate/shortCode.ts`), explicitly excluding the letters `I`, `L`, `O`, and `U` to prevent visual and phonetic confusion when read over low-quality voice calls or SMS.
+- **Zero PII Leakage:** The certificate contains only stage event types, integer metrics, salts, transaction hashes, and the plain M-Pesa receipt reference, completely omitting personal names, phone numbers, and physical coordinates.
+
 ---
 
 ## 4. Trust Assumptions and Honest Limitations
@@ -118,7 +124,7 @@ Disputes in biomass trading typically center on whether payment was actually mad
 
 ## 5. Automated Security Test Coverage
 
-The security guarantees, invariant checks, cryptographic canonicalization, and privacy derivations are validated by 60 automated tests across `test/ZiwaChain.ts` and `test/hashing.test.ts`.
+The security guarantees, invariant checks, cryptographic canonicalization, privacy derivations, and certificate structures are validated by 66 automated tests across `test/ZiwaChain.ts`, `test/hashing.test.ts`, and `test/certificate.test.ts`.
 
 ```bash
   ZiwaChain
@@ -174,6 +180,17 @@ The security guarantees, invariant checks, cryptographic canonicalization, and p
       ✔ supersededBy returns bytes32(0) for an un-superseded hash
       ✔ workCreditsOf returns 0 for a harvesterId that has no credits yet
 
+  Certificate Module
+    shortCode (Crockford Base32)
+      ✔ is deterministic and always 11 characters including the hyphen
+      ✔ changes the short code when the payload hash changes
+      ✔ requires a valid payload hash
+    buildCertificate & Base64URL round-trip
+      ✔ builds a version 1 certificate matching specification
+      ✔ successfully round-trips via Base64URL encoding and decoding
+    certificateQr
+      ✔ returns a valid PNG Data URL for a certificate
+
   Hashing Module
     RFC 8785 Canonical JSON
       ✔ ensures object key order does not change output
@@ -198,5 +215,5 @@ The security guarantees, invariant checks, cryptographic canonicalization, and p
       ✔ produces different pseudonyms for different secrets
       ✔ requires secret, groupId, and batchId
 
-  60 passing (1s)
+  66 passing (2s)
 ```

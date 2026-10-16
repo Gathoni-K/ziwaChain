@@ -18,6 +18,7 @@ ignition/deployments/chain-31337
 
 # Demo wallet keystore files — never commit private keys
 demo/wallet*.json
+demo/.demo-wallets.json
 demo/keystore/
 scripts/wallet*.json
 *.keystore

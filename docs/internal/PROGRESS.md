@@ -4,6 +4,60 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 16, 2026, Task 4: Build Harvester Certificate Generator and Pipeline
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `src/certificate/shortCode.ts` | Created: Deterministic 10-character Crockford Base32 SMS short code generator formatted with hyphen |
+| `src/certificate/build.ts` | Created: Version 1 Harvester Certificate builder with Base64URL encoding/decoding utilities |
+| `src/certificate/qr.ts` | Created: Browser-safe and Node-safe QR code generator emitting PNG Data URLs with URL payload fallback |
+| `src/certificate/index.ts` | Created: Re-exports for certificate utilities |
+| `scripts/make-certificates.ts` | Created: Pipeline reading demo-data.json, writing JSON certificates, QR PNGs, and rejection audit notes |
+| `package.json` | Updated: Added `"certificate"` script (`npx hardhat run scripts/make-certificates.ts`) and installed `qrcode` |
+| `test/certificate.test.ts` | Created: 6 unit tests covering shortCode determinism, round-trip Base64URL parsing, and QR PNG generation |
+| `docs/architecture/spec.md` | Updated: Added Section 6 covering Harvester Certificate architecture and offline verification |
+| `docs/security/assessment.md` | Updated: Added Section 3.4 on certificate privacy and updated test coverage to 66 tests |
+| `docs/overview.md` | Updated: Added certificate details in portable proof section and replaced em dashes with commas |
+| `docs/demo-script.md` | Updated: Incorporated certificate generation pipeline and updated test suite count |
+
+### Test and execution results
+- `npx hardhat test` passes 66/66 tests (42 contract tests, 18 hashing tests, 6 certificate tests).
+- `npx tsc --noEmit` passes with 0 errors.
+- `npm run certificate` successfully generated certificates and QR PNGs for approved batches and formal audit notes for rejected batches in `demo/certificates/`.
+
+### Decisions made or clarified
+- Certificate JSON schema version 1 includes plain paymentRef and settlementConfirmation code, enabling harvesters to reconcile with their M-Pesa statements without leaking PII on-chain.
+- URL fragment (`#c=`) is utilized for client-side zero-server payload transfer.
+- Crockford Base32 excludes confusing characters (I, L, O, U) for SMS/voice readability.
+
+---
+
+## Oct 16, 2026, Task 3: Add Deployment and Seed Script for Real Demo Batches
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `scripts/seed.ts` | Created: End-to-end deployment and demo batch seeding script (supports local and Base Sepolia networks, ephemeral wallet generation, and role assignment) |
+| `.env.example` | Created: Template listing DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL, and PSEUDONYM_SECRET |
+| `.env` | Updated: Added PSEUDONYM_SECRET entry for local execution |
+| `.gitignore` | Updated: Added `demo/.demo-wallets.json` pattern to safeguard ephemeral private keys |
+| `demo/demo-data.json` | Generated: Complete on-chain record for Batch A (full journey), Batch B (quality rejection), and Batch C (hash correction) |
+| `README.md` | Updated: Added Quick Start run instructions for local and Base Sepolia seed execution |
+| `docs/architecture/spec.md` | Updated: Added Demo Batch Seed Runner to system architecture component breakdown |
+
+### Test and execution results
+- `npx hardhat test` passes 60/60 tests (42 contract tests and 18 hashing tests).
+- `npx tsc --noEmit` passes with 0 errors.
+- `npx hardhat run scripts/seed.ts` successfully deployed contract, granted roles, executed all 3 demo batches, and produced `demo/demo-data.json`.
+
+### Decisions made or clarified
+- On local networks, in-memory signers are assigned as relayer, verifier, buyer, and processor.
+- On live networks such as Base Sepolia, 4 ephemeral wallets are generated, funded from the deployer wallet with a constant 0.0005 ETH each, and stored strictly in the gitignored `demo/.demo-wallets.json`.
+- `demo/demo-data.json` contains full canonical payloads, salts, hashes, transaction hashes, and block numbers, but strictly omits private keys and the pseudonym secret.
+
+---
+
 ## Oct 16, 2026 — Task 2: Build Off-Chain Hashing & Pseudonym Module
 
 ### Files added or updated

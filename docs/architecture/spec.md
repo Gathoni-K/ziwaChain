@@ -55,6 +55,10 @@ flowchart TD
    - Enforces linear lifecycle, role permissions, mass balance, non-transferability, and hash supersession.
 7. **Public Verify Page (Static Web App):**
    - Zero-backend client. Reads Base Sepolia directly via JSON-RPC. Recomputes hashes in-browser to verify certificates against immutable chain events.
+8. **Demo Batch Seed Runner (`scripts/seed.ts`):**
+   - End-to-end deployment and execution harness that seeds real demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction).
+   - Operates on local in-memory nodes as well as Base Sepolia (automatically funding ephemeral actor wallets).
+   - Emits canonical payloads, salts, hashes, and transaction receipts to `demo/demo-data.json` for certificate generation and verify page testing.
 
 ---
 
@@ -189,5 +193,37 @@ The contract never overwrites historical data. If a field evidence hash or paylo
 - Tracks `_hashAuthor[batchId][hash]` to restrict corrections strictly to the original submitter.
 - Maps `_supersededByMap[batchId][oldHash] = newHash`.
 - Emits `RecordCorrected(batchId, author, oldHash, newHash, reasonHash)`.
-- Quantities **cannot** be altered via `correctRecord`, protecting mass balance invariants.
+- Quantities cannot be altered via `correctRecord`, protecting mass balance invariants.
+
+---
+
+## 6. Harvester Certificate Architecture and Offline Verification
+
+The harvester certificate serves as portable, self-contained proof. It enables any third party (such as an agricultural SACCO loan officer or corporate ESG auditor) to verify the authenticity of a harvest batch directly against Base Sepolia without requiring access to ZiwaClear's internal database (`src/certificate/build.ts`).
+
+### Certificate Data Schema (Version 1)
+```json
+{
+  "version": 1,
+  "chainId": "31337",
+  "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "batchId": "0x2979c3606b661c258449350a53dd28384d5d42d8032e35ac9bc98739b5e17bcd",
+  "pseudonym": "0x406cbc69950796e47fd36afe766ef07274c254b93613a8a61096a464436b8399",
+  "deploymentBlock": 1,
+  "stages": { ... },
+  "paymentRef": "MPESA-QKH78219XZ-2026",
+  "settlementConfirmation": { "code": "4821", "salt": "0x..." },
+  "shortCode": "TR8NZ-A9VC5",
+  "verifyUrl": "https://ziwachain.org/verify#c=ey..."
+}
+```
+
+### Components
+1. **Crockford Base32 Short Code (`src/certificate/shortCode.ts`):** A 10-character code derived from the harvest payload hash and formatted into two groups of 5 with a hyphen (e.g. `TR8NZ-A9VC5`). It excludes ambiguous characters (I, L, O, U) so harvesters can easily read it over phone calls or SMS.
+2. **Compact Base64URL Encoding:** The certificate is encoded into a URL fragment (`#c=<base64url>`). Because URL fragments are never sent to web servers, the user's certificate payload remains strictly client-side when the verification page loads.
+3. **High-Density QR Generator (`src/certificate/qr.ts`):** Generates PNG QR codes encoding the complete self-verifying URL. If payload size exceeds optical QR scanning density, it falls back to a query URL containing the on-chain identifiers.
+4. **Batch Certificate Pipeline (`scripts/make-certificates.ts`):** Automated pipeline that reads `demo/demo-data.json`, writes verified JSON certificates and PNG QR codes, and generates formal audit notes for rejected batches.
+
+Verified by 6 unit tests in `test/certificate.test.ts`.
+
 

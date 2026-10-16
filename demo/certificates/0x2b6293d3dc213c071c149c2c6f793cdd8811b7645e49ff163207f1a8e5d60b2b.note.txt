@@ -1,0 +1,10 @@
+ZiwaChain Batch Verification Audit Note
+--------------------------------------------------------------------------------
+Batch ID:    0x2b6293d3dc213c071c149c2c6f793cdd8811b7645e49ff163207f1a8e5d60b2b
+Pseudonym:   0xd8628fe1716ce6d5bb817019a4450884a08b2e2de523e76908689fdcbe938aec
+Status:      Rejected (Terminal Quality Rejection)
+Reason:      Excessive mud and inorganic contamination exceeding threshold.
+Outcome:     In accordance with ZiwaChain protocol rules, stage Rejected is terminal.
+             Work credits are not issued and a commercial certificate of custody is withheld.
+Timestamp:   2026-10-16T09:10:50.438Z
+--------------------------------------------------------------------------------
