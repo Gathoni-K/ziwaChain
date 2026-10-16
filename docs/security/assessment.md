@@ -109,7 +109,11 @@ Disputes in biomass trading typically center on whether payment was actually mad
 The Harvester Certificate (`src/certificate/build.ts`) packages the off-chain verification material into a portable JSON structure:
 - **Serverless Client Verification:** The certificate data is encoded into the URL fragment (`#c=<base64url>`). According to HTTP standards (RFC 3986), URL fragments are processed purely by the browser and are never transmitted in HTTP requests, preventing certificate payload logging on web servers.
 - **Transcription Error Resilience:** The human-readable short code utilizes Crockford Base32 (`src/certificate/shortCode.ts`), explicitly excluding the letters `I`, `L`, `O`, and `U` to prevent visual and phonetic confusion when read over low-quality voice calls or SMS.
-- **Zero PII Leakage:** The certificate contains only stage event types, integer metrics, salts, transaction hashes, and the plain M-Pesa receipt reference, completely omitting personal names, phone numbers, and physical coordinates.
+### 3.5 SMS Privacy & Phone Number Masking
+In rural informal supply chains, phone numbers represent sensitive personal data and high-risk attack vectors for SIM-swap fraud and unbanked user harassment:
+- **Zero On-Chain Phone Numbers:** Phone numbers are strictly never written to the blockchain, nor are plain phone hashes stored on-chain (phone numbers have low entropy and can easily be reversed via dictionary attacks).
+- **Log and Console Masking:** All telecom gateway layers enforce strict phone masking (`src/sms/gateway.ts`), preserving country routing code and the last 3 digits while obfuscating all other digits (e.g. `+2547****678`).
+- **Enumeration Attack Prevention:** Inbound messages from unrecognized senders or with incorrect OTPs are rejected or silently ignored without returning hints about whether a pending batch exists.
 
 ---
 
@@ -124,7 +128,7 @@ The Harvester Certificate (`src/certificate/build.ts`) packages the off-chain ve
 
 ## 5. Automated Security Test Coverage
 
-The security guarantees, invariant checks, cryptographic canonicalization, privacy derivations, and certificate structures are validated by 66 automated tests across `test/ZiwaChain.ts`, `test/hashing.test.ts`, and `test/certificate.test.ts`.
+The security guarantees, invariant checks, cryptographic canonicalization, privacy derivations, certificate structures, public verification checks, and simulated SMS settlement flows are validated by 85 automated tests across `test/ZiwaChain.ts`, `test/hashing.test.ts`, `test/certificate.test.ts`, `test/verify.test.ts`, and `test/sms.test.ts`.
 
 ```bash
   ZiwaChain
@@ -221,6 +225,24 @@ The security guarantees, invariant checks, cryptographic canonicalization, priva
       ✔ validates on-chain mass balance across full batch lifecycle
       ✔ verifies M-Pesa paymentRef preimage against paymentRefHash
       ✔ reads work credits balance for harvester pseudonym
+  SMS Flow
+    Phone masking
+      ✔ masks all but the last 3 digits of a standard phone number
+      ✔ masks a short number without crashing
+      ✔ does not include the full phone number in the masked output
+    Inbound message parsing
+      ✔ accepts YES <code> with a matching 4-digit code (case-insensitive)
+      ✔ accepts YES <code> with extra leading and trailing whitespace
+      ✔ rejects a wrong code with a polite error and retry count
+      ✔ ignores messages from an unknown sender phone number
+      ✔ ignores unrecognised messages silently
+    Settlement on-chain recording
+      ✔ records confirmSettlement on-chain when the correct code is received
+      ✔ refuses a second settlement attempt on the same batch with a graceful reply
+      ✔ locks out after 3 wrong code attempts and sends a contact message
+    PROOF delivery
+      ✔ sends the short code and verify link after a successful confirmation
+      ✔ replies with a not-found message when PROOF is sent before settlement
 
-  72 passing (2s)
+  85 passing (3s)
 ```

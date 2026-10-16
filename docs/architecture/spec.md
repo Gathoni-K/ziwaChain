@@ -61,6 +61,10 @@ flowchart TD
    - End-to-end deployment and execution harness that seeds real demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction).
    - Operates on local in-memory nodes as well as Base Sepolia (automatically funding ephemeral actor wallets).
    - Emits canonical payloads, salts, hashes, and transaction receipts to `demo/demo-data.json` for certificate generation and verify page testing.
+9. **Simulated SMS Gateway & Settlement Flow (`src/sms/`, `scripts/demo-sms.ts`):**
+   - Two-leg SMS flow for low-bandwidth harvesters: post-acceptance settlement OTP confirmation and on-demand PROOF certificate delivery.
+   - Modular `SmsGateway` interface allowing seamless transition from `SimulatedGateway` to live telecom providers (such as Africa's Talking, Twilio, or Safaricom USSD gateway).
+   - Strict phone number masking in logs and zero on-chain phone number storage.
 
 ---
 
@@ -227,5 +231,54 @@ The harvester certificate serves as portable, self-contained proof. It enables a
 4. **Batch Certificate Pipeline (`scripts/make-certificates.ts`):** Automated pipeline that reads `demo/demo-data.json`, writes verified JSON certificates and PNG QR codes, and generates formal audit notes for rejected batches.
 
 Verified by 6 unit tests in `test/certificate.test.ts`.
+
+---
+
+## 7. SMS Gateway and Harvester Settlement Flow
+
+The harvester interaction layer (`src/sms/`) bridges the gap between rural informal harvesters and the Base Sepolia blockchain without requiring smartphones, Web3 wallets, or gas tokens.
+
+### Interaction Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor H as Harvester (+2547****678)
+    participant GW as SmsGateway (SimulatedGateway)
+    participant SF as SmsFlow Engine
+    participant REL as ZiwaClear Relayer Wallet
+    participant SC as ZiwaChain.sol (Base Sepolia)
+
+    Note over SF,SC: Buyer completes acceptBatch on-chain
+    SF->>SF: Generate 4-digit numeric OTP (e.g. 4821)
+    SF->>GW: send(to, "Your batch of 500 kg was accepted. Reply YES 4821...")
+    GW-->>H: SMS Dispatch
+
+    H->>GW: Inbound SMS: "YES 4821" (case & whitespace tolerant)
+    GW->>SF: handleIncoming(from, text)
+    SF->>SF: Verify OTP match & attempt count (<= 3)
+    SF->>SF: Generate fresh salt, compute hashConfirmation(code, salt)
+    SF->>REL: Call confirmSettlement(batchId, confirmationHash, payloadHash)
+    REL->>SC: Transaction broadcast & receipt confirmation
+    SF->>GW: send(to, "Confirmed. Your payment is recorded. Tx: 0x... Reply PROOF...")
+    GW-->>H: SMS Confirmation
+
+    opt Harvester requests certificate
+        H->>GW: Inbound SMS: "PROOF"
+        GW->>SF: handleIncoming(from, "PROOF")
+        SF->>GW: send(to, "Your certificate code is TR8NZ-A9VC5. Verify at: https://...")
+        GW-->>H: SMS with short code and verification link
+    end
+```
+
+### Key Technical Properties
+
+1. **Plug-In Architecture (`src/sms/gateway.ts`):** The `SmsGateway` interface exposes two primary methods (`send(to, text)` and `onReceive(handler)`). In development and demonstration mode, `SimulatedGateway` formats messages as clean conversational terminal outputs. In production, a telecom gateway adapter (such as Africa's Talking or Twilio) implements `SmsGateway`, routing incoming webhook events to `onReceive` without touching the business logic in `src/sms/flow.ts`.
+2. **Privacy and Phone Masking:** Phone numbers are strictly never written to the blockchain or logged in plaintext. The `maskPhone` function preserves operator routing visibility while masking internal digits (e.g., `+254712345678` -> `+2547****678`).
+3. **Resilience & Rate Limiting:** Harvesters are given 3 attempts to provide the matching OTP. Exceeding 3 failed attempts invalidates the session and returns an operational support contact notice. Unrecognized phone numbers and malformed messages are silently ignored to prevent enumeration.
+4. **Idempotency & Re-entry Defense:** If a second settlement confirmation is attempted for a batch that is already marked `settled` on-chain, the flow catches the contract revert gracefully and replies that the batch was already confirmed, preventing transaction crash or state corruption.
+
+Verified by 13 unit tests in `test/sms.test.ts`. Full test suite: 85 tests passing.
+
 
 

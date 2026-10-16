@@ -21,6 +21,7 @@ Decentralized traceability projects in developing markets frequently fail becaus
 ### 1.1 The Harvester-First Entry Wedge
 Harvesters face an immediate, tangible pain point: **payment disputes and lack of financial identity**. 
 - **Immediate Value (Day 1):** Two-sided settlement co-signing via SMS ("YES 4821") creates an irrefutable receipt. If an aggregator claims a delivery was short-weighted or unpaid, the harvester has a cryptographically anchored record tied to the buyer's wallet and M-Pesa reference.
+- **Operational Proof via SMS:** The built SMS engine (`src/sms/flow.ts`) and demo runner (`scripts/demo-sms.ts`) showcase this full flow: post-acceptance OTP dispatch, "YES <code>" settlement locking on Base Sepolia, and "PROOF" delivery of certificate short codes and verify links directly to basic feature phones.
 - **Medium-Term Value (Months 3–6):** Agricultural Savings and Credit Cooperatives (SACCOs) and lakeside micro-lenders require documentation of income regularity before underwriting loans for fishing boats, harvest equipment, or clean cookstoves. Harvesters can present their verified certificates to prove historical delivery consistency.
 - **No Cost to Harvester:** All blockchain transaction gas fees are sponsored and abstracted by the ZiwaClear relayer.
 
@@ -32,7 +33,7 @@ Commercial enterprises turning invasive weeds into products (biogas digesters, o
 
 ### 1.3 Institutional & Donor Alignment
 - **Results-Based Climate Finance:** International development agencies and climate funds (e.g., UNEP, USAID, climate impact DAOs) require verifiable evidence before disbursing outcome-based subsidies. ZiwaChain provides cryptographic proof of biomass removal and circular conversion without relying on self-reported spreadsheets.
-- **Accredited Verification Partners:** Independent biological research stations on Lake Victoria (such as KMFRI – Kenya Marine and Fisheries Research Institute) can be provisioned with `VERIFIER_ROLE` to validate biomass quality and harvesting compliance.
+- **Accredited Verification Partners:** Independent biological research stations on Lake Victoria (such as KMFRI, Kenya Marine and Fisheries Research Institute) can be provisioned with `VERIFIER_ROLE` to validate biomass quality and harvesting compliance.
 
 ---
 
@@ -43,7 +44,7 @@ The technical evolution of ZiwaChain is organized across three development horiz
 ```mermaid
 timeline
     title ZiwaChain Scalability & Development Milestones
-    Phase 1 (Current) : Smart Contract (Base Sepolia) : 42 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification
+    Phase 1 (Current) : Smart Contract (Base Sepolia) : 85 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification : Two-Leg SMS Settlement Flow
     Phase 2 (Months 1-3) : 2-of-N Verifier Consensus : Automated M-Pesa Daraja API Webhooks : Merkle Statement Bundles for SACCOs : Offline-First PWA for Field Verifiers
     Phase 3 (Months 4-12) : Base Mainnet Migration : Account Abstraction (ERC-4337) : Carbon Registry Methodology Alignment : Multi-Lake Expansion (Lake Kyoga, Lake Naivasha)
 ```
@@ -51,9 +52,10 @@ timeline
 ### Horizon 1: Hackathon Prototype (Current Milestone - Oct 2026)
 - **Status:** **Completed & Built**
 - Full core contract deployed and verified on Base Sepolia (`cancun` EVM target).
-- 42 comprehensive unit tests validating stage monotonicity, role checks, mass-balance limits, non-transferability, and hash supersessions.
+- 85 comprehensive unit tests validating stage monotonicity, role checks, mass-balance limits, non-transferability, hash supersessions, and SMS settlement flows.
 - Client-side canonical serialization (RFC 8785) and salted SHA-256/Keccak-256 payload hashing.
 - Static, zero-backend public verification interface.
+- Complete two-leg SMS settlement and PROOF flow engine with phone privacy masking.
 
 ### Horizon 2: Commercial Pilot & Field Hardening (Q1 2027)
 - **Multi-Verifier Consensus (2-of-N):** Upgrade `verifyBatch` to require threshold signatures from both an independent ecological verifier and a community landing-site elder, eliminating single-verifier collusion.

@@ -103,7 +103,7 @@ Processor wallet ─────────────────────
   - `correctRecord(batchId, supersededHash, newHash, reasonHash)`: only the original author of a hash; evidence and payload hashes only
   - `getBatch(batchId)`, `workCreditsOf(harvesterId)`, `supersededBy(batchId, hash)`
 - **Mass balance:** accepted ≤ harvested; processed input ≤ accepted; total end-use kg ≤ processed input.
-- **Credits:** ERC-1155 token ID 1 (`WORK_CREDIT`), one per kg reaching end use, **non-transferable** (enforced via `_update` hook — only minting from address(0) is allowed), minted to the relayer as custodian and tracked per pseudonymous ID in `workCreditsOf`. They are not carbon credits.
+- **Credits:** ERC-1155 token ID 1 (`WORK_CREDIT`), one per kg reaching end use, **non-transferable** (enforced via `_update` hook, only minting from address(0) is allowed), minted to the relayer as custodian and tracked per pseudonymous ID in `workCreditsOf`. They are not carbon credits.
 - **Events:** `HarvestLogged`, `BatchVerified`, `BatchAccepted`, `SettlementConfirmed`, `BatchProcessed`, `EndUseRecorded`, `RecordCorrected`, `CreditsIssued`.
 - `processType` and `endUseType` are `bytes32` labels, so the taxonomy lives off-chain.
 
@@ -156,39 +156,52 @@ Processor wallet ─────────────────────
 
 ---
 
-## 7. Repo state (as of Oct 15, 2026)
+## 7. Repo state (as of Oct 16, 2026, after Tasks 1-5)
 
 ```
 ziwachain/
   PROJECT_CONTEXT.md              ← this file
-  contracts/ZiwaChain.sol         ← complete, 42 tests passing
-  test/ZiwaChain.ts               ← 42 tests, all passing
+  README.md                       ← judge entry point
+  contracts/ZiwaChain.sol         ← complete, 42 tests
+  test/ZiwaChain.ts               ← 42 contract tests
+  test/hashing.test.ts            ← 18 hashing tests
+  test/certificate.test.ts        ← 6 certificate tests
+  test/verify.test.ts             ← 6 verify-page tests
   ignition/modules/ZiwaChain.ts   ← deploys with account 0 as admin
-  hardhat.config.ts               ← Hardhat 2, TypeScript, solidity 0.8.28, evmVersion cancun, baseSepolia + sepolia networks
-  docs/architecture/eventSchema.md ← judge-facing; reflects current design
-  docs/internal/PROGRESS.md       ← working notes log
-  docs/Learn/Setup.md             ← developer setup guide (working notes)
-  docs/Learn/Errors.md            ← error log (working notes)
-  src/hashing/                    ← directory created; index.ts not yet written (Task 2)
-  src/certificate/                ← directory created; index.ts not yet written (Task 3)
-  src/sms/                        ← directory created; index.ts not yet written (Task 2)
-  .env                            ← DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL (never commit)
+  hardhat.config.ts               ← Hardhat 2, TypeScript, 0.8.28, cancun, baseSepolia
+  scripts/seed.ts                 ← deploys + runs 3 demo batches; writes demo-data.json
+  scripts/make-certificates.ts    ← generates JSON certs, QR PNGs, audit notes
+  scripts/demo-sms.ts             ← simulated SMS settlement and PROOF conversation runner
+  src/hashing/                    ← RFC 8785 canonical JSON, salted keccak256, HMAC pseudonym
+  src/certificate/                ← Version 1 certificate builder, QR generator, short code
+  src/sms/                        ← gateway interface, simulated chat gateway, settlement/PROOF flow
+  demo/demo-data.json             ← seeded batch records (3 batches, all stages)
+  demo/certificates/              ← generated certificates and QR PNGs
+  web/                            ← static verify page (esbuild bundle)
+  web/dist/                       ← built bundle (no CDN)
+  docs/architecture/spec.md       ← technical spec with 9 components
+  docs/architecture/eventSchema.md ← event envelope and data model
+  docs/security/assessment.md     ← threat model, RBAC, 85-test coverage
+  docs/impact/impact-assessment.md ← methane avoidance projections
+  docs/overview.md                ← 2-page problem and solution
+  docs/adoption-and-scalability.md ← adoption strategy and scaling roadmap
+  docs/demo-script.md             ← 3-minute video script
+  docs/internal/PROGRESS.md       ← append-only build log
+  .env                            ← DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL, PSEUDONYM_SECRET
 ```
 
-- **Test run:** `npx hardhat test` → 42 passing.
-- **Not yet done:** deployment to Base Sepolia (needs a testnet-only wallet and faucet funds), canonical hashing module, certificate generator, verify page, seed/demo script, written deliverables, demo video.
+- **Test run:** `npx hardhat test` → 85 passing (42 contract + 18 hashing + 6 certificate + 6 verify + 13 sms).
+- **Remaining tasks:** Task 7 (remaining judge-facing documents), Task 8 (skeptical review, no code changes).
+- **Manual steps (done by owner, not tasks):** Base Sepolia deployment, demo video recording, hosting, Devpost submission.
 
 ---
 
 ## 8. Next steps (in order)
 
-1. **Task 2:** Build the TypeScript hashing module (`src/hashing/index.ts`, `src/sms/index.ts`): HMAC pseudonyms, canonical serialisation, salted payload hash. Browser-safe. With tests. Node-only HMAC code in a separate file.
-2. **Task 3:** Build the certificate generator (`src/certificate/index.ts`): JSON, QR, short code.
-3. **Task 4:** Deploy to Base Sepolia and write a seed script that runs one full batch for the demo, including a tampered certificate that fails verification and a correction event.
-4. **Task 5:** Build the static verify page (`web/`): in-browser hash recomputation, read-only chain access.
-5. **Task 6:** Simulate the SMS PROOF flow for the demo.
-6. **Task 7:** Write the deliverables: architecture diagram, security and data integrity assessment, impact assessment (estimates labelled and cited), adoption strategy, 2-page problem and solution, scalability roadmap, 3-minute video.
-7. **Feature freeze Oct 21.** Spend Oct 21–23 on polish and docs. Internal deadline Oct 24; official close Oct 25 11:59 PM UTC.
+1. **Task 6 (complete):** Build simulated SMS settlement and PROOF flow in `src/sms/`, with tests and a `demo:sms` script (completed, 85/85 tests passing).
+2. **Task 7 (current):** Remaining judge-facing documents: final review, synchronization, and completeness check across all judge-facing documentation.
+3. **Task 8:** Skeptical review. Read every judge-facing document as a skeptical judge would. Flag any claim that outpaces the code, any missing limitation, any inconsistency. No new code. Fix prose only.
+4. **Manual steps (owner does these, not tasks):** Base Sepolia deployment (`npx hardhat run scripts/seed.ts --network baseSepolia`), demo video recording following `docs/demo-script.md`, hosting public static verify page, Devpost submission. Internal deadline Oct 24; official close Oct 25 11:59 PM UTC.
 
 ---
 

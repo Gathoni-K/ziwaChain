@@ -34,9 +34,15 @@ npx hardhat clean && npx hardhat compile
 ```
 
 ### Run Test Suite
-Run the full automated test suite (60 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, RFC 8785 canonical serialization, and HMAC pseudonyms):
+Run the full automated test suite (85 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, RFC 8785 canonical serialization, HMAC pseudonyms, certificate generation, in-browser verification algorithm, and simulated SMS settlement flows):
 ```bash
 npx hardhat test
+```
+
+### Run Simulated SMS Settlement & PROOF Demo
+Run the interactive SMS settlement confirmation and certificate delivery flow against a local node:
+```bash
+npm run demo:sms
 ```
 
 ### Typecheck TypeScript Code
@@ -86,38 +92,48 @@ Judges can review the complete hackathon evaluation documentation via the links 
 ```
 ziwachain/
 ├── contracts/
-│   └── ZiwaChain.sol                 # Core smart contract (ERC-1155, AccessControl, Mass Balance)
+│   └── ZiwaChain.sol                  # Core smart contract (ERC-1155, AccessControl, mass balance)
 ├── scripts/
-│   └── seed.ts                       # End-to-end deployment & demo batch seed runner
+│   ├── seed.ts                        # End-to-end deployment and demo batch seed runner
+│   ├── make-certificates.ts           # Certificate generation pipeline (JSON, QR, audit notes)
+│   └── demo-sms.ts                    # Simulated SMS settlement and PROOF conversation runner
 ├── test/
-│   ├── ZiwaChain.ts                  # Core smart contract test suite (42 unit tests)
-│   └── hashing.test.ts               # Off-chain hashing, RFC 8785, and pseudonym suite (18 unit tests)
+│   ├── ZiwaChain.ts                   # Contract test suite (42 unit tests)
+│   ├── hashing.test.ts                # RFC 8785 canonical JSON, salt, and pseudonym suite (18 tests)
+│   ├── certificate.test.ts            # Certificate builder, short code, and QR suite (6 tests)
+│   ├── verify.test.ts                 # In-browser verification algorithm suite (6 tests)
+│   └── sms.test.ts                    # SMS parsing, settlement flow, and phone masking suite (13 tests)
 ├── demo/
-│   └── demo-data.json                # Seeded demo batch records, tx hashes, salts, and payloads
+│   ├── demo-data.json                 # Seeded demo batch records, tx hashes, salts, and payloads
+│   └── certificates/                  # Generated harvester certificates (JSON + QR PNGs)
 ├── ignition/
 │   └── modules/
-│       └── ZiwaChain.ts              # Hardhat Ignition deployment module
-
+│       └── ZiwaChain.ts               # Hardhat Ignition deployment module
+├── web/
+│   ├── index.html                     # Public verify page: static entry point
+│   ├── main.ts                        # In-browser verification engine (all 5 checks)
+│   ├── style.css                      # High-contrast responsive stylesheet (light/dark mode)
+│   ├── config.ts                      # RPC URL config and contract ABI
+│   └── dist/                          # Bundled distribution (esbuild output, no CDN)
 ├── docs/
 │   ├── architecture/
-│   │   ├── spec.md                   # Full technical spec & architecture diagram
-│   │   └── eventSchema.md            # Canonical event envelope & data dictionary
+│   │   ├── spec.md                    # Full technical spec and architecture diagram
+│   │   └── eventSchema.md             # Canonical event envelope and data dictionary
 │   ├── security/
-│   │   └── assessment.md             # Security, data integrity & threat analysis
+│   │   └── assessment.md              # Security, data integrity, and threat analysis
 │   ├── impact/
-│   │   └── impact-assessment.md      # Carbon-reduction projections & climate rationale
-│   ├── overview.md                   # 2-page problem & solution overview
-│   ├── adoption-and-scalability.md   # Adoption strategy & scaling roadmap
-│   ├── demo-script.md                # 3-minute video presentation script
-│   ├── Learn/                        # Internal developer guides and debugging logs
-│   └── internal/                     # Append-only internal build progress log
-├── src/                              # Off-chain client modules (Task 2 & 3 in progress)
-│   ├── hashing/                      # Canonical JSON (RFC 8785) & HMAC pseudonym derivation
-│   ├── certificate/                  # Harvester proof certificate generator
-│   └── sms/                          # SMS parser & confirmation hash utilities
-├── hardhat.config.ts                 # Hardhat configuration (Solidity 0.8.28, Cancun, Base Sepolia)
-├── package.json                      # Project dependencies & metadata
-└── tsconfig.json                     # TypeScript compiler configuration
+│   │   └── impact-assessment.md       # Carbon-reduction projections and climate rationale
+│   ├── overview.md                    # 2-page problem and solution overview
+│   ├── adoption-and-scalability.md    # Adoption strategy and scaling roadmap
+│   ├── demo-script.md                 # 3-minute video presentation script
+│   ├── Learn/                         # Internal developer guides and debugging logs
+│   └── internal/                      # Append-only internal build progress log
+├── src/
+│   ├── hashing/                       # RFC 8785 canonical JSON, salted hash, HMAC pseudonym
+│   ├── certificate/                   # Harvester certificate builder, QR generator, short code
+│   └── sms/                           # SMS gateway interface, simulated chat gateway, settlement/PROOF flow
+├── hardhat.config.ts                  # Hardhat configuration (Solidity 0.8.28, Cancun, Base Sepolia)
+├── package.json                       # Project dependencies and npm scripts
 ```
 
 ---
@@ -128,14 +144,18 @@ To maintain total transparency with hackathon judges, our implementation status 
 
 ### What Is Built and Proven by Tests
 - **Core Smart Contract (`ZiwaChain.sol`):** Deployed and tested on Solidity 0.8.28 (`cancun` EVM) using OpenZeppelin v5 contracts.
-- **Strict Linear Lifecycle:** Enforced stage transitions: `None` → `Harvested` → `Verified` \| `Rejected` → `Accepted` → `Processed` → `EndUse`.
+- **Strict Linear Lifecycle:** Enforced stage transitions: `None` → `Harvested` → `Verified` | `Rejected` → `Accepted` → `Processed` → `EndUse`.
 - **Role-Based Access Control:** Distinct roles for `RELAYER_ROLE`, `VERIFIER_ROLE`, `BUYER_ROLE`, `PROCESSOR_ROLE`, and `DEFAULT_ADMIN_ROLE`.
 - **Separation of Duties:** Relayers cannot act as verifiers (`VerifierCannotBeRelayer`).
 - **Strict Mass-Balance Invariants:** Contract rejects transactions where `acceptedKg > harvestedKg`, `processedKg > acceptedKg`, or `endUseKgTotal > processedKg`.
-- **Harvester Privacy:** Per-batch pseudonymous IDs (`HMAC-SHA256`) prevent public linkability of harvester identities across transactions.
+- **Harvester Privacy:** Per-batch HMAC-SHA256 pseudonyms preventing public linkability of harvester identities across batches.
 - **Non-Transferable Work Credits:** ERC-1155 token ID 1 (`WORK_CREDIT`) minted 1:1 per kilogram reaching verified circular end use; token transfers are blocked via the `_update` hook.
 - **Append-Only Tamper-Evident Corrections:** Hashes can only be superseded by their original author with a recorded reason; historical records remain immutable and visible.
-- **Full Automated Test Suite:** 42/42 tests passing in `test/ZiwaChain.ts`.
+- **Off-Chain Hashing Module (`src/hashing/`):** RFC 8785 canonical JSON serialization, random 128-bit salts, `keccak256` payload hashing, and HMAC-SHA256 per-batch pseudonym derivation. Browser-safe; no Node-only imports in the main export.
+- **Harvester Certificate Pipeline (`src/certificate/`, `scripts/make-certificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
+- **Public In-Browser Verify Page (`web/`):** Zero-backend static page bundled with esbuild. Runs 5 independent verification checks against the live blockchain with no login and no ZiwaClear server contact. Accepts certificate input via URL fragment, file upload, or paste.
+- **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demo-sms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
+- **Full Automated Test Suite:** 85/85 tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, and SMS flows.
 
 ### Roadmap Items (Not Yet Built in Current Release)
 - **Multi-Verifier Consensus:** Upgrading single verifiers to a 2-of-N threshold signature model.

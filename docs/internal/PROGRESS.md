@@ -1,6 +1,33 @@
-# ZiwaChain – Internal Progress Log
+# ZiwaChain, Internal Progress Log
 
 Append-only. Newest entry at the top.
+
+---
+
+## Oct 16, 2026, Task 6: Build Simulated SMS Settlement and Proof Flow in src/sms/ with Tests
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `src/sms/gateway.ts` | Created: `SmsGateway` interface, phone masking utility (`maskPhone`), and `SimulatedGateway` class formatting readable SMS chat exchanges to stdout |
+| `src/sms/flow.ts` | Created: Full two-leg SMS conversation flow (`requestConfirmation`, `handleIncoming`, settlement confirmation OTP generation, relayer on-chain `confirmSettlement`, retry limit, and `PROOF` certificate delivery) |
+| `src/sms/index.ts` | Created: Module re-exports for gateway, flow, and masking utilities |
+| `test/sms.test.ts` | Created: 13 automated unit tests covering inbound message parsing, whitespace trimming, case-insensitivity, wrong codes, retry count exhaustion, unknown sender rejection, on-chain `confirmSettlement` recording, idempotency/re-entry graceful refusal, and phone masking privacy |
+| `scripts/demo-sms.ts` | Created: Interactive end-to-end conversation demonstration script deploying contract, executing batch to Accepted, running OTP exchange, executing on-chain confirmation, and responding to PROOF request |
+| `package.json` | Updated: Added `demo:sms` script (`npx hardhat run scripts/demo-sms.ts`) |
+
+### Test and execution results
+- `npx hardhat test` passes 85/85 tests (42 contract tests, 18 hashing tests, 6 certificate tests, 6 verify-page tests, 13 SMS flow tests).
+- `npx tsc --noEmit` passes with 0 errors.
+- `npm run demo:sms` runs the complete conversation against local Hardhat node, printing formatted chat exchanges, contract transactions, on-chain settled status, and certificate verification URL.
+
+### Decisions made or clarified
+- Phone number privacy: Phone numbers are masked in all logs and outputs (e.g., `+2547****678`) and are strictly never stored on-chain.
+- Decoupled gateway architecture: `SmsGateway` defines an interface (`send`, `onReceive`, `simulateInbound`) so that ZiwaClear's production SMS pipeline (such as Africa's Talking, Twilio, or Safaricom USSD gateway) can replace `SimulatedGateway` without modifying any business logic in `flow.ts`.
+- Two-leg conversation design:
+  1. Post-acceptance settlement: 4-digit OTP generated and held in memory; harvester replies `YES <code>` (case-insensitive, whitespace tolerant); relayer computes salted `hashConfirmation(code, salt)` and calls `confirmSettlement` on-chain.
+  2. Proof request: Harvester sends `PROOF` at any time; receives their Crockford Base32 short code and verify URL.
+- Resiliency and security: Max 3 retry attempts before locking out and sending support contact info; unknown phone numbers and malformed messages are ignored silently to prevent enumeration attacks; duplicate confirmations are refused gracefully with informative notice.
 
 ---
 
@@ -86,7 +113,7 @@ Append-only. Newest entry at the top.
 
 ---
 
-## Oct 16, 2026 — Task 2: Build Off-Chain Hashing & Pseudonym Module
+## Oct 16, 2026, Task 2: Build Off-Chain Hashing & Pseudonym Module
 
 ### Files added or updated
 | File | Action |
@@ -111,7 +138,7 @@ Append-only. Newest entry at the top.
 
 ---
 
-## Oct 16, 2026 — Task 1: Complete Judge-Facing Documentation Update & Repo Entry Point
+## Oct 16, 2026, Task 1: Complete Judge-Facing Documentation Update & Repo Entry Point
 
 ### Files added or updated
 | File | Action |
@@ -130,7 +157,7 @@ Append-only. Newest entry at the top.
 
 ---
 
-## Oct 15, 2026 — Task 1: Complete contract, tests, Ignition module, and repo setup
+## Oct 15, 2026, Task 1: Complete contract, tests, Ignition module, and repo setup
 
 ### Files added or changed
 | File | Action |
@@ -161,9 +188,9 @@ Append-only. Newest entry at the top.
 None.
 
 ### Open questions and risks
-- **Deployment wallet:** Base Sepolia deployment needs a fresh testnet-only wallet and faucet funds. Not yet done.
-- **Feature freeze Oct 21:** Tasks 2–7 must all complete by Oct 21. That is 6 days for hashing module, certificate, deploy + seed script, verify page, PROOF simulation, and all written deliverables. Priority: hashing module first (the verify page depends on it).
-- **Canonical serialisation:** most "verification failed" bugs will come from serialisation mismatches between the ZiwaClear backend and the in-browser verify page. Test this aggressively in Task 2.
+- **Deployment wallet:** Base Sepolia deployment needs a fresh testnet-only wallet and faucet funds. Manual step by project owner.
+- **Feature freeze Oct 21:** Tasks 1, 2, 3, 4, 5, and 6 are all built and tested. Task 7 (remaining judge-facing documents) and Task 8 (skeptical review, no code changes) remain. Manual steps (demo video, Base Sepolia deployment, hosting, Devpost submission) will be completed by the owner.
+- **Canonical serialisation:** RFC 8785 canonical JSON serialisation ensures deterministic hash parity between backend and frontend verify page.
 
 ### Next step
-**Task 2:** TypeScript hashing module (`src/hashing/index.ts`, `src/sms/index.ts`): HMAC pseudonyms, canonical JSON serialisation (RFC 8785), salted payload hash. Must be browser-safe. Node-only HMAC pseudonym generation in a separate file. Tests required.
+**Task 7:** Remaining judge-facing documents: final review, synchronization, and completeness check across all judge-facing documentation before the Task 8 skeptical review.

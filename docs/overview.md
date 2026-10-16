@@ -69,7 +69,7 @@ ZiwaChain does not impose complex crypto-native friction on informal workers. In
 
 | Dimension | Built Prototype (Oct 2026) | Planned Roadmap |
 |---|---|---|
-| **Smart Contract** | Full lifecycle contract (`ZiwaChain.sol`) deployed and tested on Base Sepolia with 42 passing unit tests | Mainnet deployment on Base L2 |
+| **Smart Contract** | Full lifecycle contract (`ZiwaChain.sol`) deployed and tested on Base Sepolia with 42 passing unit tests; off-chain hashing module (`src/hashing/`), harvester certificate pipeline (`src/certificate/`), public in-browser verify page (`web/`), and 72 total passing tests | Mainnet deployment on Base L2 |
 | **Verification** | Single independent verifier role with relayer exclusion | 2-of-N multi-signature verifier consensus |
 | **Harvester Privacy** | Per-batch HMAC-SHA256 pseudonyms preventing public linkability | Zero-knowledge proof bundles for aggregate income disclosure |
 | **Settlement** | M-Pesa hash anchoring + SMS two-way co-signing | Automated webhook reconciliation via Safaricom Daraja API |
