@@ -53,8 +53,10 @@ flowchart TD
 6. **Smart Contract (`ZiwaChain.sol`):**
    - Deployed on **Base Sepolia** (Solidity 0.8.28, EVM version `cancun`).
    - Enforces linear lifecycle, role permissions, mass balance, non-transferability, and hash supersession.
-7. **Public Verify Page (Static Web App):**
+7. **Public Verify Page (Static Web App in `web/`):**
    - Zero-backend client. Reads Base Sepolia directly via JSON-RPC. Recomputes hashes in-browser to verify certificates against immutable chain events.
+   - Enforces 5 distinct verification checks: client-side hash recomputation (RFC 8785 + keccak256), on-chain event log matching, record supersession audit (`supersededBy`), conservation of mass verification (`getBatch`), and M-Pesa payment reference hash confirmation.
+   - Decodes certificate payloads strictly client-side from URL fragments (`#c=<base64url>`) without contacting any central server.
 8. **Demo Batch Seed Runner (`scripts/seed.ts`):**
    - End-to-end deployment and execution harness that seeds real demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction).
    - Operates on local in-memory nodes as well as Base Sepolia (automatically funding ephemeral actor wallets).

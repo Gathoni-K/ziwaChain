@@ -4,6 +4,34 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 16, 2026, Task 5: Build Public Verify Page in web/ (Zero Framework, In-Browser Verification)
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `web/config.ts` | Created: Public Base Sepolia default RPC, query override (`?rpc=`), stage labels, and contract event/view ABI |
+| `web/style.css` | Created: High-contrast responsive styling with dark/light mode (`prefers-color-scheme`), timeline, checklist indicators, and mass balance visualizer |
+| `web/index.html` | Created: Plain HTML static UI with browser privacy trust banner, honest disclosure notice, certificate input panel, and live verification report card |
+| `web/main.ts` | Created: Browser-side TypeScript verification engine executing 5 independent verification steps, parsing Base64URL fragment (`#c=`), textarea paste, and file upload |
+| `package.json` | Updated: Installed `esbuild` as devDependency, added `web:build` and `web:dev` scripts |
+| `web/dist/` | Generated: Bundled static distribution files (`bundle.js`, `style.css`, `index.html`) produced by esbuild |
+| `test/verify.test.ts` | Created: Automated test suite validating all 5 verification steps against a live deployed ZiwaChain contract |
+| `docs/architecture/spec.md` | Updated: Added Component 7 documenting the public verify page architecture and verification pipeline |
+| `docs/security/assessment.md` | Updated: Updated test suite count to 72 passing tests |
+
+### Test and execution results
+- `npx hardhat test` passes 72/72 tests (42 contract tests, 18 hashing tests, 6 certificate tests, 6 verification tests).
+- `npx tsc --noEmit` passes with 0 errors.
+- `npm run web:build` bundles `web/main.ts` into `web/dist/bundle.js` in ~80ms (zero external CDN dependencies, self-contained).
+
+### Decisions made or clarified
+- Client-side trust architecture: no backend server or API is ever contacted, verification reads directly from the blockchain via ethers v6 JsonRpcProvider and recomputes hashes in browser memory.
+- Certificate transfer via URL fragment (`#c=`) prevents certificate payloads and harvester metadata from appearing in web server access logs.
+- Honest verification disclosure: the page prominently explains that verification proves cryptographic immutability and rules adherence, but cannot verify whether physical measurements were true when recorded.
+- Corrected records queried through `supersededBy` are clearly labeled as "superseded by a newer record", showing both hashes rather than triggering an erroneous verification failure.
+
+---
+
 ## Oct 16, 2026, Task 4: Build Harvester Certificate Generator and Pipeline
 
 ### Files added or updated

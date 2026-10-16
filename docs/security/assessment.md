@@ -214,6 +214,13 @@ The security guarantees, invariant checks, cryptographic canonicalization, priva
       ✔ produces unlinkable pseudonyms for different batches of the same harvester group
       ✔ produces different pseudonyms for different secrets
       ✔ requires secret, groupId, and batchId
+    Public Verification Algorithm (web/in-browser verification)
+      ✔ recomputes payload hashes and matches on-chain events
+      ✔ detects payload tampering with immediate red mismatch
+      ✔ correctly identifies superseded records without flagging them as error
+      ✔ validates on-chain mass balance across full batch lifecycle
+      ✔ verifies M-Pesa paymentRef preimage against paymentRefHash
+      ✔ reads work credits balance for harvester pseudonym
 
-  66 passing (2s)
+  72 passing (2s)
 ```

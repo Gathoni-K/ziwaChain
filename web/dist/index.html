@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZiwaChain - Harvester Certificate Verification</title>
+  <meta name="description" content="In-browser cryptographic verification of Lake Victoria water hyacinth biomass harvester certificates on Base Sepolia.">
+  <link rel="stylesheet" href="style.css">
+  <script src="bundle.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-bar">
+        <h1>ZiwaChain Verification</h1>
+        <span class="mono" id="versionBadge">v1.0</span>
+      </div>
+
+      <div class="trust-badge">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <div>
+          Checked in your browser. No ZiwaClear server was contacted.
+        </div>
+      </div>
+
+      <div class="disclosure-box">
+        <strong>What these checks prove:</strong> that every record in this certificate existed at the specified time, that no field was altered afterwards, and that the smart contract rules (mass balance, separation of duties, role authorization) were strictly enforced on-chain.<br><br>
+        <strong>What they do not prove:</strong> that the physical real-world facts (such as the exact scale weight at the beach) were true. That real-world link relies on independent physical verification, the buyer's wallet acceptance, and the harvester's SMS confirmation.
+      </div>
+    </header>
+
+    <!-- Certificate Input Card -->
+    <section class="card">
+      <h2>1. Certificate Input</h2>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
+        Load a certificate from a QR code link (#c=...), upload a .json file, paste raw JSON, or test with sample demo batches:
+      </p>
+
+      <div class="quick-buttons">
+        <button id="btnLoadBatchA" class="btn btn-outline" type="button">Load Batch A (Verified)</button>
+        <button id="btnLoadBatchC" class="btn btn-outline" type="button">Load Batch C (Corrected)</button>
+        <button id="btnTamperTest" class="btn btn-danger-outline" type="button">Tamper Test (Altered Mass)</button>
+      </div>
+
+      <div class="file-input-wrapper">
+        <label for="fileInput" style="font-weight: 600;">Upload .json:</label>
+        <input type="file" id="fileInput" accept=".json,application/json">
+      </div>
+
+      <textarea id="jsonInput" placeholder="Paste certificate JSON here..."></textarea>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button id="btnVerify" class="btn btn-primary" type="button">Run Verification</button>
+        <div class="rpc-info">
+          RPC: <span class="mono" id="rpcDisplay">loading...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verification Results Area (hidden until verification executes) -->
+    <main id="resultsArea" style="display: none;">
+      
+      <!-- Overall Status Banner -->
+      <div id="statusBanner" class="status-banner loading">
+        Executing verification checks...
+      </div>
+
+      <!-- Verification Steps Breakdown -->
+      <section class="card">
+        <h2>2. Cryptographic & On-Chain Audit Steps</h2>
+        <ul class="checklist" id="checklist">
+          <!-- Populated dynamically by main.ts -->
+        </ul>
+      </section>
+
+      <!-- Mass Balance & Quantities Card -->
+      <section class="card" id="massBalanceSection">
+        <h2>3. Chain of Custody Mass Balance</h2>
+        <div class="mass-balance-grid">
+          <div class="mass-card">
+            <div class="label">Harvested</div>
+            <div class="value" id="massHarvested">-</div>
+          </div>
+          <div class="mass-card">
+            <div class="label">Accepted</div>
+            <div class="value" id="massAccepted">-</div>
+          </div>
+          <div class="mass-card">
+            <div class="label">Processed</div>
+            <div class="value" id="massProcessed">-</div>
+          </div>
+          <div class="mass-card">
+            <div class="label">End Use</div>
+            <div class="value" id="massEndUse">-</div>
+          </div>
+        </div>
+        <div id="massBalanceStatus" style="font-weight: 600; font-size: 0.95rem; text-align: center; margin-top: 8px;"></div>
+      </section>
+
+      <!-- Work Credits Summary Card -->
+      <section class="card" id="creditsSection">
+        <h2>4. Harvester Work Credits</h2>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">
+          Non-transferable ERC-1155 tokens (ID 1) minted 1:1 for verified biomass reaching circular end use:
+        </p>
+        <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px;">
+          <span style="font-size: 2rem; font-weight: 800; color: var(--primary);" id="creditsDisplay">0</span>
+          <span style="font-weight: 600;">WORK_CREDIT tokens</span>
+        </div>
+        <p class="mono" style="font-size: 0.8rem; color: var(--text-muted);">
+          Attributed to Pseudonym: <span id="pseudonymDisplay">-</span>
+        </p>
+      </section>
+
+      <!-- Journey Timeline Card -->
+      <section class="card" id="timelineSection">
+        <h2>5. Batch Lifecycle Timeline</h2>
+        <div class="timeline" id="timelineContainer">
+          <!-- Populated dynamically by main.ts -->
+        </div>
+      </section>
+
+      <!-- Technical Audit Accordion -->
+      <section class="card">
+        <details>
+          <summary style="font-weight: 600; cursor: pointer; padding: 4px 0;">View Raw On-Chain Technical Metadata</summary>
+          <div style="margin-top: 12px;">
+            <p style="font-size: 0.85rem; margin-bottom: 6px;"><strong>Batch ID:</strong> <span class="mono" id="metaBatchId">-</span></p>
+            <p style="font-size: 0.85rem; margin-bottom: 6px;"><strong>Contract Address:</strong> <span class="mono" id="metaContract">-</span></p>
+            <p style="font-size: 0.85rem; margin-bottom: 6px;"><strong>Chain ID:</strong> <span class="mono" id="metaChainId">-</span></p>
+            <p style="font-size: 0.85rem; margin-bottom: 6px;"><strong>Short Code:</strong> <span class="mono" id="metaShortCode">-</span></p>
+            <p style="font-size: 0.85rem; margin-bottom: 6px;"><strong>M-Pesa Reference:</strong> <span class="mono" id="metaPaymentRef">-</span></p>
+          </div>
+        </details>
+      </section>
+
+    </main>
+
+    <footer style="margin-top: 30px; margin-bottom: 20px; text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+      ZiwaChain Open Source Protocol &bull; IEEE ClimateChain 2026 &bull; Lake Victoria Sustainable Supply Chains
+    </footer>
+  </div>
+</body>
+</html>
