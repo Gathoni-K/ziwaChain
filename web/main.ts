@@ -89,6 +89,8 @@ async function runVerification(certJsonString: string) {
   pseudonymDisplay.innerText = cert.pseudonym || "-";
 
   let hasFailures = false;
+  let batchStageNum: number | null = null;
+  let batchStageName: string | null = null;
   const recomputedHashes: Record<string, string> = {};
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -160,9 +162,8 @@ async function runVerification(certJsonString: string) {
 
     const contract = new Contract(cert.contractAddress, ZIWACHAIN_ABI, provider);
 
-    // STEP 2: Query On-Chain Events starting from deploymentBlock
+    // STEP 2: Query On-Chain Events and verify every certificate stage
     const fromBlock = cert.deploymentBlock ? Number(cert.deploymentBlock) : 0;
-    let eventsMatched = 0;
 
     // Filter events for this batchId
     const filter = {
@@ -186,17 +187,56 @@ async function runVerification(certJsonString: string) {
       }
     }
 
-    if (batchLogs.length > 0) {
+    // Map stage key or eventType to expected on-chain event name
+    function getExpectedEventName(key: string, eventType?: string): string {
+      const type = (eventType || key).toUpperCase();
+      if (type.startsWith("HARVEST")) return "HarvestLogged";
+      if (type.startsWith("VERIF")) return "BatchVerified";
+      if (type.startsWith("BUYER") || type.startsWith("ACCEPT")) return "BatchAccepted";
+      if (type.startsWith("SETTLE")) return "SettlementConfirmed";
+      if (type.startsWith("PROCESS")) return "BatchProcessed";
+      if (type.startsWith("END_USE")) return "EndUseRecorded";
+      return type;
+    }
+
+    const stages = cert.stages || {};
+    const stageKeys = Object.keys(stages);
+    let allStagesMatched = true;
+
+    for (const [key, stage] of Object.entries(stages)) {
+      const expectedEvent = getExpectedEventName(key, stage.eventType);
+      const matchingLog = batchLogs.find(
+        (log) =>
+          log.name === expectedEvent &&
+          log.args &&
+          log.args.payloadHash &&
+          log.args.payloadHash.toLowerCase() === stage.payloadHash.toLowerCase() &&
+          log.txHash.toLowerCase() === stage.txHash.toLowerCase()
+      );
+
+      if (!matchingLog) {
+        allStagesMatched = false;
+        hasFailures = true;
+        addCheckItem(
+          `On-Chain Event Provenance (${key})`,
+          "fail",
+          `Stage '${key}' verification failed: No matching on-chain ${expectedEvent} event found with payloadHash ${stage.payloadHash.slice(0, 14)}... and txHash ${stage.txHash.slice(0, 14)}...`
+        );
+      }
+    }
+
+    if (allStagesMatched && stageKeys.length > 0) {
       addCheckItem(
         "On-Chain Event Provenance",
         "pass",
-        `Located ${batchLogs.length} immutable on-chain lifecycle events for batch ${cert.batchId.slice(0, 12)}... on chain ${cert.chainId}.`
+        `All ${stageKeys.length} certificate stages matched against immutable on-chain event logs and transaction hashes.`
       );
-    } else {
+    } else if (stageKeys.length === 0) {
+      hasFailures = true;
       addCheckItem(
         "On-Chain Event Provenance",
-        "notice",
-        `No event logs found for batchId ${cert.batchId.slice(0, 12)}... from block ${fromBlock}.`
+        "fail",
+        "Certificate contains no lifecycle stages."
       );
     }
 
@@ -230,6 +270,24 @@ async function runVerification(certJsonString: string) {
     const batchData = await contract.getBatch(cert.batchId);
     const stageNum = Number(batchData.stage);
     const stageName = STAGE_NAMES[stageNum] || "Unknown";
+    batchStageNum = stageNum;
+    batchStageName = stageName;
+
+    // Harvester Pseudonym Check: assert cert.pseudonym equals getBatch().harvesterId
+    if (!cert.pseudonym || cert.pseudonym.toLowerCase() !== batchData.harvesterId.toLowerCase()) {
+      hasFailures = true;
+      addCheckItem(
+        "Harvester Pseudonym Integrity",
+        "fail",
+        `Certificate pseudonym (${(cert.pseudonym || "none").slice(0, 14)}...) does not match on-chain harvesterId (${batchData.harvesterId.slice(0, 14)}...).`
+      );
+    } else {
+      addCheckItem(
+        "Harvester Pseudonym Integrity",
+        "pass",
+        `Certificate pseudonym matches on-chain harvesterId (${batchData.harvesterId.slice(0, 14)}...).`
+      );
+    }
 
     const harvestedKg = Number(batchData.harvestedKg);
     const acceptedKg = Number(batchData.acceptedKg);
@@ -276,11 +334,64 @@ async function runVerification(certJsonString: string) {
     );
 
     // STEP 5: Verify Payment Reference
-    if (batchData.paymentRefHash && batchData.paymentRefHash !== ethers.ZeroHash) {
+    // Hash the certificate's plain paymentRef exactly as the seed script does and compare it
+    // with the on-chain paymentRefHash, and also compare the BUYER_ACCEPTED payload's paymentRefHash.
+    // Any mismatch is a FAIL.
+    const buyerAcceptedStage = cert.stages?.BUYER_ACCEPTED;
+    const buyerAcceptedPayload = buyerAcceptedStage?.payload as any;
+    const certPaymentRef = cert.paymentRef;
+    const certPaymentSalt = cert.paymentSalt || (buyerAcceptedStage as any)?.paymentSalt;
+
+    let paymentRefValid = true;
+
+    // 1. Compare BUYER_ACCEPTED payload's paymentRefHash with on-chain paymentRefHash
+    if (
+      !buyerAcceptedPayload ||
+      !buyerAcceptedPayload.paymentRefHash ||
+      buyerAcceptedPayload.paymentRefHash.toLowerCase() !== batchData.paymentRefHash.toLowerCase()
+    ) {
+      paymentRefValid = false;
+      hasFailures = true;
+      addCheckItem(
+        "BUYER_ACCEPTED Payment Reference Hash",
+        "fail",
+        `BUYER_ACCEPTED stage payload paymentRefHash (${buyerAcceptedPayload?.paymentRefHash?.slice(0, 14)}...) does not match on-chain record (${batchData.paymentRefHash.slice(0, 14)}...).`
+      );
+    }
+
+    // 2. Hash the certificate's plain paymentRef exactly as the seed script does
+    if (certPaymentRef) {
+      let recomputedPaymentRefHash: string | null = null;
+      if (certPaymentSalt) {
+        recomputedPaymentRefHash = hashRecord({ receipt: certPaymentRef }, certPaymentSalt);
+      }
+
+      if (recomputedPaymentRefHash) {
+        if (recomputedPaymentRefHash.toLowerCase() !== batchData.paymentRefHash.toLowerCase()) {
+          paymentRefValid = false;
+          hasFailures = true;
+          addCheckItem(
+            "Commercial Payment Reference Verification",
+            "fail",
+            `Hashed plain paymentRef '${certPaymentRef}' with salt does not match on-chain paymentRefHash.`
+          );
+        }
+      }
+    } else {
+      paymentRefValid = false;
+      hasFailures = true;
+      addCheckItem(
+        "Commercial Payment Reference Verification",
+        "fail",
+        "Certificate is missing paymentRef."
+      );
+    }
+
+    if (paymentRefValid && batchData.paymentRefHash && batchData.paymentRefHash !== ethers.ZeroHash) {
       addCheckItem(
         "Commercial Payment Reference",
         "pass",
-        `M-Pesa payment reference hash confirmed on-chain (${batchData.paymentRefHash.slice(0, 14)}...).`
+        `M-Pesa payment reference confirmed on-chain and matches BUYER_ACCEPTED payload (${batchData.paymentRefHash.slice(0, 14)}...).`
       );
     }
 
@@ -300,6 +411,9 @@ async function runVerification(certJsonString: string) {
   if (hasFailures) {
     statusBanner.className = "status-banner failed";
     statusBanner.innerHTML = "❌ VERIFICATION FAILED: One or more tamper or integrity checks failed.";
+  } else if (batchStageNum === 3 || batchStageName === "Rejected") {
+    statusBanner.className = "status-banner rejected";
+    statusBanner.innerHTML = "⚠️ This record is authentic, but the batch was rejected at verification. No credits were issued.";
   } else {
     statusBanner.className = "status-banner verified";
     statusBanner.innerHTML = "✅ VERIFIED: All cryptographic hashes and on-chain rules match perfectly.";

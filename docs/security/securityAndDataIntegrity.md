@@ -46,11 +46,13 @@ This document details our threat model, smart contract security controls, crypto
 - **Automated Test Validation:** Proven by tests: `"produces unlinkable pseudonyms for different batches of the same harvester group"` and `"requires secret, groupId, and batchId"` in [test/hashing.test.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/hashing.test.ts).
 
 ### 2.4 Threat: Replayed, Forged, or Altered Certificates
-**Attack Vector:** A bad actor alters a certificate JSON to inflate their delivered kilograms from 500 kg to 5,000 kg and attempts to use the forged certificate to obtain a bank loan.  
+**Attack Vector:** A bad actor alters a certificate JSON to inflate their delivered kilograms from 500 kg to 5,000 kg and attempts to use the forged certificate to obtain a bank loan, or re-hashes a tampered payload to try to bypass client-side verification.  
 **Mitigating Controls:**
-- **Canonical Re-computation in Browser:** The public verify page ([web/main.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/web/main.ts)) recomputes the keccak256 hash of the canonical JSON payload and random salt client-side. If a single character or quantity is altered, the recomputed hash diverges completely from the on-chain event log.
-- **Direct Blockchain Verification:** The verification engine does not consult any ZiwaClear database. It queries Base Sepolia event logs (`HarvestLogged`, `BatchVerified`, `BatchAccepted`) directly via JSON-RPC. If the recomputed hash is not anchored in the contract logs, the certificate immediately displays **TAMPER DETECTED**.
-- **Automated Test Validation:** Proven by tests: `"detects tampering when any payload field changes (e.g. quantityKg)"` in [test/hashing.test.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/hashing.test.ts) and `"Step 1 (Tamper Detection): Flags altered certificate data when a single field is changed"` in [test/verify.test.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/verify.test.ts).
+- **Canonical Re-computation in Browser:** The public verify page ([web/main.ts](docs/../web/main.ts)) recomputes the keccak256 hash of the canonical JSON payload and random salt client-side. If a single character or quantity is altered, the recomputed hash diverges from the certificate hash.
+- **Direct Event Provenance Binding:** In Step 2, the client queries Base Sepolia event logs directly and binds EVERY certificate stage to its on-chain event (`HarvestLogged`, `BatchVerified`, `BatchAccepted`, `SettlementConfirmed`, `BatchProcessed`, `EndUseRecorded`), asserting that the certificate's `payloadHash` and transaction hash strictly match the on-chain log. If an attacker tampers with the payload and recomputes the certificate hash, the forged hash is absent from on-chain event arguments, causing verification to fail.
+- **Harvester Pseudonym & Commercial Payment Verification:** The engine asserts `cert.pseudonym === getBatch().harvesterId` and validates the plain `paymentRef` against `batchData.paymentRefHash` and `BUYER_ACCEPTED.payload.paymentRefHash`.
+- **Authentic Rejection Handling:** Authentic rejected batches display an amber notice banner ("This record is authentic, but the batch was rejected at verification. No credits were issued.") and never show a green verified banner.
+- **Automated Test Validation:** Proven by 10 verification algorithm tests in [test/verify.test.ts](docs/../test/verify.test.ts) testing single-field changes, forged-and-rehashed payloads, pseudonym mismatches, payment reference tampering, and terminal rejected states.
 
 ### 2.5 Threat: Double Crediting & Mass Inflation (Mass-Balance Invariants)
 **Attack Vector:** A processor attempts to claim 10,000 work credits from an initial harvest of only 1,000 kilograms of wet hyacinth by repeatedly calling `recordEndUse` or inflating conversion ratios.  
@@ -125,16 +127,18 @@ To accommodate real-world field errors (such as typographical errors in laborato
 To ensure transparency with evaluating judges, we explicitly disclose the following trust assumptions:
 
 1. **Relayer Custody Dependence:** Because harvesters do not manage EVM wallets, initial batch reporting relies on ZiwaClear's relayer key. While cryptographic checks prevent the relayer from verifying its own batches, the relayer is a centralized operational point for SMS intake.
-2. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature.
-3. **Single Verifier Trust Point in Prototype:** The current contract relies on a single verifier key per batch. While verifiers cannot hold the relayer role, a dishonest verifier could collude with harvesters to approve sub-standard biomass. Upgrading to 2-of-N threshold verification is scheduled for Phase 2.
-4. **Permanent Mass Balance:** If a scaling error is accepted by a commercial buyer, the kilogram mass cannot be altered retroactively. The batch must be cancelled and re-logged.
-5. **Work Credits are Not Carbon Credits:** Work credits represent verified kilograms of hyacinth removed and diverted to circular processing. They do not constitute certified carbon credits.
+2. **Custodian Multi-Relayer Isolation:** In the current prototype, any address with `RELAYER_ROLE` can invoke `confirmSettlement`. Restricting confirmation strictly to `b.custodian` is planned for multi-relayer enterprise scaling.
+3. **Custodian Contract Receiver Requirement:** Work credits are minted to `b.custodian`. If the custodian address is a smart contract wallet, it must implement `IERC1155Receiver`; otherwise `recordEndUse` reverts with `ERC1155InvalidReceiver`.
+4. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature.
+5. **Single Verifier Trust Point in Prototype:** The current contract relies on a single verifier key per batch. While verifiers cannot hold the relayer role, a dishonest verifier could collude with harvesters to approve sub-standard biomass. Upgrading to 2-of-N threshold verification is scheduled for Phase 2.
+6. **Permanent Mass Balance:** If a scaling error is accepted by a commercial buyer, the kilogram mass cannot be altered retroactively. The batch must be cancelled and re-logged.
+7. **Work Credits are Not Carbon Credits:** Work credits represent verified kilograms of hyacinth removed and diverted to circular processing. They do not constitute certified carbon credits.
 
 ---
 
 ## 5. Automated Security Test Results
 
-All 85 automated security and functional tests pass against the in-process Hardhat network:
+All 94 automated security and functional tests pass against the in-process Hardhat network:
 
 ```bash
 $ npx hardhat test
@@ -142,11 +146,11 @@ $ npx hardhat test
   ZiwaChain
     logHarvest (4 tests passing)
     verifyBatch (4 tests passing)
-    acceptBatch (4 tests passing)
+    acceptBatch (5 tests passing)
     confirmSettlement (5 tests passing)
     recordProcessing (4 tests passing)
-    recordEndUse (7 tests passing)
-    correctRecord (6 tests passing)
+    recordEndUse (8 tests passing, including CEI and receiver lockout check)
+    correctRecord (7 tests passing, including zero-hash InvalidHash check)
     work credit non-transferability (2 tests passing)
     view helpers (4 tests passing)
 
@@ -161,10 +165,19 @@ $ npx hardhat test
     Record & Confirmation Hashing (5 tests passing)
     Pseudonym Derivation HMAC-SHA256 (4 tests passing)
 
+  Link and Script Integrity
+    npm script targets check (1 test passing)
+    README.md relative link resolution (1 test passing)
+    docs/ link resolution (1 test passing)
+
   Public Verification Algorithm (web/in-browser verification)
     Client-side hash recomputation (2 tests passing)
     Event log matching & supersession audit (2 tests passing)
     Conservation of mass balance & payment reference check (2 tests passing)
+    Tamper detection on forged and re-hashed payloads (1 test passing)
+    Pseudonym integrity validation (1 test passing)
+    Payment reference validation (1 test passing)
+    Rejected batch amber status handling (1 test passing)
 
   SMS Flow
     Phone masking privacy (3 tests passing)
@@ -172,5 +185,5 @@ $ npx hardhat test
     Settlement on-chain recording & re-entry refusal (3 tests passing)
     PROOF delivery & not-found handling (2 tests passing)
 
-  85 passing (3s)
+  94 passing (4s)
 ```

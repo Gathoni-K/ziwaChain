@@ -10,8 +10,9 @@
 
 import type { ContractTransactionResponse } from "ethers";
 import type { ZiwaChain } from "../../typechain-types/contracts/ZiwaChain";
-import { hashConfirmation } from "../hashing/hash";
+import { hashConfirmation, hashRecord } from "../hashing/hash";
 import { newSalt } from "../hashing/salt";
+import { SettlementConfirmationPayload } from "../hashing/types";
 import { maskPhone, type SmsGateway } from "./gateway";
 
 /** Minimal shape that flow.ts needs from a batch. */
@@ -24,6 +25,10 @@ export interface BatchContext {
   certificateShortCode: string;
   /** Verify URL for the batch certificate. */
   verifyUrl: string;
+  /** Salt used for the settlement confirmation payload. */
+  settlementSalt?: string;
+  /** Canonical settlement confirmation payload. */
+  settlementPayload?: SettlementConfirmationPayload;
 }
 
 /** Internal per-batch state kept in memory for the duration of the conversation. */
@@ -164,11 +169,24 @@ export class SmsFlow {
     const salt = newSalt();
     const confirmationHash = hashConfirmation(receivedCode, salt);
 
-    // payloadHash for the confirmSettlement event. We pass the confirmation hash
-    // also as the payloadHash because the settlement event's payload IS the confirmation.
+    // Canonical SettlementConfirmationPayload event envelope
+    const now = Math.floor(Date.now() / 1000);
+    const settlementPayload: SettlementConfirmationPayload = {
+      schemaVersion: 1,
+      eventType: "SETTLEMENT_CONFIRMED",
+      batchId,
+      confirmationHash,
+      confirmedAt: now
+    };
+    const payloadHash = hashRecord(settlementPayload, salt);
+
+    // Retain salt and payload in batch context so a certificate can include them.
+    batchContext.settlementSalt = salt;
+    batchContext.settlementPayload = settlementPayload;
+
     let txHash: string;
     try {
-      const tx = await this.relayerSendTx(batchId, confirmationHash, confirmationHash);
+      const tx = await this.relayerSendTx(batchId, confirmationHash, payloadHash);
       await tx.wait();
       txHash = tx.hash;
     } catch (err: any) {

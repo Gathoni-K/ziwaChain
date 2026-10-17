@@ -209,6 +209,9 @@ contract ZiwaChain is ERC1155, AccessControl {
     ///         Work credits are non-transferable; only minting from address(0) is allowed.
     error NonTransferable();
 
+    /// @notice A zero hash was provided where a valid non-zero hash is required.
+    error InvalidHash();
+
     // ─── Constructor ──────────────────────────────────────────────────────────
 
     /// @param admin Receives DEFAULT_ADMIN_ROLE and can grant all other roles.
@@ -309,7 +312,6 @@ contract ZiwaChain is ERC1155, AccessControl {
         b.acceptedKg     = acceptedKg;
         b.paymentRefHash = paymentRefHash;
 
-        _recordHash(batchId, paymentRefHash);
         _recordHash(batchId, payloadHash);
 
         emit BatchAccepted(batchId, msg.sender, acceptedKg, paymentRefHash, payloadHash);
@@ -340,7 +342,6 @@ contract ZiwaChain is ERC1155, AccessControl {
         b.settled                = true;
         b.settlementConfirmation = confirmationHash;
 
-        _recordHash(batchId, confirmationHash);
         _recordHash(batchId, payloadHash);
 
         emit SettlementConfirmed(batchId, confirmationHash, payloadHash);
@@ -410,10 +411,13 @@ contract ZiwaChain is ERC1155, AccessControl {
 
         _recordHash(batchId, payloadHash);
 
+        // Update credit mapping BEFORE external mint call (Checks-Effects-Interactions pattern).
+        _workCredits[b.harvesterId] += endUseKg;
+
         // Mint one work credit per kg to the relayer, who holds them as custodian on behalf of
         // the pseudonymous harvester. Credits are non-transferable (enforced in _update below).
+        // NOTE: In this prototype, custodian must be an EOA or implement IERC1155Receiver; otherwise _mint reverts.
         _mint(b.custodian, WORK_CREDIT, endUseKg, "");
-        _workCredits[b.harvesterId] += endUseKg;
 
         emit EndUseRecorded(batchId, endUseType, endUseKg, outputUnits, payloadHash);
         emit CreditsIssued(batchId, b.harvesterId, endUseKg);
@@ -438,6 +442,7 @@ contract ZiwaChain is ERC1155, AccessControl {
         bytes32 reasonHash
     ) external {
         if (_batches[batchId].stage == Stage.None) revert UnknownBatch(batchId);
+        if (newHash == bytes32(0)) revert InvalidHash();
 
         address author = _hashAuthor[batchId][supersededHash];
         if (author == address(0))   revert HashNotFound();

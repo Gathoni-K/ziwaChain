@@ -4,6 +4,42 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 17, 2026, Task 8: Skeptical Review Implementation & Protocol Hardening
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `contracts/ZiwaChain.sol` | Updated: Defined `InvalidHash()` custom error. Reordered `recordEndUse` to update `workCreditsOf` before `_mint` (Checks-Effects-Interactions pattern). Restricted `correctRecord` to evidence and payload hashes only (removed `paymentRefHash` and `confirmationHash` from `_recordHash`), and enforced `if (newHash == bytes32(0)) revert InvalidHash()`. Added NatSpec documentation on custodian `IERC1155Receiver` requirement. |
+| `contracts/test/PlainRelayer.sol` | Created: Minimal test contract without `IERC1155Receiver` to test and document revert behavior when `recordEndUse` targets an incompatible contract custodian. |
+| `src/sms/flow.ts` | Updated: Assembled canonical `SettlementConfirmationPayload` (schemaVersion, eventType `SETTLEMENT_CONFIRMED`, batchId, confirmedAt), computed `payloadHash = hashRecord(payload, salt)`, passed both `confirmationHash` and `payloadHash` to on-chain `confirmSettlement`, and stored salt and payload in `BatchContext`. |
+| `src/certificate/build.ts` | Updated: Extended `HarvesterCertificate` interface and builder to accept optional `paymentSalt` from `BUYER_ACCEPTED` stage, allowing client-side payment verification. |
+| `scripts/seed.ts` | Updated: Captured `paymentSalt` during buyer acceptance and stored in batch records so downstream certificate builders retain it. |
+| `scripts/makeCertificates.ts` | Updated: Injected `paymentSalt` into generated certificates. |
+| `web/main.ts` | Updated: Hardened Step 2 verification to match every stage in the certificate against its corresponding emitted on-chain event's `payloadHash` and `txHash` (tampered/recomputed payloads fail). Verified certificate `pseudonym` strictly matches `getBatch().harvesterId`. Recomputed plain `paymentRef` hash with `paymentSalt` and verified match against on-chain `paymentRefHash` and `BUYER_ACCEPTED` payload. Rendered distinct amber banner for `Stage.Rejected` batches ("This record is authentic, but the batch was rejected at verification. No credits were issued.") while prohibiting green verified banner. |
+| `web/style.css` | Updated: Added `.status-banner.rejected` styling with distinct amber color and icon. |
+| `web/dist/` | Re-bundled: Updated production web bundle (`bundle.js`, `style.css`) via esbuild. |
+| `test/ZiwaChain.ts` | Updated: Added test validating `correctRecord` reverts with `InvalidHash` when `newHash` is `bytes32(0)` (9e), and test validating `recordEndUse` reverts with `ERC1155InvalidReceiver` if custodian contract lacks `IERC1155Receiver` (9f). |
+| `test/verify.test.ts` | Updated: Added tests asserting verification failure on re-hashed payload tampering (9a), harvester pseudonym mismatch (9b), payment reference mismatch (9c), and rejection amber banner assertion (9d). |
+| `test/links.test.ts` | Created: Automated test verifying that all markdown relative links across `README.md` and `docs/` resolve to existing files on disk, and all `package.json` scripts target existing script files. |
+| `README.md` & `PROJECT_CONTEXT.md` | Updated: Synchronized documentation links and npm scripts to match disk, added Checks-Effects-Interactions pattern note, custodian `IERC1155Receiver` note, and multi-relayer custodian roadmap note. |
+| `docs/security/securityAndDataIntegrity.md` | Updated: Updated test count to 94 tests, documented stage-by-stage event log binding, CEI pattern in `recordEndUse`, custodian contract receiver limitation, and multi-relayer roadmap item. |
+| `docs/internal/PROGRESS.md` | Restored as the single project progress log with complete history and Task 8 review fixes. |
+
+### Test and execution results
+- `npx hardhat test` passes 94/94 tests (44 contract tests, 18 hashing tests, 6 certificate tests, 10 verify tests, 13 SMS tests, 3 link/script integrity tests).
+- `npx tsc --noEmit` passes with 0 errors.
+- `npm run web:build` bundles cleanly with 0 errors.
+
+### Decisions made or clarified
+- Verify page event binding: Step 2 now actively iterates over every stage in the certificate, maps to the corresponding on-chain event by topic and `batchId`, and asserts `payloadHash` and `transactionHash` equality. Tampering with payload content and recomputing its hash now causes verification to fail because the recomputed hash does not match the on-chain event log.
+- Pseudonym binding: Certificate `pseudonym` is checked against `getBatch(batchId).harvesterId`.
+- Payment reference verification: The plain payment reference in the certificate is hashed as `hashRecord({ receipt: paymentRef }, paymentSalt)` and matched against on-chain `batch.paymentRefHash` and the `BUYER_ACCEPTED` payload hash.
+- Rejected batch UX: Separated cryptographic record authenticity from batch business approval. Rejected batches display an amber banner and never the green verified banner.
+- Custodian check on `confirmSettlement`: Explicitly not approved for prototype single-relayer deployment. Documented as a roadmap item and security limitation.
+- Contract CEI & correctRecord: `_workCredits` state updated before `_mint`. `correctRecord` restricted to evidence and payload hashes only, and zero hash reverts with `InvalidHash`.
+
+---
+
 ## Oct 16, 2026, Task 7: Draft Hackathon Submission Documents in docs/ for Judges
 
 ### Files added or updated

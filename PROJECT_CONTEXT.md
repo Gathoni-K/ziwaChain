@@ -162,16 +162,19 @@ Processor wallet ─────────────────────
 ziwachain/
   PROJECT_CONTEXT.md              ← this file
   README.md                       ← judge entry point
-  contracts/ZiwaChain.sol         ← complete, 42 tests
-  test/ZiwaChain.ts               ← 42 contract tests
+  contracts/ZiwaChain.sol         ← complete, 44 tests
+  contracts/test/PlainRelayer.sol ← mock non-receiver relayer for tests
+  test/ZiwaChain.ts               ← 44 contract tests
   test/hashing.test.ts            ← 18 hashing tests
   test/certificate.test.ts        ← 6 certificate tests
-  test/verify.test.ts             ← 6 verify-page tests
+  test/verify.test.ts             ← 10 verify-page tests
+  test/sms.test.ts                ← 13 SMS tests
+  test/links.test.ts              ← 1 link integrity test
   ignition/modules/ZiwaChain.ts   ← deploys with account 0 as admin
   hardhat.config.ts               ← Hardhat 2, TypeScript, 0.8.28, cancun, baseSepolia
   scripts/seed.ts                 ← deploys + runs 3 demo batches; writes demo-data.json
-  scripts/make-certificates.ts    ← generates JSON certs, QR PNGs, audit notes
-  scripts/demo-sms.ts             ← simulated SMS settlement and PROOF conversation runner
+  scripts/makeCertificates.ts     ← generates JSON certs, QR PNGs, audit notes
+  scripts/demoSms.ts              ← simulated SMS settlement and PROOF conversation runner
   src/hashing/                    ← RFC 8785 canonical JSON, salted keccak256, HMAC pseudonym
   src/certificate/                ← Version 1 certificate builder, QR generator, short code
   src/sms/                        ← gateway interface, simulated chat gateway, settlement/PROOF flow
@@ -181,17 +184,17 @@ ziwachain/
   web/dist/                       ← built bundle (no CDN)
   docs/architecture/spec.md       ← technical spec with 9 components
   docs/architecture/eventSchema.md ← event envelope and data model
-  docs/security/assessment.md     ← threat model, RBAC, 85-test coverage
-  docs/impact/impact-assessment.md ← methane avoidance projections
+  docs/security/securityAndDataIntegrity.md ← threat model, RBAC, integrity analysis
+  docs/impact/climateImpactAssessment.md ← methane avoidance projections
   docs/overview.md                ← 2-page problem and solution
-  docs/adoption-and-scalability.md ← adoption strategy and scaling roadmap
-  docs/demo-script.md             ← 3-minute video script
+  docs/adoptionAndScalability.md  ← adoption strategy and scaling roadmap
+  docs/demoScript.md              ← 3-minute video script
   docs/internal/PROGRESS.md       ← append-only build log
   .env                            ← DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL, PSEUDONYM_SECRET
 ```
 
-- **Test run:** `npx hardhat test` → 85 passing (42 contract + 18 hashing + 6 certificate + 6 verify + 13 sms).
-- **Remaining tasks:** Task 7 (remaining judge-facing documents), Task 8 (skeptical review, no code changes).
+- **Test run:** `npx hardhat test` → 92 passing (44 contract + 18 hashing + 6 certificate + 10 verify + 13 sms + 1 links).
+- **Remaining tasks:** Task 8 review fixes applied, Base Sepolia deployment, demo video recording, hosting.
 - **Manual steps (done by owner, not tasks):** Base Sepolia deployment, demo video recording, hosting, Devpost submission.
 
 ---

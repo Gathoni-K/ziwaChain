@@ -55,6 +55,7 @@ export interface HarvesterCertificate {
   deploymentBlock: number;
   stages: Record<string, CertificateStage>;
   paymentRef: string;
+  paymentSalt?: string;
   settlementConfirmation: SettlementConfirmationData;
   shortCode: string;
   verifyUrl: string;
@@ -63,6 +64,7 @@ export interface HarvesterCertificate {
 export interface BuildCertificateOptions {
   verifyBaseUrl?: string;
   paymentRef?: string;
+  paymentSalt?: string;
   settlementCode?: string;
   chainId?: string;
   contractAddress?: string;
@@ -112,6 +114,7 @@ export function buildCertificate(
 
   // Plain M-Pesa payment reference
   const paymentRef = options.paymentRef || "MPESA-QKH78219XZ-2026";
+  const paymentSalt = options.paymentSalt || batchData.paymentSalt || rawStages["BUYER_ACCEPTED"]?.paymentSalt;
   const settlementCode = options.settlementCode || "4821";
 
   const certificateBase: Omit<HarvesterCertificate, "verifyUrl"> = {
@@ -123,6 +126,7 @@ export function buildCertificate(
     deploymentBlock,
     stages,
     paymentRef,
+    ...(paymentSalt ? { paymentSalt } : {}),
     settlementConfirmation: {
       code: settlementCode,
       salt: settlementSalt

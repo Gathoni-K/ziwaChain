@@ -61,7 +61,9 @@ describe("Client-Side Verification Algorithm", () => {
     const txV = await zc.connect(verifier).verifyBatch(batchId, true, ethers.id("verify-evidence"), verifyHash);
     const rcptV = await txV.wait();
 
-    const paymentRefHash = ethers.id("payment-receipt-hash");
+    const paymentSalt = "0x77777777777777777777777777777777";
+    const paymentRefRaw = "MPESA-TEST-REC-01";
+    const paymentRefHash = hashRecord({ receipt: paymentRefRaw }, paymentSalt);
     const acceptPayload = {
       schemaVersion: 1,
       eventType: "BUYER_ACCEPTED",
@@ -137,7 +139,8 @@ describe("Client-Side Verification Algorithm", () => {
         }
       },
       {
-        paymentRef: "MPESA-TEST-REC-01",
+        paymentRef: paymentRefRaw,
+        paymentSalt,
         settlementCode: "4821"
       }
     );
@@ -196,6 +199,89 @@ describe("Client-Side Verification Algorithm", () => {
     const batch = await zc.getBatch(batchId);
     const certAcceptPayload: any = cert.stages.BUYER_ACCEPTED.payload;
     expect(batch.paymentRefHash).to.equal(certAcceptPayload.paymentRefHash);
+
+    // Verify hashed plain paymentRef with salt also matches
+    const computedPaymentHash = hashRecord({ receipt: cert.paymentRef }, cert.paymentSalt!);
+    expect(computedPaymentHash).to.equal(batch.paymentRefHash);
+  });
+
+  it("Step 2 (Tamper Detection): Fails verification when payload was edited and re-hashed because on-chain event does not match (Item 9a)", async () => {
+    // Attacker modifies harvest quantity from 1000 to 2000 and re-hashes payload
+    const tampered = JSON.parse(JSON.stringify(cert));
+    tampered.stages.HARVEST_LOGGED.payload.quantityKg = 2000;
+    tampered.stages.HARVEST_LOGGED.payloadHash = hashRecord(
+      tampered.stages.HARVEST_LOGGED.payload,
+      tampered.stages.HARVEST_LOGGED.salt
+    );
+
+    // Step 1 passes because payloadHash matches recomputed hash
+    const recomputed = hashRecord(tampered.stages.HARVEST_LOGGED.payload, tampered.stages.HARVEST_LOGGED.salt);
+    expect(recomputed).to.equal(tampered.stages.HARVEST_LOGGED.payloadHash);
+
+    // Step 2 query against on-chain logs: on-chain event contains the real payloadHash, not the forged one
+    const filter = zc.filters.HarvestLogged(batchId);
+    const logs = await zc.queryFilter(filter);
+    expect(logs.length).to.equal(1);
+    const onChainHash = logs[0].args.payloadHash;
+
+    // Must detect mismatch between tampered certificate payloadHash and immutable on-chain event
+    expect(tampered.stages.HARVEST_LOGGED.payloadHash).to.not.equal(onChainHash);
+  });
+
+  it("Pseudonym integrity: Fails verification when certificate pseudonym does not match on-chain harvesterId (Item 9b)", async () => {
+    const batch = await zc.getBatch(batchId);
+    // Attacker puts a different pseudonym in certificate
+    const tampered = JSON.parse(JSON.stringify(cert));
+    tampered.pseudonym = derivePseudonym(secret, "attacker-group-impersonation", batchId);
+
+    // Verification must detect mismatch
+    expect(tampered.pseudonym).to.not.equal(batch.harvesterId);
+  });
+
+  it("Payment reference integrity: Fails verification when paymentRef does not match on-chain record (Item 9c)", async () => {
+    const batch = await zc.getBatch(batchId);
+    // Attacker claims a different payment receipt in certificate
+    const forgedReceipt = "MPESA-FORGED-REC-999";
+    const forgedHash = hashRecord({ receipt: forgedReceipt }, cert.paymentSalt!);
+
+    // Recomputed hash from forged receipt does not match on-chain paymentRefHash
+    expect(forgedHash).to.not.equal(batch.paymentRefHash);
+
+    // Attacker tampers with BUYER_ACCEPTED stage payload paymentRefHash
+    const tampered = JSON.parse(JSON.stringify(cert));
+    tampered.stages.BUYER_ACCEPTED.payload.paymentRefHash = ethers.id("fake-payment-hash");
+    expect(tampered.stages.BUYER_ACCEPTED.payload.paymentRefHash).to.not.equal(batch.paymentRefHash);
+  });
+
+  it("Rejected batch integrity: An authentic rejected batch reflects terminal stage Rejected and never qualifies for verified status (Item 9d)", async () => {
+    const rejectedBatchId = ethers.id("rejected-test-batch-002");
+    const pseudonymB = derivePseudonym(secret, "group-rejected-02", rejectedBatchId);
+
+    // Relayer logs harvest
+    await zc.connect(relayer).logHarvest(
+      rejectedBatchId,
+      pseudonymB,
+      hotspotRef,
+      1000,
+      ethers.id("ev-b"),
+      ethers.id("pl-b")
+    );
+
+    // Verifier rejects batch
+    await zc.connect(verifier).verifyBatch(
+      rejectedBatchId,
+      false, // rejected
+      ethers.id("ev-rejected"),
+      ethers.id("pl-rejected")
+    );
+
+    const batch = await zc.getBatch(rejectedBatchId);
+    // Stage enum 3 is Rejected
+    expect(Number(batch.stage)).to.equal(3);
+
+    // Work credits must be zero
+    const credits = await zc.workCreditsOf(pseudonymB);
+    expect(credits).to.equal(0n);
   });
 
 });

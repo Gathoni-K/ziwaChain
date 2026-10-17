@@ -387,6 +387,38 @@ describe("ZiwaChain", () => {
       ).to.be.revertedWithCustomError(zc, "WrongStage");
     });
 
+    it("reverts recordEndUse with ERC1155InvalidReceiver if contract custodian lacks receiver (Item 9f)", async () => {
+      const { zc, admin, verifier, buyer, processor } = await deploy();
+      const plainRelayerFactory = await ethers.getContractFactory("PlainRelayer");
+      const plainRelayer = await plainRelayerFactory.deploy();
+      await plainRelayer.waitForDeployment();
+      const relayerAddress = await plainRelayer.getAddress();
+
+      // Grant RELAYER_ROLE to the PlainRelayer contract
+      await zc.connect(admin).grantRole(await zc.RELAYER_ROLE(), relayerAddress);
+
+      const contractBatchId = id("contract-custodian-batch");
+      await plainRelayer.logHarvest(
+        zc,
+        contractBatchId,
+        id("harvester-contract"),
+        id("hotspot-contract"),
+        1000,
+        id("ev-contract"),
+        id("pl-contract")
+      );
+
+      // Verify, accept, process
+      await zc.connect(verifier).verifyBatch(contractBatchId, true, id("v-ev"), id("v-pl"));
+      await zc.connect(buyer).acceptBatch(contractBatchId, 800, id("pay-ref"), id("a-pl"));
+      await zc.connect(processor).recordProcessing(contractBatchId, id("biogas"), 800, 10, id("p-pl"));
+
+      // Attempting to record end use mints to plainRelayer which has no onERC1155Received
+      await expect(
+        zc.connect(processor).recordEndUse(contractBatchId, id("bioenergy"), 400, 5, id("eu-pl"))
+      ).to.be.revertedWithCustomError(zc, "ERC1155InvalidReceiver");
+    });
+
   });
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -436,6 +468,13 @@ describe("ZiwaChain", () => {
       await expect(
         zc.connect(relayer).correctRecord(batchId, hEvidence, hPayload, id("reason"))
       ).to.be.revertedWithCustomError(zc, "CannotReuseHash");
+    });
+
+    it("refuses newHash == bytes32(0) with InvalidHash (Item 9e)", async () => {
+      const { zc, relayer } = await harvested();
+      await expect(
+        zc.connect(relayer).correctRecord(batchId, hEvidence, ethers.ZeroHash, id("reason"))
+      ).to.be.revertedWithCustomError(zc, "InvalidHash");
     });
 
   });

@@ -234,6 +234,12 @@ textarea {
   color: var(--warning);
 }
 
+.status-banner.rejected {
+  background: var(--warning-light);
+  border: 2px solid var(--warning);
+  color: var(--warning);
+}
+
 /* Verification Checklist */
 .checklist {
   list-style: none;

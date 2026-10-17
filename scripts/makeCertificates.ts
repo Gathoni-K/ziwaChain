@@ -68,13 +68,13 @@ Timestamp:   ${new Date().toISOString()}
       continue;
     }
 
-    // Build the portable Harvester Certificate
     const certificate = buildCertificate(
       {
         ...batchData,
         chainId: demoData.chainId,
         contractAddress: demoData.contractAddress,
-        deploymentBlock: demoData.deploymentBlock
+        deploymentBlock: demoData.deploymentBlock,
+        paymentSalt: batchData.stages?.BUYER_ACCEPTED?.paymentSalt
       },
       {
         paymentRef: "MPESA-QKH78219XZ-2026",

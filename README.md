@@ -87,14 +87,14 @@ Judges can review the complete hackathon evaluation documentation via the links 
 
 | Document | Description |
 |---|---|
-| [System Architecture Specification](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/architecture.md) | Component architecture, Mermaid diagrams, on-chain vs off-chain boundary, and roles matrix |
-| [Security & Data Integrity Assessment](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/security/security-and-data-integrity.md) | Threat modeling, RBAC, mass balance preservation, HMAC privacy, and 85-test suite |
-| [Climate Impact Assessment](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/impact/climate-impact-assessment.md) | Methane avoidance projections, fuel displacement models, IPCC sources, and clear estimate labels |
-| [Problem & Solution Overview](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/overview.md) | 2-page overview of the circular bioeconomy model and informal harvester precarity on Lake Victoria |
-| [Adoption Strategy & Scalability Roadmap](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/adoption-and-scalability.md) | Three-tiered proof acceptance pathway, Kisumu pilot plan, scaling horizons, and field findings placeholder |
-| [Demo Video Script](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/demo-script.md) | 3-minute video presentation script with timestamps, visual cues, and voiceover text |
-| [Technical Specification & Test Proofs](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/spec.md) | Supplementary deep dive into smart contract rules and unit test mappings |
-| [Event Schema & Data Model](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/docs/architecture/eventSchema.md) | Supplementary canonical event envelope and data dictionary |
+| [System Architecture Specification](docs/architecture/architecture.md) | Component architecture, Mermaid diagrams, on-chain vs off-chain boundary, and roles matrix |
+| [Security & Data Integrity Assessment](docs/security/securityAndDataIntegrity.md) | Threat modeling, RBAC, mass balance preservation, HMAC privacy, and test suite |
+| [Climate Impact Assessment](docs/impact/climateImpactAssessment.md) | Methane avoidance projections, fuel displacement models, IPCC sources, and clear estimate labels |
+| [Problem & Solution Overview](docs/overview.md) | 2-page overview of the circular bioeconomy model and informal harvester precarity on Lake Victoria |
+| [Adoption Strategy & Scalability Roadmap](docs/adoptionAndScalability.md) | Three-tiered proof acceptance pathway, Kisumu pilot plan, scaling horizons, and field findings placeholder |
+| [Demo Video Script](docs/demoScript.md) | 3-minute video presentation script with timestamps, visual cues, and voiceover text |
+| [Technical Specification & Test Proofs](docs/architecture/spec.md) | Supplementary deep dive into smart contract rules and unit test mappings |
+| [Event Schema & Data Model](docs/architecture/eventSchema.md) | Supplementary canonical event envelope and data dictionary |
 
 ---
 
@@ -103,17 +103,20 @@ Judges can review the complete hackathon evaluation documentation via the links 
 ```
 ziwachain/
 ├── contracts/
-│   └── ZiwaChain.sol                  # Core smart contract (ERC-1155, AccessControl, mass balance)
+│   ├── ZiwaChain.sol                  # Core smart contract (ERC-1155, AccessControl, mass balance)
+│   └── test/
+│       └── PlainRelayer.sol           # Mock relayer contract without receiver for unit tests
 ├── scripts/
 │   ├── seed.ts                        # End-to-end deployment and demo batch seed runner
-│   ├── make-certificates.ts           # Certificate generation pipeline (JSON, QR, audit notes)
-│   └── demo-sms.ts                    # Simulated SMS settlement and PROOF conversation runner
+│   ├── makeCertificates.ts            # Certificate generation pipeline (JSON, QR, audit notes)
+│   └── demoSms.ts                     # Simulated SMS settlement and PROOF conversation runner
 ├── test/
-│   ├── ZiwaChain.ts                   # Contract test suite (42 unit tests)
+│   ├── ZiwaChain.ts                   # Contract test suite (44 unit tests)
 │   ├── hashing.test.ts                # RFC 8785 canonical JSON, salt, and pseudonym suite (18 tests)
 │   ├── certificate.test.ts            # Certificate builder, short code, and QR suite (6 tests)
-│   ├── verify.test.ts                 # In-browser verification algorithm suite (6 tests)
-│   └── sms.test.ts                    # SMS parsing, settlement flow, and phone masking suite (13 tests)
+│   ├── verify.test.ts                 # In-browser verification algorithm suite (10 tests)
+│   ├── sms.test.ts                    # SMS parsing, settlement flow, and phone masking suite (13 tests)
+│   └── links.test.ts                  # Link and script path integrity validator (1 test)
 ├── demo/
 │   ├── demo-data.json                 # Seeded demo batch records, tx hashes, salts, and payloads
 │   └── certificates/                  # Generated harvester certificates (JSON + QR PNGs)
@@ -122,7 +125,7 @@ ziwachain/
 │       └── ZiwaChain.ts               # Hardhat Ignition deployment module
 ├── web/
 │   ├── index.html                     # Public verify page: static entry point
-│   ├── main.ts                        # In-browser verification engine (all 5 checks)
+│   ├── main.ts                        # In-browser verification engine (all 5 checks + event binding)
 │   ├── style.css                      # High-contrast responsive stylesheet (light/dark mode)
 │   ├── config.ts                      # RPC URL config and contract ABI
 │   └── dist/                          # Bundled distribution (esbuild output, no CDN)
@@ -132,14 +135,14 @@ ziwachain/
 │   │   ├── spec.md                    # Detailed technical spec and test rule mapping
 │   │   └── eventSchema.md             # Canonical event envelope and data dictionary
 │   ├── security/
-│   │   ├── security-and-data-integrity.md # Primary threat model, RBAC, and integrity analysis
+│   │   ├── securityAndDataIntegrity.md # Primary threat model, RBAC, and integrity analysis
 │   │   └── assessment.md              # Detailed security assessment and test logs
 │   ├── impact/
-│   │   ├── climate-impact-assessment.md   # Primary climate model and carbon projections
-│   │   └── impact-assessment.md       # Supplementary impact calculations
+│   │   ├── climateImpactAssessment.md # Primary climate model and carbon projections
+│   │   └── impactAssessment.md       # Supplementary impact calculations
 │   ├── overview.md                    # 2-page problem and solution overview
-│   ├── adoption-and-scalability.md    # Adoption strategy and scaling roadmap
-│   ├── demo-script.md                 # 3-minute video presentation script
+│   ├── adoptionAndScalability.md      # Adoption strategy and scaling roadmap
+│   ├── demoScript.md                  # 3-minute video presentation script
 │   ├── Learn/                         # Internal developer guides and debugging logs
 │   └── internal/                      # Append-only internal build progress log
 ├── src/
@@ -157,22 +160,25 @@ ziwachain/
 To maintain total transparency with hackathon judges, our implementation status is categorized below:
 
 ### What Is Built and Proven by Tests
-- **Core Smart Contract (`ZiwaChain.sol`):** Deployed and tested on Solidity 0.8.28 (`cancun` EVM) using OpenZeppelin v5 contracts.
+- **Core Smart Contract (`ZiwaChain.sol`):** Deployed and tested on Solidity 0.8.28 (`cancun` EVM) using OpenZeppelin v5 contracts. Follows strict Checks-Effects-Interactions (CEI) order prior to token minting.
 - **Strict Linear Lifecycle:** Enforced stage transitions: `None` → `Harvested` → `Verified` | `Rejected` → `Accepted` → `Processed` → `EndUse`.
 - **Role-Based Access Control:** Distinct roles for `RELAYER_ROLE`, `VERIFIER_ROLE`, `BUYER_ROLE`, `PROCESSOR_ROLE`, and `DEFAULT_ADMIN_ROLE`.
 - **Separation of Duties:** Relayers cannot act as verifiers (`VerifierCannotBeRelayer`).
 - **Strict Mass-Balance Invariants:** Contract rejects transactions where `acceptedKg > harvestedKg`, `processedKg > acceptedKg`, or `endUseKgTotal > processedKg`.
 - **Harvester Privacy:** Per-batch HMAC-SHA256 pseudonyms preventing public linkability of harvester identities across batches.
 - **Non-Transferable Work Credits:** ERC-1155 token ID 1 (`WORK_CREDIT`) minted 1:1 per kilogram reaching verified circular end use; token transfers are blocked via the `_update` hook.
-- **Append-Only Tamper-Evident Corrections:** Hashes can only be superseded by their original author with a recorded reason; historical records remain immutable and visible.
+  > [!NOTE]
+  > **Custodian Receiver Requirement:** In the prototype, the custodian (`relayer`) address that holds minted credits must be a standard wallet (EOA) or implement `IERC1155Receiver`; otherwise `recordEndUse` reverts with `ERC1155InvalidReceiver`.
+- **Append-Only Tamper-Evident Corrections:** Hashes can only be superseded by their original author with a recorded reason; historical records remain immutable and visible. Only evidence and payload hashes may be superseded (Decision D); `newHash == bytes32(0)` reverts with `InvalidHash`.
 - **Off-Chain Hashing Module (`src/hashing/`):** RFC 8785 canonical JSON serialization, random 128-bit salts, `keccak256` payload hashing, and HMAC-SHA256 per-batch pseudonym derivation. Browser-safe; no Node-only imports in the main export.
-- **Harvester Certificate Pipeline (`src/certificate/`, `scripts/make-certificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
-- **Public In-Browser Verify Page (`web/`):** Zero-backend static page bundled with esbuild. Runs 5 independent verification checks against the live blockchain with no login and no ZiwaClear server contact. Accepts certificate input via URL fragment, file upload, or paste.
-- **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demo-sms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
-- **Full Automated Test Suite:** 85/85 tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, and SMS flows.
+- **Harvester Certificate Pipeline (`src/certificate/`, `scripts/makeCertificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
+- **Public In-Browser Verify Page (`web/`):** Zero-backend static page bundled with esbuild. Runs 5 independent verification checks against the live blockchain with no login and no ZiwaClear server contact. Binds every stage in the certificate directly to its emitted on-chain event log (`payloadHash` and `txHash`), validates `cert.pseudonym` against `batchData.harvesterId`, verifies plain `paymentRef`, and presents an amber banner for authentic rejected batches without granting verified status.
+- **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demoSms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), canonical `SettlementConfirmationPayload` assembly, relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
+- **Full Automated Test Suite:** 92 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
 
 ### Roadmap Items (Not Yet Built in Current Release)
 - **Multi-Verifier Consensus:** Upgrading single verifiers to a 2-of-N threshold signature model.
+- **Custodian Multi-Relayer Isolation:** Adding `msg.sender == b.custodian` check on `confirmSettlement` for multi-relayer operational topologies.
 - **Post-Acceptance Quantity Adjustments:** On-chain dispute resolution for discrepancies discovered after buyer acceptance.
 - **Automated M-Pesa Settlement Reconciliation:** Direct smart-contract reconciliation against Safaricom Daraja API callbacks.
 - **Credit Redemption Mechanisms:** Work-credit redemption for subsidized agricultural inputs, protective equipment, or carbon-finance dividends.

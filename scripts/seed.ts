@@ -295,6 +295,7 @@ async function main() {
     blockNumber: rcptAcceptA!.blockNumber,
     payload: acceptPayloadA,
     salt: acceptSaltA,
+    paymentSalt: paymentSaltA,
     hash: acceptHashA
   };
 
