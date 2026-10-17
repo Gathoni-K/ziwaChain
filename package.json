@@ -10,8 +10,9 @@
     "test": "npx hardhat test",
     "certificate": "npx hardhat run scripts/makeCertificates.ts",
     "demo:sms": "npx hardhat run scripts/demoSms.ts",
-    "web:build": "mkdir -p web/dist && esbuild web/main.ts --bundle --outfile=web/dist/bundle.js --minify --sourcemap --target=es2022 && cp web/index.html web/style.css web/dist/",
-    "web:dev": "mkdir -p web/dist && cp web/index.html web/style.css web/dist/ && esbuild web/main.ts --bundle --outfile=web/dist/bundle.js --sourcemap --target=es2022 --servedir=web/dist"
+    "verify:contract": "npx hardhat run scripts/verify.ts --network baseSepolia",
+    "web:build": "mkdir -p web/dist && esbuild web/main.ts --bundle --outfile=web/dist/bundle.js --minify --sourcemap --target=es2022 && cp web/index.html web/style.css web/certificate.html web/dist/",
+    "web:dev": "mkdir -p web/dist && cp web/index.html web/style.css web/certificate.html web/dist/ && esbuild web/main.ts --bundle --outfile=web/dist/bundle.js --sourcemap --target=es2022 --servedir=web/dist"
   },
   "keywords": [],
   "author": "",

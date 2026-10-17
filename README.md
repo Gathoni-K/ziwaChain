@@ -34,7 +34,7 @@ npx hardhat clean && npx hardhat compile
 ```
 
 ### Run Test Suite
-Run the full automated test suite (85 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, RFC 8785 canonical serialization, HMAC pseudonyms, certificate generation, in-browser verification algorithm, and simulated SMS settlement flows):
+Run the full automated test suite (94 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, RFC 8785 canonical serialization, HMAC pseudonyms, certificate generation, in-browser verification algorithm, simulated SMS settlement flows, and markdown link integrity):
 ```bash
 npx hardhat test
 ```
@@ -52,7 +52,7 @@ npx tsc --noEmit
 ```
 
 ### Seed Demo Batches (Local In-Memory Network)
-Run the automated seed script to deploy the contract and execute 3 real demo batches (Batch A full journey, Batch B quality rejection, Batch C hash correction):
+Run the automated seed script to deploy the contract and execute 3 illustrative demo batches (Batch A full journey, Batch B quality rejection, Batch C hash correction; illustrative demo data, not real harvests):
 ```bash
 npx hardhat run scripts/seed.ts
 ```
@@ -67,6 +67,7 @@ Open `web/dist/index.html` directly in any web browser (no local server or inter
 ```bash
 npm run web:dev
 ```
+A separate printable certificate page is available at `web/certificate.html`. Open it in a browser, paste a certificate JSON, and use Ctrl+P / ⌘P to save as PDF (A5).
 
 ### Deploy & Seed on Base Sepolia
 To deploy and seed on Base Sepolia testnet:
@@ -77,7 +78,16 @@ To deploy and seed on Base Sepolia testnet:
 ```bash
 npx hardhat run scripts/seed.ts --network baseSepolia
 ```
-The script automatically generates and funds 4 ephemeral testnet wallets (relayer, verifier, buyer, processor), grants on-chain roles, executes all 3 demo batches, and writes output metadata to `demo/demo-data.json`.
+The script automatically generates and funds 4 ephemeral testnet wallets (relayer, verifier, buyer, processor), grants on-chain roles, executes all 3 demo batches (illustrative data, not real harvests), and writes output metadata to `demo/demo-data.json`.
+
+### Verify Contract on Basescan (prepare-only, requires Base Sepolia deployment)
+1. Set `ETHERSCAN_API_KEY` in your `.env` file (one Etherscan V2 key covers Base Sepolia; do not use a separate Basescan key).
+2. Ensure `demo/demo-data.json` exists from a Base Sepolia seed run.
+3. Run the verification script:
+```bash
+npx hardhat run scripts/verify.ts --network baseSepolia
+```
+The script reads `contractAddress` and `adminAddress` from `demo/demo-data.json` and submits the verification to Etherscan V2.
 
 ---
 
@@ -89,11 +99,13 @@ Judges can review the complete hackathon evaluation documentation via the links 
 |---|---|
 | [System Architecture Specification](docs/architecture/architecture.md) | Component architecture, Mermaid diagrams, on-chain vs off-chain boundary, and roles matrix |
 | [Security & Data Integrity Assessment](docs/security/securityAndDataIntegrity.md) | Threat modeling, RBAC, mass balance preservation, HMAC privacy, and test suite |
+| [Why Blockchain? Architectural Justification](docs/security/whyBlockchain.md) | Honest comparison of blockchain vs signed log vs database for informal-labor provenance |
 | [Climate Impact Assessment](docs/impact/climateImpactAssessment.md) | Methane avoidance projections, fuel displacement models, IPCC sources, and clear estimate labels |
 | [Problem & Solution Overview](docs/overview.md) | 2-page overview of the circular bioeconomy model and informal harvester precarity on Lake Victoria |
 | [Adoption Strategy & Scalability Roadmap](docs/adoptionAndScalability.md) | Three-tiered proof acceptance pathway, Kisumu pilot plan, scaling horizons, and field findings placeholder |
 | [Demo Video Script](docs/demoScript.md) | 3-minute video presentation script with timestamps, visual cues, and voiceover text |
 | [Technical Specification & Test Proofs](docs/architecture/spec.md) | Supplementary deep dive into smart contract rules and unit test mappings |
+| [Gas Cost Estimate](docs/architecture/gasCostEstimate.md) | Measured gas-per-function table and low/high ETH cost estimate with stated assumptions |
 | [Event Schema & Data Model](docs/architecture/eventSchema.md) | Supplementary canonical event envelope and data dictionary |
 
 ---
@@ -136,10 +148,9 @@ ziwachain/
 │   │   └── eventSchema.md             # Canonical event envelope and data dictionary
 │   ├── security/
 │   │   ├── securityAndDataIntegrity.md # Primary threat model, RBAC, and integrity analysis
-│   │   └── assessment.md              # Detailed security assessment and test logs
+│   │   └── whyBlockchain.md           # Architectural justification for blockchain in informal labor
 │   ├── impact/
-│   │   ├── climateImpactAssessment.md # Primary climate model and carbon projections
-│   │   └── impactAssessment.md       # Supplementary impact calculations
+│   │   └── climateImpactAssessment.md # Primary climate model and carbon projections
 │   ├── overview.md                    # 2-page problem and solution overview
 │   ├── adoptionAndScalability.md      # Adoption strategy and scaling roadmap
 │   ├── demoScript.md                  # 3-minute video presentation script
@@ -174,7 +185,7 @@ To maintain total transparency with hackathon judges, our implementation status 
 - **Harvester Certificate Pipeline (`src/certificate/`, `scripts/makeCertificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
 - **Public In-Browser Verify Page (`web/`):** Zero-backend static page bundled with esbuild. Runs 5 independent verification checks against the live blockchain with no login and no ZiwaClear server contact. Binds every stage in the certificate directly to its emitted on-chain event log (`payloadHash` and `txHash`), validates `cert.pseudonym` against `batchData.harvesterId`, verifies plain `paymentRef`, and presents an amber banner for authentic rejected batches without granting verified status.
 - **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demoSms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), canonical `SettlementConfirmationPayload` assembly, relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
-- **Full Automated Test Suite:** 92 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
+- **Full Automated Test Suite:** 94 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
 
 ### Roadmap Items (Not Yet Built in Current Release)
 - **Multi-Verifier Consensus:** Upgrading single verifiers to a 2-of-N threshold signature model.

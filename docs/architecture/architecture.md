@@ -41,14 +41,15 @@ flowchart TD
 
 ### Component Breakdown
 
-1. **Harvester Interface (SMS/USSD):** Harvesters report deliveries (bags, harvest location, group identifier) using 2G/3G basic phones. They receive SMS notifications upon commercial acceptance and confirm payment receipts via two-way SMS codes.
+1. **Harvester Interface (SMS/USSD):** Harvesters report deliveries (bags, harvest location, group identifier) using 2G/3G basic phones. In the prototype, this SMS gateway is simulated (`src/sms/SimulatedGateway.ts`); production integration with a commercial telecom provider is planned.
 2. **ZiwaClear Relayer (`RELAYER_ROLE`):** Ingests harvest dispatches, derives per-batch un-linkable pseudonyms, formats canonical RFC 8785 JSON payloads, generates cryptographic salts, and broadcasts `logHarvest` transactions on Base Sepolia. The relayer sponsors all network gas fees.
-3. **Field Verifiers (`VERIFIER_ROLE`):** Independent inspectors stationed at landing beaches (e.g. Kenya Marine and Fisheries Research Institute, KMFRI) who physically inspect weed quality, moisture, and absence of soil contaminants. They sign `verifyBatch` transactions with their own EVM wallets.
-4. **Commercial Biomass Buyers (`BUYER_ROLE`):** Commercial off-takers purchasing weed for bio-energy, briquettes, or compost. They weigh deliveries, submit `acceptBatch` on-chain, and record the hash of the off-chain M-Pesa mobile money payout.
+3. **Field Verifiers (`VERIFIER_ROLE`):** Independent inspectors stationed at landing beaches (e.g. Kenya Marine and Fisheries Research Institute, KMFRI). Note: physical field inspection, weighbridge checks, and intake sampling describe the intended real-world process and are not built into the software; in prototype demonstrations, these roles are simulated via demo accounts.
+4. **Commercial Biomass Buyers (`BUYER_ROLE`):** Commercial off-takers purchasing weed for bio-energy, briquettes, or compost. They inspect deliveries, submit `acceptBatch` on-chain, and record the hash of the off-chain M-Pesa mobile money payout. In the prototype, commercial buyer transactions and M-Pesa references use illustrative demo data.
 5. **Industrial Processors (`PROCESSOR_ROLE`):** Biogas, pyrolysis, or organic fertilizer plants. They log biomass conversion through `recordProcessing` and `recordEndUse`, triggering the on-chain minting of work credits.
 6. **Smart Contract (`ZiwaChain.sol`):** Deployed on Base Sepolia, enforcing role permissions, irreversible linear stage transitions, conservation of mass balance, non-transferable credit issuance, and append-only hash supersessions.
 7. **Certificate Generator (`src/certificate/`):** Generates portable Version 1 JSON certificates containing canonical payloads, salts, on-chain transaction references, Crockford Base32 short codes, and self-verifying QR codes.
 8. **Public Verify Page (`web/`):** A zero-backend static client bundled with esbuild. Queries Base Sepolia directly via public JSON-RPC to recompute hashes and audit batches with zero server tracking.
+9. **Demo Data Note:** All demo batches (Batch A, Batch B, Batch C) in `demo/demo-data.json` are illustrative demo data for testing, not records of real harvests.
 
 ---
 

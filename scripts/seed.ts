@@ -26,6 +26,7 @@ interface StageRecord {
   payload: object;
   salt: string;
   hash: string;
+  paymentSalt?: string;
 }
 
 interface BatchDemoData {
@@ -169,12 +170,14 @@ async function main() {
     chainId: string;
     network: string;
     contractAddress: string;
+    adminAddress: string;
     deploymentBlock: number;
     batches: Record<string, BatchDemoData>;
   } = {
     chainId,
     network: networkName,
     contractAddress: zcAddress,
+    adminAddress: deployer.address,
     deploymentBlock,
     batches: {}
   };

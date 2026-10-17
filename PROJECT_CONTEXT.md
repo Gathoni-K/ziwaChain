@@ -193,7 +193,7 @@ ziwachain/
   .env                            ← DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL, PSEUDONYM_SECRET
 ```
 
-- **Test run:** `npx hardhat test` → 92 passing (44 contract + 18 hashing + 6 certificate + 10 verify + 13 sms + 1 links).
+- **Test run:** `npx hardhat test` → 94 passing (44 contract + 18 hashing + 6 certificate + 10 verify + 13 sms + 3 links).
 - **Remaining tasks:** Task 8 review fixes applied, Base Sepolia deployment, demo video recording, hosting.
 - **Manual steps (done by owner, not tasks):** Base Sepolia deployment, demo video recording, hosting, Devpost submission.
 

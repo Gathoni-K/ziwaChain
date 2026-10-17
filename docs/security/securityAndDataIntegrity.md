@@ -129,10 +129,14 @@ To ensure transparency with evaluating judges, we explicitly disclose the follow
 1. **Relayer Custody Dependence:** Because harvesters do not manage EVM wallets, initial batch reporting relies on ZiwaClear's relayer key. While cryptographic checks prevent the relayer from verifying its own batches, the relayer is a centralized operational point for SMS intake.
 2. **Custodian Multi-Relayer Isolation:** In the current prototype, any address with `RELAYER_ROLE` can invoke `confirmSettlement`. Restricting confirmation strictly to `b.custodian` is planned for multi-relayer enterprise scaling.
 3. **Custodian Contract Receiver Requirement:** Work credits are minted to `b.custodian`. If the custodian address is a smart contract wallet, it must implement `IERC1155Receiver`; otherwise `recordEndUse` reverts with `ERC1155InvalidReceiver`.
-4. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature.
+4. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature. In the prototype, this SMS gateway is simulated (`src/sms/SimulatedGateway.ts`); live telecom integration is planned for production.
 5. **Single Verifier Trust Point in Prototype:** The current contract relies on a single verifier key per batch. While verifiers cannot hold the relayer role, a dishonest verifier could collude with harvesters to approve sub-standard biomass. Upgrading to 2-of-N threshold verification is scheduled for Phase 2.
 6. **Permanent Mass Balance:** If a scaling error is accepted by a commercial buyer, the kilogram mass cannot be altered retroactively. The batch must be cancelled and re-logged.
 7. **Work Credits are Not Carbon Credits:** Work credits represent verified kilograms of hyacinth removed and diverted to circular processing. They do not constitute certified carbon credits.
+8. **Field Inspection, Weighbridge & Intake Checks:** Landing-site field inspection, weighbridge calibration, and physical intake sampling describe the intended real-world process; hardware integrations are not built into the software prototype and test runs use simulated development signers.
+9. **Illustrative Demo Data:** Seeded batches in `demo/demo-data.json` are illustrative demo data for protocol testing, not records of physical harvests.
+
+For an architectural comparison explaining why a public blockchain is used rather than a centralized database or signed log, see [Why ZiwaChain Uses a Blockchain](whyBlockchain.md).
 
 ---
 

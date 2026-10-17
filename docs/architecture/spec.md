@@ -58,12 +58,12 @@ flowchart TD
    - Enforces 5 distinct verification checks: client-side hash recomputation (RFC 8785 + keccak256), on-chain event log matching, record supersession audit (`supersededBy`), conservation of mass verification (`getBatch`), and M-Pesa payment reference hash confirmation.
    - Decodes certificate payloads strictly client-side from URL fragments (`#c=<base64url>`) without contacting any central server.
 8. **Demo Batch Seed Runner (`scripts/seed.ts`):**
-   - End-to-end deployment and execution harness that seeds real demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction).
+   - End-to-end deployment and execution harness that seeds illustrative demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction; illustrative demo data, not real harvests).
    - Operates on local in-memory nodes as well as Base Sepolia (automatically funding ephemeral actor wallets).
    - Emits canonical payloads, salts, hashes, and transaction receipts to `demo/demo-data.json` for certificate generation and verify page testing.
-9. **Simulated SMS Gateway & Settlement Flow (`src/sms/`, `scripts/demo-sms.ts`):**
+9. **Simulated SMS Gateway & Settlement Flow (`src/sms/`, `scripts/demoSms.ts`):**
    - Two-leg SMS flow for low-bandwidth harvesters: post-acceptance settlement OTP confirmation and on-demand PROOF certificate delivery.
-   - Modular `SmsGateway` interface allowing seamless transition from `SimulatedGateway` to live telecom providers (such as Africa's Talking, Twilio, or Safaricom USSD gateway).
+   - The SMS gateway is simulated in the prototype (`SimulatedGateway.ts`); live telecom integration (e.g. Africa's Talking) is planned for production. Field inspection and weighbridge checks also describe the intended real-world process and are executed by demo accounts in the prototype.
    - Strict phone number masking in logs and zero on-chain phone number storage.
 
 ---

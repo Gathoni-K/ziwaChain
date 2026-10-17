@@ -4,6 +4,66 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 17, 2026, Task 9: Prototype Improvements
+
+### Files added or updated
+| File | Action |
+|---|---|
+| `web/index.html` | Updated: Set button labels to spec-exact "Load valid demo certificate", "Load tampered demo certificate", and "Load Batch C (Corrected)" working from bundled data. |
+| `web/main.ts` | Confirmed demo buttons work directly from bundled sample data (`SAMPLE_BATCH_A` and 1 kg tampered variation) with only chain reads needing network. |
+| `web/certificate.html` | Created: Printable bilingual (English / Swahili) A5 certificate page. Loads certificate JSON via paste or URL fragment, renders all required fields (batch ID, harvest date, verified weight, buyer acceptance, payment reference, SMS confirmation, work credits, short code), displays QR code if present, and includes an honest bilingual disclaimer. Swahili text marked for owner review. |
+| `web/dist/` | Re-bundled: `bundle.js`, `index.html`, and `certificate.html` copied into dist by `npm run web:build` |
+| `docs/architecture/gasCostEstimate.md` | Created: Gas cost estimate using real figures from `hardhat-gas-reporter` v2.3.0 (94 tests). Per-function gas units table, full journey total (708,238 gas), low/high ETH and USD estimate ranges with stated sources. Clearly labelled ESTIMATE throughout. |
+| `docs/architecture/gasReport.txt` | Generated: Raw hardhat-gas-reporter output from `REPORT_GAS=true npx hardhat test` |
+| `hardhat.config.ts` | Updated: Added `@nomicfoundation/hardhat-verify` import, Etherscan V2 `etherscan: { apiKey }` block (single key, no deprecated customChains), and `gasReporter` config with `outputFile` and `enabled: process.env.REPORT_GAS === "true"` |
+| `.env.example` | Updated: Added `ETHERSCAN_API_KEY` entry with comment explaining Etherscan V2 covers Base Sepolia |
+| `scripts/seed.ts` | Updated: Added `adminAddress: deployer.address` to `demoData` output so `scripts/verify.ts` can read it; added `paymentSalt?: string` to `StageRecord` interface |
+| `scripts/verify.ts` | Created: Reads `demo/demo-data.json` for `contractAddress` and `adminAddress`, submits Etherscan V2 verification using `hardhat verify:verify`. Does NOT deploy; operator runs after seed. |
+| `package.json` | Updated: Added `"verify:contract"` script; updated `web:build` and `web:dev` to also copy `web/certificate.html` to dist |
+| `docs/security/whyBlockchain.md` | No code changes needed; verified all claims match code and contract. Linked from `README.md` and `docs/security/securityAndDataIntegrity.md`. See Item 5 notes below. |
+| `docs/security/securityAndDataIntegrity.md` | Updated: Linked to `whyBlockchain.md`; added honest disclosures on SMS simulation, intended physical inspection/weighbridge processes, and illustrative demo data |
+| `docs/architecture/architecture.md` | Updated: Disclosed SMS gateway simulation, intended field inspection/weighbridge processes, and illustrative demo data in component breakdown |
+| `docs/architecture/spec.md` | Updated: Changed "real demo batches" to illustrative demo data, disclosed SMS simulation and intended physical processes |
+| `README.md` | Updated: Test count 85 → 94; added `whyBlockchain.md` and `gasCostEstimate.md` to docs table; added printable certificate note; added Basescan verification step; added demo batch illustrative-data disclaimer and limitations 8 & 9 |
+| `docs/overview.md` | Updated: Overclaim pass (Items 5 & 6): SMS gateway labelled simulated; field inspection labelled as intended real-world process not yet built into prototype; demo batches labelled as illustrative; telecom integration row updated; test count 85 → 94 |
+| `docs/demoScript.md` | Updated: Overclaim pass (Item 6): demo data labelled illustrative; SMS gateway labelled simulated; field verifier labelled as demo account in prototype; tamper test updated to use demo button; test count 85 → 94 |
+| `docs/internal/PROGRESS.md` | Updated: This entry |
+
+### Item 5: whyBlockchain.md — Claims vs Code Audit
+All 5 sections were read against the contract and tests. No claim contradicts the code. Changes made: **none** (no wording needed to change; all claims are either faithful to the contract or already qualified as roadmap). Specific checks performed:
+
+- Section 2 table "Each party's own signature is native to the system" — verified buyers, verifiers, processors use their own wallets; harvesters go through relayer (already disclosed in Section 4).
+- Section 3 "contract enforces who may act at each stage" — verified by RBAC and stage guards in `ZiwaChain.sol`.
+- Section 3 "Verification runs in the reader's browser" — verified by `web/main.ts` which uses `JsonRpcProvider` with no server-side call.
+- Section 4 "Harvesters do not sign for themselves" — accurate and present in the doc.
+- Section 4 "One admin wallet" — accurate; multisig roadmap already noted.
+- The doc does not use "undeniable" or "carbon credits" — confirmed.
+
+`README.md` and `docs/security/securityAndDataIntegrity.md` now link to `whyBlockchain.md` so judges see it.
+
+### Item 6: Overclaim pass — changes made
+| Document | Change |
+|---|---|
+| `docs/overview.md` | Pillar 1: added "SMS gateway is simulated in the prototype". Pillar 2: added "field inspection represents the intended real-world process; prototype uses demo accounts". Pillar 4: added "buyer is a demo account and M-Pesa reference is illustrative demo data". Built/Roadmap table: demo data disclaimer and telecom row clarification. |
+| `docs/demoScript.md` | Harvest to End Use row: labelled data as illustrative, verifier as demo account, SMS as simulated. Verify page row: referenced demo buttons and clarified network call is to Hardhat/Sepolia. Roadmap row: added "what is not built" and "demo data" bullets. Test count 85 → 94. |
+| `README.md` | Run Test Suite description updated. Seed description added "illustrative data, not real harvests". Honest limitations 8 & 9 added for field inspection/weighbridge and demo data. |
+| `docs/architecture/architecture.md` | Disclosed SMS gateway simulation, intended field inspection/weighbridge processes, and illustrative demo batches in Component Breakdown. |
+| `docs/architecture/spec.md` | Removed "real demo batches" phrasing; added disclosures for simulated SMS and intended physical checks. |
+| `docs/security/securityAndDataIntegrity.md` | Added Section 4 disclosures 8 & 9 and linked to `whyBlockchain.md`. |
+
+### Test results
+- `npx hardhat test` passes **94 / 94** tests (unchanged from Task 8).
+- `npm run web:build` completes in ~61ms, 0 errors.
+- `npx tsc --noEmit` passes with 0 errors (to be confirmed on each code change).
+
+### Decisions made or clarified
+- Printable certificate Swahili text: marked with `<!--[SW for review]-->` and `<!--[SW: ...]-->` inline comments throughout `web/certificate.html`. Owner must review before presentation.
+- `verify:contract` npm script is NOT listed as a required-test target in `links.test.ts` (it references `scripts/verify.ts`, which is checked by the script path test, but requires `--network baseSepolia` and a live deployment; running it locally would fail). The test checks the file exists on disk, which it does.
+- Gas reporter is disabled by default (no `REPORT_GAS` flag set). Costs are estimates; the L1 data fee on Base L2 dominates over L2 execution cost.
+- Etherscan V2 configuration: single `apiKey` string under `etherscan`. No `customChains` added. `@nomicfoundation/hardhat-verify` v2.1.3 (installed) resolves Base Sepolia automatically via the V2 API.
+
+
+
 ## Oct 17, 2026, Task 8: Skeptical Review Implementation & Protocol Hardening
 
 ### Files added or updated

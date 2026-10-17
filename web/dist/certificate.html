@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZiwaChain Harvester Certificate</title>
+  <meta name="description" content="Printable ZiwaChain Harvester Certificate – verified water hyacinth biomass chain of custody.">
+  <style>
+    /* ── Core Reset & Print Setup ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page {
+      size: A5 portrait;
+      margin: 14mm 12mm 12mm 12mm;
+    }
+
+    html, body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11pt;
+      color: #111;
+      background: #fff;
+      line-height: 1.5;
+    }
+
+    /* ── Screen wrapper ───────────────────────────────────────────────────────── */
+    .wrapper {
+      max-width: 148mm;   /* A5 width */
+      margin: 24px auto;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    @media print {
+      .wrapper { max-width: none; border: none; padding: 0; margin: 0; }
+      .no-print { display: none !important; }
+    }
+
+    /* ── Header ───────────────────────────────────────────────────────────────── */
+    .cert-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 2.5pt solid #0d5c2e;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+    .cert-header-left h1 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0d5c2e;
+      line-height: 1.2;
+    }
+    .cert-header-left .subtitle {
+      font-size: 9pt;
+      color: #444;
+      margin-top: 2px;
+    }
+    .cert-header-right { text-align: right; flex-shrink: 0; }
+    .short-code {
+      font-family: 'Courier New', monospace;
+      font-size: 16pt;
+      font-weight: 700;
+      color: #0d5c2e;
+      letter-spacing: 2px;
+    }
+    .short-code-label { font-size: 7pt; color: #666; }
+
+    /* ── QR Code ──────────────────────────────────────────────────────────────── */
+    .qr-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .qr-img {
+      width: 72px;
+      height: 72px;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      flex-shrink: 0;
+      image-rendering: pixelated;
+    }
+    .qr-placeholder {
+      width: 72px;
+      height: 72px;
+      border: 1px dashed #aaa;
+      border-radius: 2px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 7pt;
+      color: #aaa;
+      text-align: center;
+    }
+    .qr-desc { font-size: 8.5pt; color: #444; }
+
+    /* ── Data grid ────────────────────────────────────────────────────────────── */
+    .section-title {
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #0d5c2e;
+      border-bottom: 1pt solid #c8e6c9;
+      padding-bottom: 2px;
+      margin-bottom: 6px;
+      margin-top: 10px;
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: 42% 58%;
+      row-gap: 4px;
+      column-gap: 6px;
+    }
+    .field-label { font-size: 8.5pt; color: #555; font-weight: 600; }
+    .field-value { font-size: 8.5pt; color: #111; word-break: break-all; }
+    .field-value.mono { font-family: 'Courier New', monospace; font-size: 7.5pt; }
+    .field-value.badge {
+      display: inline-block;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .badge-approved { background: #e8f5e9; color: #1b5e20; }
+    .badge-rejected { background: #fff8e1; color: #6d4c00; }
+
+    /* ── Bilingual label helper ───────────────────────────────────────────────── */
+    .bi { display: block; }
+    .bi .sw { font-size: 7.5pt; color: #777; font-style: italic; }
+
+    /* ── Disclaimer box ───────────────────────────────────────────────────────── */
+    .disclaimer {
+      margin-top: 12px;
+      border: 1pt solid #c8e6c9;
+      border-radius: 3px;
+      padding: 6px 8px;
+      font-size: 8pt;
+      color: #333;
+      background: #f9fef9;
+    }
+    .disclaimer p + p { margin-top: 4px; }
+    .disclaimer strong { color: #0d5c2e; }
+
+    /* ── Footer strip ─────────────────────────────────────────────────────────── */
+    .cert-footer {
+      margin-top: 10px;
+      border-top: 1pt solid #e0e0e0;
+      padding-top: 6px;
+      font-size: 7pt;
+      color: #888;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── Screen-only load panel ────────────────────────────────────────────────── */
+    .load-panel {
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .load-panel h2 { font-size: 12pt; margin-bottom: 8px; color: #333; }
+    .load-panel textarea {
+      width: 100%;
+      height: 120px;
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      resize: vertical;
+    }
+    .load-panel button {
+      margin-top: 8px;
+      padding: 6px 16px;
+      background: #0d5c2e;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-size: 10pt;
+      cursor: pointer;
+    }
+    .load-panel button:hover { background: #0a4824; }
+    .print-btn {
+      margin-top: 8px;
+      margin-left: 8px;
+      padding: 6px 16px;
+      background: #fff;
+      color: #0d5c2e;
+      border: 1px solid #0d5c2e;
+      border-radius: 3px;
+      font-size: 10pt;
+      cursor: pointer;
+    }
+    .print-btn:hover { background: #e8f5e9; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Screen-only: load panel ─────────────────────────────────────────── -->
+  <div class="wrapper no-print" style="border-color: #aaa; margin-bottom: 12px;">
+    <div class="load-panel" style="margin-bottom:0; padding:0; background:none; border:none;">
+      <h2>Load Certificate JSON</h2>
+      <p style="font-size:9pt; color:#555; margin-bottom:6px;">
+        Paste certificate JSON below, then click Load.
+        The printable certificate will render below and can be printed with Ctrl+P / ⌘P.
+      </p>
+      <textarea id="certInput" placeholder='{"version":1,"batchId":"0x...","shortCode":"XXXXX-XXXXX",...}'></textarea>
+      <br>
+      <button onclick="loadCertificate()">Load Certificate</button>
+      <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <!-- ── Printable certificate ───────────────────────────────────────────── -->
+  <div class="wrapper" id="certBody" style="display:none;">
+
+    <!-- Header -->
+    <div class="cert-header">
+      <div class="cert-header-left">
+        <h1>ZiwaChain Harvester Certificate</h1>
+        <div class="subtitle">Cheti cha Mvunaji — ZiwaChain <!--[SW: Harvester Certificate]--></div>
+        <div class="subtitle" style="margin-top:4px; color:#888;" id="certChainLabel">Base Sepolia Testnet &bull; Chain ID: –</div>
+      </div>
+      <div class="cert-header-right">
+        <div class="short-code" id="certShortCode">–</div>
+        <div class="short-code-label">Nambari ya Uthibitisho <!--[SW: Verification Code]--></div>
+      </div>
+    </div>
+
+    <!-- QR + verify link row -->
+    <div class="qr-row">
+      <img id="certQR" class="qr-img" src="" alt="QR Code" style="display:none;">
+      <div id="certQRPlaceholder" class="qr-placeholder">QR<br>code</div>
+      <div class="qr-desc">
+        <strong>Verify online / Thibitisha mtandaoni</strong><br>
+        <!--[SW: Verify online]-->
+        Scan the QR code or visit the link below to check this certificate on the blockchain.<br>
+        <span style="font-family:monospace; font-size:7.5pt;" id="certVerifyUrl">–</span>
+      </div>
+    </div>
+
+    <!-- Batch Identity -->
+    <div class="section-title">
+      Batch Record / Rekodi ya Mapaki <!--[SW: Batch Record]-->
+    </div>
+    <div class="field-grid">
+      <div class="field-label">
+        <span class="bi">Batch ID <span class="sw">Nambari ya Mzigo</span></span>
+      </div>
+      <div class="field-value mono" id="certBatchId">–</div>
+
+      <div class="field-label">
+        <span class="bi">Harvest Date <span class="sw">Tarehe ya Kuvuna</span></span>
+      </div>
+      <div class="field-value" id="certHarvestDate">–</div>
+
+      <div class="field-label">
+        <span class="bi">Harvest Region <span class="sw">Eneo la Kuvuna</span></span>
+      </div>
+      <div class="field-value" id="certRegion">–</div>
+
+      <div class="field-label">
+        <span class="bi">Source <span class="sw">Chanzo</span></span>
+      </div>
+      <div class="field-value" id="certSource">–</div>
+    </div>
+
+    <!-- Quantities -->
+    <div class="section-title">
+      Verified Quantities / Uzito Uliothibitishwa <!--[SW: Verified Weights]-->
+    </div>
+    <div class="field-grid">
+      <div class="field-label">
+        <span class="bi">Harvested Weight <span class="sw">Uzito Uliokusanywa</span></span>
+      </div>
+      <div class="field-value" id="certHarvestedKg">–</div>
+
+      <div class="field-label">
+        <span class="bi">Verification Result <span class="sw">Matokeo ya Ukaguzi</span></span>
+      </div>
+      <div class="field-value" id="certVerifyResult">–</div>
+
+      <div class="field-label">
+        <span class="bi">Buyer Accepted Weight <span class="sw">Uzito Uliokubaliwa na Mnunuzi</span></span>
+      </div>
+      <div class="field-value" id="certAcceptedKg">–</div>
+    </div>
+
+    <!-- Settlement -->
+    <div class="section-title">
+      Settlement / Malipo <!--[SW: Payment / Settlement]-->
+    </div>
+    <div class="field-grid">
+      <div class="field-label">
+        <span class="bi">Payment Reference <span class="sw">Nambari ya Malipo (M-Pesa)</span></span>
+      </div>
+      <div class="field-value mono" id="certPaymentRef">–</div>
+
+      <div class="field-label">
+        <span class="bi">SMS Confirmation <span class="sw">Uthibitisho wa SMS</span></span>
+      </div>
+      <div class="field-value" id="certSmsConfirm">–</div>
+    </div>
+
+    <!-- Work Credits -->
+    <div class="section-title">
+      Work Credits / Mikopo ya Kazi <!--[SW: Work Credits]-->
+    </div>
+    <div class="field-grid">
+      <div class="field-label">
+        <span class="bi">Credits Issued <span class="sw">Mikopo Iliyotolewa</span></span>
+      </div>
+      <div class="field-value" id="certCredits">–</div>
+
+      <div class="field-label">
+        <span class="bi">Harvester Pseudonym <span class="sw">Jina la Siri la Mvunaji</span></span>
+      </div>
+      <div class="field-value mono" id="certPseudonym">–</div>
+    </div>
+
+    <!-- Contract -->
+    <div class="section-title">
+      On-Chain Reference / Rejea ya Blockchain
+    </div>
+    <div class="field-grid">
+      <div class="field-label">
+        <span class="bi">Contract Address <span class="sw">Anwani ya Mkataba</span></span>
+      </div>
+      <div class="field-value mono" id="certContract">–</div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <p>
+        <strong>What this certificate proves / Cheti hiki kinathibitisha nini:</strong>
+        This record was committed to a public blockchain and cannot be altered. Every hash
+        in this certificate was independently recorded on Base Sepolia by the parties
+        named above. The chain-of-custody rules (mass balance, separation of duties)
+        were enforced by the smart contract at the time of recording.
+      </p>
+      <p>
+        <em><!--[SW for review]--> Rekodi hii ilihifadhiwa kwenye blockchain ya umma na haiwezi kubadilishwa.
+        Kila hash katika cheti hiki ilirekodi kwa uhuru kwenye Base Sepolia na wahusika
+        walioorodheshwa hapo juu. Sheria za mnyororo wa utunzaji zilitekelezwa na mkataba
+        wa akili wakati wa kurekodi.</em>
+      </p>
+      <p style="margin-top:6px;">
+        <strong>What it does not prove / Haithbitishi:</strong>
+        Whether the physical weight measurement was accurate. That real-world link depends
+        on the independent field verifier and the buyer's commercial acceptance.
+        Work credits are not carbon credits.
+      </p>
+      <p>
+        <em><!--[SW for review]--> Haithbitishi: Iwapo kipimo cha uzito halisi kilikuwa sahihi.
+        Uhusiano huo wa ulimwengu wa kweli unategemea mkaguzi huru wa shamba na
+        ukubaliaji wa kibiashara wa mnunuzi. Mikopo ya kazi si mikopo ya kaboni.</em>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="cert-footer">
+      <span>ZiwaChain Open Source Protocol &bull; IEEE ClimateChain 2026</span>
+      <span id="certFooterDate">–</span>
+    </div>
+
+  </div><!-- /.wrapper -->
+
+  <script>
+    function fmt(unixSec) {
+      if (!unixSec) return "–";
+      return new Date(unixSec * 1000).toLocaleDateString("en-KE", { dateStyle: "long" });
+    }
+    function trunc(s, n) {
+      if (!s) return "–";
+      return s.length > n ? s.slice(0, n) + "…" : s;
+    }
+
+    function loadCertificate() {
+      const raw = document.getElementById("certInput").value.trim();
+      if (!raw) { alert("Paste certificate JSON first."); return; }
+      let cert;
+      try { cert = JSON.parse(raw); }
+      catch (e) { alert("Invalid JSON: " + e.message); return; }
+
+      // Render certificate
+      const harvest = cert.stages?.HARVEST_LOGGED?.payload || {};
+      const verify  = cert.stages?.VERIFIED?.payload || {};
+      const buyer   = cert.stages?.BUYER_ACCEPTED?.payload || {};
+
+      // Collect end-use kg total from all END_USE_* stages
+      let endUseKgTotal = 0;
+      for (const [k, v] of Object.entries(cert.stages || {})) {
+        if (k.startsWith("END_USE")) endUseKgTotal += (v.payload?.endUseKg || 0);
+      }
+
+      el("certBatchId").textContent    = trunc(cert.batchId, 30);
+      el("certShortCode").textContent  = cert.shortCode || "–";
+      el("certChainLabel").textContent = `Chain ID: ${cert.chainId || "–"} • ${cert.contractAddress ? trunc(cert.contractAddress, 24) : "–"}`;
+      el("certHarvestDate").textContent = fmt(harvest.harvestedAt);
+      el("certRegion").textContent     = harvest.region || "–";
+      el("certSource").textContent     = harvest.source || "–";
+      el("certHarvestedKg").textContent = harvest.quantityKg != null ? `${harvest.quantityKg.toLocaleString()} kg` : "–";
+      el("certVerifyResult").innerHTML = verify.approved === true
+        ? '<span class="badge badge-approved">APPROVED ✓</span>'
+        : verify.approved === false
+          ? '<span class="badge badge-rejected">REJECTED</span>'
+          : "–";
+      el("certAcceptedKg").textContent = buyer.acceptedKg != null ? `${buyer.acceptedKg.toLocaleString()} kg` : "–";
+      el("certPaymentRef").textContent = cert.paymentRef || "–";
+      el("certSmsConfirm").textContent = cert.settlementConfirmation?.code
+        ? `Code confirmed on-chain (YES ${cert.settlementConfirmation.code})`
+        : "–";
+      el("certCredits").textContent = endUseKgTotal > 0
+        ? `${endUseKgTotal.toLocaleString()} WORK_CREDIT (1 per kg at end use)`
+        : "Not yet minted";
+      el("certPseudonym").textContent = trunc(cert.pseudonym, 28);
+      el("certContract").textContent  = cert.contractAddress || "–";
+
+      // Verify URL
+      const verifyUrl = cert.verifyUrl
+        ? `${cert.verifyUrl}#c=<base64url-of-json>`
+        : "https://ziwachain.org/verify";
+      el("certVerifyUrl").textContent = verifyUrl;
+
+      // QR code (use certificate's own QR if present)
+      const qrImg = el("certQR");
+      const qrPl  = el("certQRPlaceholder");
+      if (cert.qrDataUrl) {
+        qrImg.src = cert.qrDataUrl;
+        qrImg.style.display = "";
+        qrPl.style.display  = "none";
+      } else {
+        qrImg.style.display = "none";
+        qrPl.style.display  = "";
+      }
+
+      el("certFooterDate").textContent = `Printed ${new Date().toLocaleDateString("en-KE", { dateStyle: "long" })}`;
+
+      el("certBody").style.display = "";
+    }
+
+    function el(id) { return document.getElementById(id); }
+
+    // Auto-load from URL fragment #c=<base64url>
+    const hash = window.location.hash;
+    if (hash && hash.includes("#c=")) {
+      try {
+        const b64 = hash.split("#c=")[1];
+        const json = atob(b64.replace(/-/g, "+").replace(/_/g, "/"));
+        document.getElementById("certInput").value = json;
+        loadCertificate();
+      } catch(e) { /* ignore */ }
+    }
+  </script>
+</body>
+</html>
