@@ -39,9 +39,9 @@ Results-Based Climate Subsidies & Corporate ESG Audit Validation
 ```
 
 #### Tier 1: Dispute Settlement (Operational Now)
-- **Who Accepts:** Frontline harvesters, commercial biomass buyers, and ZiwaClear dispute resolution staff.
+- **Who Accepts:** Frontline harvesters, the accepting and paying party (commercial processor, public works programme, or environmental funder, represented by the "buyer" role), and ZiwaClear dispute resolution staff. Note that no commercial buyer was validated in the field; downstream stages beyond verification are a pilot design with illustrative demo data.
 - **The Problem It Solves:** Harvesters regularly face predatory weight discounting, where middlemen claim deliveries contained 30% water/mud or falsely claim payment was sent.
-- **How It Works Today:** The commercial buyer commits their accepted weight on-chain via `acceptBatch` and commits the M-Pesa transaction reference hash (`paymentRefHash`). The harvester co-signs receipt via SMS ("YES 4821"), triggering `confirmSettlement`. Both parties hold an immutable record of agreed kilograms and payment receipt. If a dispute arises, the certificate serves as decisive proof.
+- **How It Works Today:** The accepting and paying party (holding `BUYER_ROLE`) commits their accepted weight on-chain via `acceptBatch` and commits the M-Pesa transaction reference hash (`paymentRefHash`). The harvester co-signs receipt via SMS ("YES 4821"), triggering `confirmSettlement`. Both parties hold an immutable record of agreed kilograms and payment receipt. If a dispute arises, the certificate serves as decisive proof.
 
 #### Tier 2: Micro-Lenders and SACCOs (Next Phase, Months 3 to 6)
 - **Who Accepts:** Lakeside Savings and Credit Cooperatives (SACCOs) and microfinance institutions (MFIs) operating in Kisumu, Bondo, and Homa Bay.
@@ -67,11 +67,11 @@ We focus on three primary landing beach hubs in the Winam Gulf with severe hyaci
 
 ### 2.2 Operational Targets & Metrics
 - **Harvester Enrollment:** 150 informal harvesters organized across 6 landing beach management units (BMUs).
-- **Biomass Volume Target:** 2,500 metric tons of wet hyacinth collected, verified, and processed over 180 days.
-- **Commercial Off-Taker Partners:** 
-  - Local biogas digester operators (displacing institutional firewood).
-  - Clean fuel briquette micro-enterprises in Kisumu.
-- **Independent Verification Partner:** Accredited biological research officers from KMFRI (Kenya Marine and Fisheries Research Institute) or regional county agricultural extension officers provisioned with `VERIFIER_ROLE`.
+- **Biomass Volume Target:** 2,500 metric tons of wet hyacinth collected, verified, and processed over 180 days (pending seasonal weed arrival and dedicated off-take funding).
+- **Accepting and Paying Off-Takers (Buyer Role):**
+  - Public works programmes or environmental donor funds (providing guaranteed pre-funded compensation).
+  - Potential circular processors (local biogas digesters or clean fuel briquette micro-enterprises; note that no commercial buyer was validated in the field, and local biogas demonstration sites currently source their own feedstock).
+- **Independent Verification Partner:** Beach Management Unit (BMU) officials, county fisheries officers, or accredited biological research officers from KMFRI (Kenya Marine and Fisheries Research Institute) provisioned with `VERIFIER_ROLE`.
 
 ---
 
@@ -83,7 +83,7 @@ The technical evolution of ZiwaChain is organized across three development horiz
 timeline
     title ZiwaChain Scalability & Development Milestones
     Phase 1 (Current Prototype) : Core Smart Contract (Base Sepolia) : 99 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification : Two-Leg SMS Settlement Flow
-    Phase 2 (Months 1-3) : 2-of-N Verifier Consensus : Automated M-Pesa Daraja API Webhooks : Merkle Statement Bundles for SACCOs : Offline-First PWA for Field Verifiers
+    Phase 2 (Months 1-3) : Commitment Before Work (Escrow) : 2-of-N Verifier Consensus : Automated M-Pesa Daraja API Webhooks : Merkle Statement Bundles for SACCOs : Offline-First PWA for Field Verifiers
     Phase 3 (Months 4-12) : Base Mainnet Migration : Account Abstraction (ERC-4337) : Carbon Registry Methodology Alignment : Multi-Lake Expansion (Lake Kyoga, Lake Naivasha)
 ```
 
@@ -97,7 +97,8 @@ timeline
 - On-chain duplicate-evidence flagging (`evidenceFirstBatch` registry and `EvidenceReused` event) surfaced via client-side amber notices.
 
 ### Horizon 2: Commercial Pilot and Field Hardening (Q1 2027)
-- **Multi-Verifier Consensus (2-of-N):** Upgrade `verifyBatch` to require threshold attestations from both an independent ecological verifier and a community beach elder, eliminating single-verifier collusion.
+- **Commitment Before Work (Payer Pre-Funding / Escrow):** A smart contract mechanism enabling the accepting and paying party (programme, donor fund, or processor) to commit or lock funds into escrow before harvesting begins. This gives harvesters verifiable certainty of payout before expending physical labor, directly overcoming harvester distrust after past registration fee scams. Today, payment occurs off-chain via M-Pesa, and the chain records a payment reference hash and the harvester's two-way SMS confirmation.
+- **Multi-Verifier Consensus (2-of-N):** Upgrade `verifyBatch` to require threshold attestations from both an independent ecological verifier (e.g. county fisheries officer) and a community beach elder or BMU official, eliminating single-verifier collusion.
 - **Automated Settlement Reconciliation:** Connect the relayer directly to Safaricom's M-Pesa Daraja B2C API webhooks to automatically trigger `confirmSettlement` upon transaction receipt matching.
 - **Lender Statement Bundles:** Implement an off-chain Merkle tree generator allowing a harvester to combine 30 discrete batch certificates into a single Merkle root. A SACCO loan officer can verify the harvester's cumulative 6-month delivery volume with one cryptographic membership proof, preserving privacy over individual transactions.
 - **Offline-First Verifier PWA:** Progressive Web Application for field inspectors with local cryptographic signing and queue synchronization over intermittent lakeside 2G/3G connectivity.
@@ -130,26 +131,42 @@ Complementary roles by current contract support:
 
 ## 5. User Testing and Field Findings
 
-### Field Findings
+### Provisional Field Findings
 
-**[TO BE ADDED]**
+> [!NOTE]
+> **Source Facts & Sample Limits (Provisional):**
+> These observations are based on two days of informal fieldwork conducted around Dunga Beach, Homa Bay, and Kendu Bay on Lake Victoria between October 18 and October 19, 2026, across a small number of informal conversations with fishers and local residents. They reflect conditions at those specific sites and must not be generalized lake-wide. To protect privacy and adhere to research protocols, no individual person or organization is named.
 
-The following headings are placeholders for findings from engagement with harvesters, SACCO loan officers, and buyers in the Kisumu pilot area. Fill these in before submission or after the pilot:
+The field inquiry revealed several critical grounded insights:
+- **Ecological Dynamics & Seasonality:** Fishers describe water hyacinth as arriving around July and leaving around August, typically causing about a week of lost fishing when a landing is blocked. At Dunga, fishers and locals stated that water hyacinth has been absent for approximately three years. At Homa Bay, the shoreline had minimal weed during the visit. Kendu Bay exhibited a localized blockage that trapped fishing vessels. Reports that weed mats originate on the northern shore (Uyoma) are second-hand and unverified.
+- **Local Removal Practices:** Where weed is removed, fishers clear narrow paths around their boats and leave the weed on the shore to dry aerobically. Other fishers choose to wait out the blockage until wind currents shift the mats.
+- **Trust in Paid Harvesting:** Fishers reported that they would harvest hyacinth if paid, but they expect immediate payment and carry deep distrust of paid harvesting schemes following a reported scam where participants paid upfront registration fees and the organizer disappeared.
+- **Buyer & Off-Taker Landscape:** No dependable commercial buyer was found. A local biogas demonstration site at Dunga sources its own feedstock and does not purchase external biomass, meaning it is not a validated commercial buyer.
+- **Information Flow:** Information in the landing beaches flows strictly through county fisheries officers and Beach Management Unit (BMU) officials down to frontline fishers.
+- **Pilot Design Status:** Downstream chain-of-custody stages beyond verification (buyer acceptance, processing, and end use) are a pilot design with illustrative demo data.
 
-**Who would accept the certificate**
-<!-- Who in the harvester's ecosystem would act on this certificate: which SACCO, which buyer, which funder, which government officer. Describe the specific role, not just a category. -->
+### Who Would Accept the Certificate
 
-**What costly problem it solves for them**
-<!-- What dispute, paperwork burden, risk, or compliance requirement does this certificate eliminate or reduce for that person. Put a number on it if possible. -->
+- **Natural Verifiers (BMU Officials & County Fisheries Officers):** Because information already flows through county fisheries officers and Beach Management Unit (BMU) leaders down to fishers, these actors are the natural verifiers for landed weed. They possess local standing and physical oversight of beach landings.
+- **Possible Payers (County Programmes, NGOs/Donors, Processors):** The "buyer" role in ZiwaChain represents the accepting and paying party. Potential payers include county public works programmes (financing manual lake clearing as civic infrastructure), environmental NGOs and climate donors (funding biodiversity restoration), and future biogas or organic fertilizer processors. None of these commercial off-takers was validated in the field.
+- **Community Lenders (Agricultural SACCOs):** Lakeside savings and credit cooperatives can evaluate the tamper-evident certificate to assess seasonal income stability and loan eligibility for equipment or fishing gear.
 
-**What would make them reject it**
-<!-- What specific concerns, format mismatches, trust gaps, or process conflicts would cause that person to set the certificate aside. -->
+### What Costly Problem It Solves for Them
 
+- **For Harvesters:** Eliminates unrecorded deliveries and predatory off-chain discounting by providing a portable, tamper-evident proof of delivery and payment confirmation that they can hold on basic 2G phones or paper.
+- **For Payers and Donors:** Eliminates phantom biomass and fraudulent reporting by anchoring disbursements to verified mass-balance records and physical verifier attestations.
+- **For Verifiers and BMUs:** Formalizes beach landing records and replaces easily lost paper manifests with immutable digital delivery receipts.
 
+### What Could Make Them Reject It (Pilot Hypotheses to Test)
+
+1. **Distrust After the Reported Scam:** Fishers may suspect any formal registration or organized collection scheme is a cover for advance fee demands. *Hypothesis to test: Harvesters will participate only if registration is zero-cost and payment commitment is transparently locked upfront.*
+2. **Expectation of Immediate Pay:** Fishers operate in a daily cash economy and expect payment immediately upon delivery. *Hypothesis to test: If off-chain M-Pesa disbursement experiences delays or multi-day batching, harvesters will abandon the digital workflow.*
+3. **No Clear Payer:** In the absence of validated commercial buyers, certificates cannot drive sustained collection without public or philanthropic funding. *Hypothesis to test: Removal activities depend entirely on whether county governments or donor programmes sponsor the `BUYER_ROLE` payment pool.*
+4. **Friction with Paper vs Digital Workflows:** Rural BMU officials or harvesters without smartphones may struggle with QR codes or digital short codes. *Hypothesis to test: Bilingual printed certificates and SMS-based short codes bridge the usability gap for non-smartphone users.*
 
 ---
 
-## 5. Adoption Barriers & Realistic Mitigations
+## 6. Adoption Barriers & Realistic Mitigations
 
 | Barrier / Dependency | Honest Risk Assessment | Mitigation Strategy |
 |---|---|---|

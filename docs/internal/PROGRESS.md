@@ -4,6 +4,58 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 22, 2026, Task 12: Integrate Field Findings into Judge-Facing Documents
+
+### Files added or changed
+| File | Change |
+|---|---|
+| `README.md` | Problem statement updated to lead with trust in paid removal and provisional Lake Victoria field observations; defined what ZiwaChain addresses (verifiable proof of delivery, verification, and payment) and what it does not (biomass supply, commercial demand, upfront cash scams); updated test suite count to 99; added "Commitment Before Work (Payer Pre-Funding / Escrow)" as first roadmap item; clarified "buyer" role as the accepting and paying party with no commercial buyer validated in the field; added Honest Limitations 11 (provisional field findings) and 12 (pilot design of downstream chain of custody). |
+| `docs/overview.md` | Executive summary and problem statement updated to lead with trust in paid removal, cite provisional field findings with sample limits, and state what ZiwaChain addresses and does not; added clarification note on the "buyer" role (`BUYER_ROLE`) as the accepting and paying party; added "Commitment Before Work" as first roadmap item; added provisional field findings and downstream pilot status to Honest Limitations. |
+| `docs/adoptionAndScalability.md` | Replaced placeholder in Section 5 with provisional field findings from Dunga, Homa Bay, and Kendu Bay; added "Who would accept the certificate" (natural verifiers: BMU officials and fisheries officers; possible payers: county programmes, NGOs/donors, processors); added "What costly problem it solves for them"; added "What could make them reject it" as pilot hypotheses (distrust from scam, immediate pay expectations, no clear payer, digital friction); updated Section 3 roadmap to place "Commitment Before Work (Escrow)" first in Phase 2; clarified buyer role and downstream pilot status; corrected duplicate Section 5 heading to Section 6. |
+| `docs/demoScript.md` | Reworked opening 30 seconds (0:00 - 0:30) to lead with grounded field findings on trust in paid removal, seasonal weed arrival, and scam distrust; explicitly highlighted in storyboard and narration that payment (`acceptBatch`) and harvester confirmation (`confirmSettlement`) occur before certificate issuance; clarified buyer role as accepting and paying party and emphasized commitment before work in closing roadmap. |
+| `docs/impact/climateImpactAssessment.md` | In Section 1, integrated provisional field observations documenting seasonal weed arrival (July-August) and localized distribution (multi-year absence at Dunga, minimal weed at Homa Bay); explicitly stated that continuous supply is not projected; in Section 2, clarified buyer role as accepting and paying party and downstream stages as pilot design; in Section 5, relabeled 10,000 t projection as an illustrative seasonal peak campaign scenario; in Section 8, explicitly labeled all core assumptions. |
+| `docs/architecture/architecture.md` | Updated component breakdown to clarify that natural verifiers are BMU officials and county fisheries officers; clarified that "buyer" (`BUYER_ROLE`) is the accepting and paying party with no commercial buyer validated in the field; updated demo data note to include Batch D and explain provisional field findings and downstream pilot status. |
+| `docs/architecture/eventSchema.md` | In Section 9, added "Commitment before work" as the first roadmap item; in Section 10, clarified buyer role as accepting and paying party, noted BMU/fisheries officers as natural verifiers, and documented provisional field findings and downstream pilot status. |
+| `docs/architecture/gasCostEstimate.md` | Replaced em dash in header alert with colon; updated test suite measurement count from 94 to 99 passing tests. |
+| `docs/security/whyBlockchain.md` | In Section 0, clarified buyer role as accepting and paying party, noted BMU/fisheries officers as natural verifiers, and stated that downstream stages are a pilot design; in Section 4, added honest limitations on buyer validation, downstream pilot design, and provisional field findings. |
+| `docs/internal/PROGRESS.md` | Added Task 12 progress entry recording all file updates, design rationale, and test verification. |
+
+### What changed and why
+1. **Trust in Paid Removal & Field Findings:**
+   - Grounded all problem statements in provisional fieldwork conducted around Dunga, Homa Bay, and Kendu Bay on Lake Victoria (Oct 18 to 19, 2026, small sample of conversations).
+   - Identified trust in paid removal as the primary operational bottleneck: fishers would harvest if paid, but expect immediate payment and distrust harvesting schemes due to a reported scam where registration fees were collected and the organizer disappeared.
+   - Documented seasonal and localized weed occurrence (arriving ~July, leaving ~August, causing ~1 week lost fishing when blocked; multi-year absence at Dunga, minimal weed at Homa Bay).
+   - Explicitly articulated what ZiwaChain addresses (verifiable proof of delivery, verification, and payment that harvesters can hold; operator-independent shared trust) and what it does not address (supply, demand, or cash fee scams by themselves).
+2. **Buyer Role Clarification:**
+   - Clarified across all judge-facing documentation that the "buyer" role (`BUYER_ROLE`) designates the accepting and paying party (whether a commercial processor, a municipal/county public works programme, or an environmental donor fund).
+   - Transparently stated that no commercial buyer was validated in the field (local biogas demonstration sites source their own feedstock).
+   - Kept all smart contract, TypeScript interfaces, and test identifiers strictly unchanged.
+3. **Commitment Before Work as Priority Roadmap Item:**
+   - Positioned "Commitment Before Work (Payer Pre-Funding / Escrow)" as the very first roadmap item across README, overview, adoption, and event schema documents.
+   - Explained that locking or committing funds into escrow before harvest begins directly addresses harvester distrust and protects against registration fee scams.
+   - Documented that today payment occurs off-chain via M-Pesa with on-chain payment hashes and two-way SMS co-signing.
+4. **Adoption Pathway & Pilot Hypotheses:**
+   - Completed Section 5 of `docs/adoptionAndScalability.md` with provisional field facts, sample limits, and natural verifier roles (BMU officials and county fisheries officers who already manage landing beach communication).
+   - Formulated concrete hypotheses to test in pilot deployments regarding scam distrust, immediate payment expectations, lack of commercial buyers, and digital format accessibility.
+5. **Demo Script Refinements:**
+   - Refocused the 3-minute video script opening (0:00 - 0:30) on field realities and trust in paid removal.
+   - Emphasized that the harvester certificate is generated only after payment and SMS settlement confirmation are permanently recorded on Base Sepolia.
+6. **Climate Impact Seasonality & Assumptions:**
+   - Reframed `docs/impact/climateImpactAssessment.md` to avoid projecting continuous supply.
+   - Relabeled the 10,000 t model as an illustrative seasonal peak campaign scenario, and explicitly labeled all modeling assumptions in Section 8.
+7. **Standards Compliance:**
+   - Zero code, contract, or test edits made.
+   - Zero em dashes present in any judge-facing documentation.
+   - All 99 automated tests passing.
+
+### Tests
+- 99 / 99 passing (`npm test`).
+
+### Deviations from spec
+None.
+
+---
+
 ## Oct 22, 2026, Task 11: Flag Reuse of Evidence Hash Across Batches
 
 ### Files added or changed

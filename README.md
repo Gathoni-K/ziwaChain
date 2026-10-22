@@ -2,16 +2,26 @@
 
 **ZiwaChain** is a verified chain of custody and provenance protocol for invasive water hyacinth biomass harvested from Lake Victoria. Built as an extension to the ZiwaClear marketplace, it anchors harvest, verification, commercial acceptance, processing, and circular end use on Base Sepolia. The protocol equips informal harvesters with portable, tamper-evident digital proof of their work without requiring smartphone ownership or crypto wallet management.
 
-ZiwaChain lets harvesters, buyers, verifiers and lenders rely on the same delivery record without having to trust a single operator.
+ZiwaChain lets harvesters, buyers (the accepting and paying party: processors, programmes, or funders), verifiers and lenders rely on the same delivery record without having to trust a single operator.
 
 ---
 
-## The Problem
+## The Problem: Trust in Paid Removal on Lake Victoria
 
-Lake Victoria suffers from massive seasonal blooms of invasive water hyacinth (*Pontederia crassipes*), which clog waterways, destroy fish breeding grounds, and decompose anaerobically into potent greenhouse gases (methane). Informal lake harvesters extract thousands of metric tons of biomass but operate entirely in the informal economy:
-- **No Portable Proof:** Harvesters lack verifiable documentation of delivered volumes, quality checks, or earnings, leaving them vulnerable to payment disputes and short-weighing.
-- **Credit Invisibility:** Community lenders (such as agricultural SACCOs) cannot verify harvester cash flows or supply histories to underwrite microloans or equipment financing.
-- **Supply Chain Greenwashing:** Downstream buyers and clean-energy processors (biogas, organic fertilizer, briquettes) cannot cryptographically prove sustainable sourcing or circular outcomes to corporate off-takers and carbon registries.
+Provisional informal fieldwork conducted around Lake Victoria (Dunga, Homa Bay, and Kendu Bay, Oct 18 to 19, 2026, across a small sample of conversations) revealed the central barrier to managing water hyacinth (*Pontederia crassipes*): **trust in paid removal**.
+
+Fishers reported that they would harvest hyacinth if paid, but they expect immediate payment and deeply distrust paid harvesting schemes after a reported scam where people paid registration fees to an organizer who disappeared. Furthermore, weed presence is seasonal and localized (reported as arriving around July and leaving around August, blocking landings for about a week, but absent at Dunga for roughly three years and minimal at Homa Bay during field visits), and no dependable commercial buyer was found (local biogas demonstration sites source their own feedstock).
+
+Where weed arrives, fishers clear narrow paths around their boats and leave weed on the shore, or wait for wind to blow it out. Information flows strictly through county fisheries officers and Beach Management Unit (BMU) officials down to fishers.
+
+**What ZiwaChain addresses:**
+- **Verifiable proof of delivery, verification, and payment:** Equip informal harvesters with portable, tamper-evident digital proof of their work and two-sided settlement confirmation that they hold independently on their phone or on paper.
+- **Operator-independent shared trust:** A shared record on Base Sepolia that harvesters, accepting payers, verifiers, and community lenders can verify directly without trusting any single platform or middleman database.
+
+**What ZiwaChain does NOT address:**
+- It does not generate biomass supply or eliminate ecological seasonality.
+- It does not create commercial demand or manufacture buyers where none exist.
+- It cannot prevent an organizer from demanding illicit cash registration fees off-chain, though pre-funded commitment and escrow models on our roadmap directly target this vulnerability.
 
 ---
 
@@ -36,7 +46,7 @@ npx hardhat clean && npx hardhat compile
 ```
 
 ### Run Test Suite
-Run the full automated test suite (94 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, RFC 8785 canonical serialization, HMAC pseudonyms, certificate generation, in-browser verification algorithm, simulated SMS settlement flows, and markdown link integrity):
+Run the full automated test suite (99 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, duplicate-evidence flagging, RFC 8785 canonical serialization, HMAC pseudonyms, certificate generation, in-browser verification algorithm, simulated SMS settlement flows, and markdown link integrity):
 ```bash
 npx hardhat test
 ```
@@ -54,7 +64,7 @@ npx tsc --noEmit
 ```
 
 ### Seed Demo Batches (Local In-Memory Network)
-Run the automated seed script to deploy the contract and execute 3 illustrative demo batches (Batch A full journey, Batch B quality rejection, Batch C hash correction; illustrative demo data, not real harvests):
+Run the automated seed script to deploy the contract and execute 4 illustrative demo batches (Batch A full journey, Batch B quality rejection, Batch C hash correction, Batch D duplicate evidence flag; illustrative demo data, not real harvests):
 ```bash
 npx hardhat run scripts/seed.ts
 ```
@@ -191,6 +201,7 @@ To maintain total transparency with hackathon judges, our implementation status 
 - **Full Automated Test Suite:** 99 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
 
 ### Roadmap Items (Not Yet Built in Current Release)
+- **Commitment Before Work (Payer Pre-Funding / Escrow):** A mechanism allowing the accepting and paying party (programme, funder, or buyer) to lock or commit funds into escrow before harvesting begins, giving harvesters verifiable certainty of payout before doing labor. This directly addresses harvester distrust stemming from past registration fee scams. Today, payment occurs off-chain via M-Pesa, and the chain records a payment reference hash and the harvester's two-way SMS confirmation.
 - **Multi-Verifier Consensus:** Upgrading single verifiers to a 2-of-N threshold signature model.
 - **Custodian Multi-Relayer Isolation:** Adding `msg.sender == b.custodian` check on `confirmSettlement` for multi-relayer operational topologies.
 - **Post-Acceptance Quantity Adjustments:** On-chain dispute resolution for discrepancies discovered after buyer acceptance.
@@ -210,9 +221,11 @@ To maintain total transparency with hackathon judges, our implementation status 
 2. **SMS Settlement Attestation:** The harvester's settlement confirmation ("YES 4821") is verified via telecom SMS routing and hash-anchored on-chain; it is a tamper-evident attestation, not a native asymmetric cryptographic signature.
 3. **Single Verifier Trust Point:** In the current prototype, a single verifier with `VERIFIER_ROLE` can approve or reject a batch. Multi-verifier approval is scheduled on the roadmap.
 4. **Permanent Mass Balance:** If a scaling error occurs and is accepted by the buyer, the mass cannot be retroactively adjusted in the contract without rejecting and re-logging the batch.
-5. **Simulated Commercial Wallets:** While verifiers, buyers, and processors sign with dedicated private keys, prototype testing uses development signers.
+5. **Simulated Role Wallets & Buyer Clarification:** While verifiers, buyers (the accepting and paying party), and processors sign with dedicated private keys, prototype testing uses development signers. In the field, no commercial buyer was validated (local biogas demonstration sites source their own feedstock); the "buyer" role in practice represents any accepting and paying party, such as a county public works programme, environmental donor fund, or commercial off-taker.
 6. **Work Credits are Not Carbon Credits:** Work credits represent kilograms of verified biomass diverted to beneficial end use. They are not accredited carbon offset credits.
 7. **Testnet Deployment:** The current protocol prototype targets the Base Sepolia testnet.
 8. **Hash Proves Integrity, Not Truth:** A valid certificate hash confirms that a file matches the recorded hash. It does not confirm that the underlying claims in the certificate are accurate. Accuracy at entry depends on the field verifier, the buyer's independent acceptance, and the harvester's own SMS confirmation.
 9. **Illustrative Demo Data:** The seeded batches in `demo/demo-data.json` are synthetic data generated by a local seed script. They are not records of real harvests.
 10. **Duplicate Evidence Flagging Detects Exact Hashes Only:** The on-chain `evidenceFirstBatch` mapping and `EvidenceReused` event detect exact cryptographic hash reuse across batches. It cannot detect similar photos, re-compressed photos, or alternate camera angles of the same physical biomass.
+11. **Provisional Field Findings:** Field observations are provisional and derived from informal fieldwork around Dunga, Homa Bay, and Kendu Bay on Lake Victoria (Oct 18 to 19, 2026, across a small number of conversations). They reflect local conditions at those specific sites and must not be generalized lake-wide.
+12. **Pilot Status of Downstream Chain-of-Custody:** Chain-of-custody stages beyond verification (buyer acceptance, processing, and end use) are a pilot design with illustrative demo data, pending commercial offtake establishment.

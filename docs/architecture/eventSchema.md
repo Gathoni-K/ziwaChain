@@ -125,6 +125,7 @@ A work credit records **verified biomass that reached a real end use**. It is no
 
 ## 9. Roadmap
 
+- Commitment before work: payer locks or commits funds into escrow before harvest begins, protecting harvesters from registration fee scams. Today, payment occurs off-chain via M-Pesa, and the chain records a payment reference hash and the harvester's two-way SMS confirmation.
 - Buyer-facing tools: impact certificates, dashboards and reports
 - Multi-verifier approval (2-of-N)
 - Adjustment events for quantity errors found after acceptance
@@ -140,8 +141,10 @@ A work credit records **verified biomass that reached a real end use**. It is no
 
 - Harvester submissions pass through a relayer, so harvester-level non-repudiation depends on ZiwaClear's custody of that key.
 - The SMS confirmation is a code-based agreement logged by ZiwaClear and the SMS provider, not a cryptographic signature.
-- A single verifier is a trust point until multi-verifier approval is added.
+- A single verifier is a trust point until multi-verifier approval is added. Natural verifiers are BMU officials and county fisheries officers.
 - A quantity error found after the buyer accepts cannot be corrected in this version.
-- Buyers sign with wallets; the prototype uses test wallets.
+- The "buyer" role represents the accepting and paying party (processor, public works programme, or donor fund). No commercial buyer was validated in the field; in the prototype, buyers sign with test wallets.
 - Work credits are recorded but not yet redeemable.
 - The prototype runs on a testnet.
+- Field findings are provisional and derived from informal fieldwork around Dunga, Homa Bay, and Kendu Bay (Oct 18 to 19, 2026, across a small number of conversations).
+- Chain-of-custody stages beyond verification (buyer acceptance, processing, and end use) are a pilot design with illustrative demo data.

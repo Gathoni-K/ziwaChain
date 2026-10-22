@@ -6,7 +6,7 @@ This section answers a question any reviewer should ask: could an ordinary datab
 
 **Test:** Can two or more independent parties rely on the same record without trusting one party to control the whole record and its history?
 
-For ZiwaChain, the parties are the harvester (submitting via SMS through the relayer), the field verifier (issuing an attestation from their own wallet), the commercial buyer (accepting weight and committing a payment reference hash from their own wallet), and a third party such as a SACCO loan officer or results-based funder who reads the certificate independently.
+For ZiwaChain, the parties are the harvester (submitting via SMS through the relayer), the field verifier (issuing an attestation from their own wallet; natural verifiers are BMU officials and county fisheries officers), the accepting and paying party (holding `BUYER_ROLE` in the contract, whether a public programme, donor fund, or processor), and a third party such as a SACCO loan officer or results-based funder who reads the certificate independently. Note that no commercial buyer was validated in the field; downstream chain-of-custody stages beyond verification are a pilot design evaluated with illustrative demo data.
 
 **Answer for ZiwaChain:** Yes. The smart contract is the shared record. No single party controls it. The relayer cannot alter a verifier's attestation. The buyer cannot alter the harvest weight. The platform operator cannot delete or backdate any step. Any party, including a lender or auditor who has never interacted with ZiwaClear, can verify the record directly against the public chain without asking anyone for access.
 
@@ -49,6 +49,8 @@ ZiwaChain operates as a provenance and verification layer in the spirit of digit
 - **Harvesters do not sign for themselves.** They report by SMS, and a ZiwaClear relayer submits their harvest. Their SMS confirmation adds agreement but is not a cryptographic signature, so harvester-side non-repudiation depends on the platform's custody of the relayer key.
 - **Trust points remain.** One admin wallet grants roles and a single verifier role issues attestations. A multisignature admin and multi-verifier approval are on the roadmap.
 - **The prototype runs on a testnet,** so it carries no real economic security yet.
+- **Buyer validation & pilot design:** In the field, no commercial buyer was validated (local biogas demonstration sites source their own feedstock). The "buyer" role represents any accepting and paying party (programme, donor, or processor), and downstream stages beyond verification are a pilot design with illustrative demo data.
+- **Provisional field findings:** Field observations are provisional and based on informal fieldwork around Dunga, Homa Bay, and Kendu Bay on Lake Victoria (Oct 18 to 19, 2026, across a small number of conversations).
 
 ## 5. Summary
 

@@ -1,7 +1,7 @@
 # ZiwaChain: Gas Cost Estimate
 
 > [!IMPORTANT]
-> **COST ESTIMATE — NOT AUDITED FIGURES**
+> **COST ESTIMATE: NOT AUDITED FIGURES**
 > All gas unit values are measured from automated tests run on the local Hardhat network
 > with Solidity 0.8.28, EVM version `cancun`, optimiser **off** (default test build).
 > Gas units are exact measurements. ETH-per-gas and USD costs are estimates based on
@@ -12,7 +12,7 @@
 ## 1. Measurement Method
 
 Gas measurements were produced by `hardhat-gas-reporter` v2.3.0 running against the full
-94-test suite on a local Hardhat EVM node.
+automated test suite (99 passing tests) on a local Hardhat EVM node.
 
 Command to reproduce:
 ```bash

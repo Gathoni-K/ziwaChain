@@ -14,7 +14,13 @@
 
 ## 1. Ecological Context: The Lake Victoria Crisis
 
-Lake Victoria, Africa's largest freshwater body, suffers from recurring hyper-eutrophic infestations of water hyacinth (*Pontederia crassipes*). Fueled by municipal sewage, agricultural fertilizer runoff, and warm tropical waters, the weed's standing biomass doubles every 6 to 18 days under peak conditions (Gunnarsson & Petersen, 2007). In Kenya's Winam Gulf, seasonal mats have historically expanded across areas ranging from several hundred to over 20,000 hectares [TO BE CONFIRMED: exact peak seasonal coverage across 2024 to 2026 satellite surveys].
+Lake Victoria, Africa's largest freshwater body, suffers from recurring hyper-eutrophic infestations of water hyacinth (*Pontederia crassipes*). Fueled by municipal sewage, agricultural fertilizer runoff, and warm tropical waters, the weed's standing biomass doubles every 6 to 18 days under peak conditions (Gunnarsson & Petersen, 2007). In Kenya's Winam Gulf, seasonal mats have historically expanded across areas ranging from several hundred to over 20,000 hectares.
+
+> [!NOTE]
+> **Provisional Field Findings on Seasonality and Localization:**
+> Provisional informal fieldwork conducted around Lake Victoria (Dunga, Homa Bay, and Kendu Bay, Oct 18 to 19, 2026, across a small number of conversations) revealed that water hyacinth presence is **seasonal and highly localized**, rather than a continuous or uniform lake-wide sheet. Fishers report that weed arrives around July and leaves around August, causing about a week of lost fishing when a landing is blocked. At Dunga, fishers and locals stated the weed has been absent for roughly three years. At Homa Bay, shoreline weed was minimal during field visits. Kendu Bay exhibited a localized blockage that trapped fishing boats. Reports that weed mats originate on the northern shore (Uyoma) remain second-hand and unverified.
+> 
+> Consequently, **we do not project continuous, year-round biomass supply**. Biomass availability occurs in episodic seasonal pulses and mobile drift mats.
 
 ### The Counterfactual (Baseline Scenario: Unmanaged Anaerobic Decay)
 When water hyacinth mats are left unmanaged in shallow, warm bays:
@@ -35,6 +41,10 @@ By manually harvesting fresh biomass and delivering it directly to verified conv
         │
         └──► Vector 2: Fuel Briquettes / Biochar ────► Displaces non-renewable hardwood charcoal
 ```
+
+> [!NOTE]
+> **Pilot Design Status & Buyer Clarification:**
+> Downstream chain-of-custody stages beyond verification (buyer acceptance, processing, and end use) represent a pilot design demonstrated with illustrative demo data. In field visits, no commercial buyer was validated (a local biogas demonstration site at Dunga sources its own feedstock and does not purchase external weed). In ZiwaChain, the "buyer" role (`BUYER_ROLE`) designates any accepting and paying party: a municipal or county public works programme, an environmental donor fund, or a future commercial bio-processor.
 
 1. **Closed-Loop Biogas Digestion:** Biomass is digested in closed anaerobic vessels. Captured methane is combusted for clean institutional cooking gas or power generation, preventing fugitive methane release into the atmosphere and displacing unsustainably harvested firewood.
 2. **Fuel Briquettes & Biochar:** Dried biomass is carbonized or compacted with organic binders into dense briquettes, replacing unsustainably produced wood charcoal from Kenyan indigenous forests.
@@ -99,18 +109,22 @@ $$\text{Displaced Emissions } (CO_2e) = Y_{brique} \times EF_{char}$$
 
 ---
 
-## 5. Annualized Pilot Projections (10,000 Metric Ton Scale)
+## 5. Illustrative Seasonal Surge Scenario (10,000 Metric Ton Scale)
 
-At an annual operational scale harvesting 10,000 metric tons of wet biomass across three pilot beach clusters (Dunga, Usenge, Kendu Bay):
+> [!IMPORTANT]
+> **Non-Continuous Supply & Seasonal Context:**  
+> We do not project continuous, year-round supply. As documented in our provisional field findings, water hyacinth presence is seasonal and localized (mats typically arrive around July and depart around August, causing localized blockages lasting roughly a week, while other beaches such as Dunga have experienced multi-year weed absences). The figures below model an **illustrative seasonal peak campaign scenario**: aggregating 10,000 metric tons of wet biomass collected across several landing beach hubs during seasonal weed influxes, assuming dedicated public or philanthropic compensation is deployed. It is not an expectation of continuous daily operational intake.
+
+At an illustrative campaign scale aggregating 10,000 metric tons of wet biomass across three pilot beach clusters during seasonal influxes:
 
 | Impact Metric | Low Estimate (Conservative) | High Estimate (Optimistic) | Unit / Basis |
 |---|---|---|---|
-| **Wet Biomass Diverted** | 10,000 | 10,000 | Metric Tons |
+| **Wet Biomass Diverted** | 10,000 | 10,000 | Metric Tons (Seasonal Aggregate) |
 | **Avoided Benthic Methane** | 46.7 | 186.7 | Metric Tons $CH_4$ |
 | **Avoided Emissions (Decomposition Only, $GWP_{100}$)** | 1,308 | 5,228 | Metric Tons $CO_2e$ |
 | **Avoided Emissions (Woodfuel Displacement, Component B)** | 525 | 2,100 | Metric Tons $CO_2e$ |
-| **Total Avoided GHG Emissions ($GWP_{100}$)** | **1,833** | **7,328** | **Metric Tons $CO_2e$ / Year** |
-| **Total Avoided GHG Emissions ($GWP_{20}$)** | **4,196** | **17,783** | **Metric Tons $CO_2e$ / Year** |
+| **Total Avoided GHG Emissions ($GWP_{100}$)** | **1,833** | **7,328** | **Metric Tons $CO_2e$ / Seasonal Campaign** |
+| **Total Avoided GHG Emissions ($GWP_{20}$)** | **4,196** | **17,783** | **Metric Tons $CO_2e$ / Seasonal Campaign** |
 | **On-Chain Work Credits Minted** | 10,000,000 | 10,000,000 | ERC-1155 Token 1 (`WORK_CREDIT`) |
 
 *Note: Work credits are minted strictly 1:1 per kilogram reaching verified end use ($10{,}000 \text{ t} = 10{,}000{,}000 \text{ kg} = 10{,}000{,}000 \text{ credits}$). They are not carbon offsets.*
@@ -144,10 +158,13 @@ To maintain complete integrity with hackathon evaluators, we explicitly contrast
 
 ## 8. Stated Assumptions & Academic Sources
 
-### Assumptions
-1. Baseline decay assumes unharvested biomass sinks and decomposes in anoxic benthic lake layers rather than washing onto land.
-2. Local transportation emissions (landing site to processor, typically $<15\text{ km}$) account for $<2\%$ of gross avoided emissions and are excluded from this screening model.
-3. Closed-loop biodigesters operate with modern flares and sealed storage, maintaining fugitive methane leakage below $2\%$.
+### Explicitly Labeled Assumptions
+1. **Intermittent Seasonal Supply (Not Continuous):** Biomass availability is assumed to occur in concentrated seasonal influxes (typically July to August) and localized drift corridors, rather than uniform year-round supply. Fieldwork confirmed that weed is absent in some bays for years and minimal in others.
+2. **Decay Fate in Deep Anoxic Benthic Sediments:** The baseline scenario assumes unharvested biomass trapped in deep bays sinks and decays anaerobically. In practice, where fishers clear around boats, some weed is pulled onto the shore to dry aerobically, which reduces benthic methanogenesis.
+3. **Pilot Design of Downstream Stages:** Downstream chain-of-custody stages beyond verification (buyer acceptance, processing, and end use) are a pilot design evaluated with illustrative demo data. No commercial buyer was validated in the field; the 'buyer' role represents any accepting and paying entity (a public works programme, donor fund, or future bio-processor).
+4. **Illustrative Throughput Scenario:** The 10,000 metric ton figure is an illustrative multi-landing seasonal peak capacity scenario, not a guaranteed baseline commercial supply.
+5. **Local Transportation Emissions:** Hauling distances between landing beaches and conversion facilities are assumed to be $<15\text{ km}$, contributing $<2\%$ of gross avoided emissions, and are excluded from this screening model.
+6. **Closed-Loop Digestion Efficiency:** Modern sealed biodigesters operate with active flaring or direct gas utilization, maintaining fugitive methane leakage below $2\%$.
 
 ### Academic Sources
 - **IPCC (2014):** *2013 Supplement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories: Wetlands*. IPCC, Switzerland.
