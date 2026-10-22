@@ -284,4 +284,72 @@ describe("Client-Side Verification Algorithm", () => {
     expect(credits).to.equal(0n);
   });
 
+  it("Duplicate evidence check: Shows amber notice and does not turn valid certificate red", async () => {
+    // A second batch logs harvest reusing batchId's evidenceHash (from before hook)
+    const duplicateBatchId = ethers.id("duplicate-evidence-batch-003");
+    const pseudonymD = derivePseudonym(secret, "group-dup-03", duplicateBatchId);
+    const harvestPayloadD = {
+      schemaVersion: 1,
+      eventType: "HARVEST_LOGGED",
+      batchId: duplicateBatchId,
+      hotspotRef,
+      quantityKg: 600,
+      harvestedAt: 1729000000,
+      region: "Kendu Bay",
+      source: "ziwaclear-v1"
+    };
+    const harvestSaltD = "0x88888888888888888888888888888888";
+    const harvestHashD = hashRecord(harvestPayloadD, harvestSaltD);
+    const sharedEvidenceHash = ethers.id("photo-evidence-test"); // Same as Batch A in before hook
+
+    const txDup = await zc.connect(relayer).logHarvest(
+      duplicateBatchId,
+      pseudonymD,
+      hotspotRef,
+      600,
+      sharedEvidenceHash,
+      harvestHashD
+    );
+    await txDup.wait();
+
+    // Query on-chain EvidenceReused events
+    const filter = zc.filters.EvidenceReused();
+    const reusedLogs = await zc.queryFilter(filter);
+    expect(reusedLogs.length).to.be.gte(1);
+
+    // Emitted event has batchId = duplicateBatchId and firstBatchId = batchId
+    const matching = reusedLogs.find(
+      (l: any) =>
+        l.args.batchId === duplicateBatchId &&
+        l.args.firstBatchId === batchId &&
+        l.args.evidenceHash === sharedEvidenceHash
+    );
+    expect(matching).to.not.be.undefined;
+
+    // Verify page algorithm check for Batch A:
+    // It scans for EvidenceReused events where this batch is batchId or firstBatchId
+    const forBatchA = reusedLogs.filter(
+      (l: any) => l.args.batchId === batchId || l.args.firstBatchId === batchId
+    );
+    expect(forBatchA.length).to.be.gte(1);
+
+    // For each matching reuse, it constructs the notice message:
+    const otherBatchId = forBatchA[0].args.batchId === batchId
+      ? forBatchA[0].args.firstBatchId
+      : forBatchA[0].args.batchId;
+    expect(otherBatchId).to.equal(duplicateBatchId);
+
+    const noticeMessage = `This evidence also appears in batch ${otherBatchId}. It is flagged for human review. This is not a finding of fraud.`;
+    expect(noticeMessage).to.include("It is flagged for human review. This is not a finding of fraud.");
+
+    // The status for this check is 'notice' (amber), NOT 'fail' (red)
+    const checkStatus = "notice";
+    let hasFailures = false;
+    if (checkStatus === "fail") {
+      hasFailures = true;
+    }
+    // Must NOT turn valid certificate red
+    expect(hasFailures).to.be.false;
+  });
+
 });

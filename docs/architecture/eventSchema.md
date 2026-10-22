@@ -66,6 +66,8 @@ Detection, forecasting and field operations remain in ZiwaClear and ZiwaVision. 
 
 **Record corrected:** `batchId`, `supersededHash`, `newHash`, `reasonHash`
 
+**Duplicate evidence flag (on-chain event):** `EvidenceReused(batchId, firstBatchId, evidenceHash)`. Emitted when `logHarvest` receives an `evidenceHash` that was already recorded for an earlier batch.
+
 ---
 
 ## 5. On-chain and off-chain data
@@ -76,7 +78,7 @@ Detection, forecasting and field operations remain in ZiwaClear and ZiwaVision. 
 | Actor role, per-batch pseudonym | Names, phone numbers, personal data |
 | Quantities (kg, output units) | Exact harvest coordinates |
 | Salted payload, evidence and confirmation hashes | Raw satellite imagery and model outputs |
-| Work credit balances | M-Pesa transaction details, salts |
+| Work credit balances, evidenceFirstBatch registry | M-Pesa transaction details, salts |
 
 **Identity.** The per-batch pseudonym is derived with an HMAC under a server-side secret. Plain hashes of phone numbers are not used, because phone numbers have too little entropy to resist brute force.
 
@@ -96,6 +98,7 @@ Detection, forecasting and field operations remain in ZiwaClear and ZiwaVision. 
 5. **Settlement confirmation:** recorded once per batch, only by the relayer, only after acceptance.
 6. **Corrections:** only the original author of a hash can supersede it. Both hashes stay visible, a hash cannot be superseded twice, and a replacement cannot reuse an existing hash.
 7. Every transition emits an event, so the history is publicly readable.
+8. **Duplicate evidence flagging:** when `logHarvest` receives a non-zero `evidenceHash`, the contract records the first `batchId`. If the same hash is submitted for another batch, an `EvidenceReused` event is emitted. The transaction never reverts and does not declare fraud; the public verify page surfaces an amber notice for human review.
 
 ---
 

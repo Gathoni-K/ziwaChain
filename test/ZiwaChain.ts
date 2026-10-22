@@ -534,4 +534,147 @@ describe("ZiwaChain", () => {
 
   });
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // Duplicate Evidence Flagging
+  // ══════════════════════════════════════════════════════════════════════════
+
+  describe("duplicate evidence flagging", () => {
+
+    it("first use sets evidenceFirstBatch with no event", async () => {
+      const { zc, relayer } = await deploy();
+      const b1 = id("batch-ev-1");
+      const evHash = id("photo-evidence-shared");
+
+      const tx = await zc.connect(relayer).logHarvest(
+        b1,
+        id("harvester-1"),
+        hotspotRef,
+        1000,
+        evHash,
+        id("payload-1")
+      );
+
+      // Sets evidenceFirstBatch
+      expect(await zc.evidenceFirstBatch(evHash)).to.equal(b1);
+      // No EvidenceReused event
+      await expect(tx).to.not.emit(zc, "EvidenceReused");
+    });
+
+    it("reuse by another batch emits EvidenceReused and both batches continue normally", async () => {
+      const { zc, relayer, verifier } = await deploy();
+      const b1 = id("batch-ev-1");
+      const b2 = id("batch-ev-2");
+      const evHash = id("photo-evidence-shared");
+
+      // First batch logs harvest
+      await zc.connect(relayer).logHarvest(
+        b1,
+        id("harvester-1"),
+        hotspotRef,
+        1000,
+        evHash,
+        id("payload-1")
+      );
+
+      // Second batch reuses evHash
+      const tx2 = await zc.connect(relayer).logHarvest(
+        b2,
+        id("harvester-2"),
+        hotspotRef,
+        600,
+        evHash,
+        id("payload-2")
+      );
+
+      // Emits EvidenceReused with later batchId, firstBatchId, and evidenceHash
+      await expect(tx2)
+        .to.emit(zc, "EvidenceReused")
+        .withArgs(b2, b1, evHash);
+
+      // Both batches continue normally through their lifecycle
+      const b1Record = await zc.getBatch(b1);
+      const b2Record = await zc.getBatch(b2);
+      expect(b1Record.stage).to.equal(Stage.Harvested);
+      expect(b2Record.stage).to.equal(Stage.Harvested);
+
+      // Verify both batches successfully
+      await zc.connect(verifier).verifyBatch(b1, true, id("v-ev-1"), id("v-pl-1"));
+      await zc.connect(verifier).verifyBatch(b2, true, id("v-ev-2"), id("v-pl-2"));
+
+      expect((await zc.getBatch(b1)).stage).to.equal(Stage.Verified);
+      expect((await zc.getBatch(b2)).stage).to.equal(Stage.Verified);
+    });
+
+    it("zero evidence hash is never flagged", async () => {
+      const { zc, relayer } = await deploy();
+      const b1 = id("batch-zero-1");
+      const b2 = id("batch-zero-2");
+
+      // First batch with zero evidence hash
+      const tx1 = await zc.connect(relayer).logHarvest(
+        b1,
+        id("harvester-1"),
+        hotspotRef,
+        1000,
+        ethers.ZeroHash,
+        id("payload-1")
+      );
+      await expect(tx1).to.not.emit(zc, "EvidenceReused");
+      expect(await zc.evidenceFirstBatch(ethers.ZeroHash)).to.equal(ethers.ZeroHash);
+
+      // Second batch with zero evidence hash
+      const tx2 = await zc.connect(relayer).logHarvest(
+        b2,
+        id("harvester-2"),
+        hotspotRef,
+        600,
+        ethers.ZeroHash,
+        id("payload-2")
+      );
+      // Must never emit EvidenceReused
+      await expect(tx2).to.not.emit(zc, "EvidenceReused");
+    });
+
+    it("mass balance and credits are unaffected by evidence reuse", async () => {
+      const { zc, relayer, verifier, buyer, processor } = await deploy();
+      const b1 = id("batch-credits-1");
+      const b2 = id("batch-credits-2");
+      const evHash = id("photo-evidence-reuse");
+      const h1 = id("pseudonym-1");
+      const h2 = id("pseudonym-2");
+
+      // Batch 1: Full journey with 1000 kg harvest, 900 kg accept, 800 kg process & end use
+      await zc.connect(relayer).logHarvest(b1, h1, hotspotRef, 1000, evHash, id("p1-1"));
+      await zc.connect(verifier).verifyBatch(b1, true, id("v-ev-1"), id("p1-2"));
+      await zc.connect(buyer).acceptBatch(b1, 900, id("m-pesa-1"), id("p1-3"));
+      await zc.connect(relayer).confirmSettlement(b1, id("conf-1"), id("p1-4"));
+      await zc.connect(processor).recordProcessing(b1, id("biogas"), 800, 10, id("p1-5"));
+      await zc.connect(processor).recordEndUse(b1, id("bioenergy"), 800, 10, id("p1-6"));
+
+      // Batch 2: Reusing evHash, full journey with 500 kg harvest, 500 kg accept, 400 kg process & end use
+      await zc.connect(relayer).logHarvest(b2, h2, hotspotRef, 500, evHash, id("p2-1"));
+      await zc.connect(verifier).verifyBatch(b2, true, id("v-ev-2"), id("p2-2"));
+      await zc.connect(buyer).acceptBatch(b2, 500, id("m-pesa-2"), id("p2-3"));
+      await zc.connect(relayer).confirmSettlement(b2, id("conf-2"), id("p2-4"));
+      await zc.connect(processor).recordProcessing(b2, id("biogas"), 400, 5, id("p2-5"));
+      await zc.connect(processor).recordEndUse(b2, id("bioenergy"), 400, 5, id("p2-6"));
+
+      // Mass balance invariant holds on both batches
+      const rec1 = await zc.getBatch(b1);
+      const rec2 = await zc.getBatch(b2);
+      expect(rec1.acceptedKg).to.be.lte(rec1.harvestedKg);
+      expect(rec1.processedKg).to.be.lte(rec1.acceptedKg);
+      expect(rec1.endUseKgTotal).to.be.lte(rec1.processedKg);
+
+      expect(rec2.acceptedKg).to.be.lte(rec2.harvestedKg);
+      expect(rec2.processedKg).to.be.lte(rec2.acceptedKg);
+      expect(rec2.endUseKgTotal).to.be.lte(rec2.processedKg);
+
+      // Credits minted correctly for both
+      expect(await zc.workCreditsOf(h1)).to.equal(800n);
+      expect(await zc.workCreditsOf(h2)).to.equal(400n);
+    });
+
+  });
+
 });

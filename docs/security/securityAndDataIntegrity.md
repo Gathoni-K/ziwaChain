@@ -9,7 +9,7 @@
 
 ZiwaChain bridges informal rural labor on Lake Victoria into an immutable provenance system on Base Sepolia. Because informal harvesters lack private keys and operate via standard 2G/3G SMS messaging, the protocol adopts an asymmetric trust design. This design introduces specific threat vectors that differ fundamentally from traditional decentralized finance protocols. 
 
-This document details our threat model, smart contract security controls, cryptographic data integrity guarantees, and the 94 automated unit tests that empirically validate these invariants. We conclude with an unvarnished analysis of our trust assumptions and known operational limitations.
+This document details our threat model, smart contract security controls, cryptographic data integrity guarantees, and the 99 automated unit tests that empirically validate these invariants. We conclude with an unvarnished analysis of our trust assumptions and known operational limitations.
 
 ---
 
@@ -108,6 +108,18 @@ This document details our threat model, smart contract security controls, crypto
 - **Zero Operational Intervention:** The admin role (`DEFAULT_ADMIN_ROLE`) cannot call operational lifecycle methods (`logHarvest`, `verifyBatch`, `acceptBatch`, `confirmSettlement`, `recordProcessing`, `recordEndUse`). It can only grant and revoke roles.
 - **Clean Multi-Sig Handover:** The contract is implemented without upgradeable proxies or complex storage layout requirements. Handing complete administrative ownership to a multi-signature smart contract vault (such as Gnosis Safe) requires a single transaction (`grantRole(DEFAULT_ADMIN_ROLE, safeAddress)` followed by `renounceRole`), requiring zero smart contract redeployment.
 
+### 2.10 Threat: Duplicate Field Evidence Reuse Across Different Batches
+**Attack Vector:** An actor reuses identical field landing photos or weighbridge receipts across multiple harvest submissions to double-claim wet biomass volumes or artificially duplicate harvest lots.  
+**Mitigating Controls:**
+- **On-Chain First-Use Registry (`evidenceFirstBatch`):** When `logHarvest` receives a non-zero `evidenceHash`, the contract checks if the hash has been recorded previously. If not, it stores `evidenceFirstBatch[evidenceHash] = batchId`.
+- **Informative Event Emission (`EvidenceReused`):** If a subsequent harvest submits an identical `evidenceHash`, the contract emits `EvidenceReused(batchId, firstBatchId, evidenceHash)` and continues normal execution without reverting.
+- **FLAG ONLY Design Philosophy:** The smart contract never reverts the transaction and never declares fraud. Evidence reuse may have legitimate operational causes (such as split loads, multi-day collection from a single landing pile, or shared weighbridge documentation across related batches). Automated blockchain execution must not penalize harvesters without human inspection.
+- **Client-Side Amber Flagging:** The public verification interface ([web/main.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/web/main.ts)) scans on-chain `EvidenceReused` events. If the batch appears as `batchId` (the reusing batch) or `firstBatchId` (the original batch), the verify page displays an amber review notice:
+  > "This evidence also appears in batch `<id>`. It is flagged for human review. This is not a finding of fraud."
+  Crucially, this notice does NOT turn a valid certificate red; the overall certificate status remains verified.
+- **What This Does and Does Not Detect:** This mechanism strictly detects **identical, bit-for-bit cryptographic evidence hashes**. It does NOT detect similar photos, re-cropped images, different camera angles, altered JPEG compression levels, or distinct photos depicting the same physical hyacinth mat. Perceptual hashing, optical similarity, and image deduplication must be conducted off-chain.
+- **Automated Test Validation:** Proven by 4 contract tests in [test/ZiwaChain.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/ZiwaChain.ts) and 1 verification algorithm test in [test/verify.test.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/verify.test.ts).
+
 ---
 
 ## 3. Append-Only Tamper-Evident Corrections
@@ -136,6 +148,7 @@ To ensure transparency with evaluating judges, we explicitly disclose the follow
 8. **Field Inspection, Weighbridge and Intake Checks:** Landing-site field inspection, weighbridge calibration, and physical intake sampling describe the intended real-world process; hardware integrations are not built into the software prototype and test runs use simulated development signers.
 9. **Illustrative Demo Data:** Seeded batches in `demo/demo-data.json` are illustrative demo data for protocol testing, not records of physical harvests.
 10. **Hash Proves Integrity, Not Truth:** A valid certificate hash confirms that a file matches the recorded hash. It does not confirm that the underlying claims in the certificate are accurate. The chain makes fabrication and alteration detectable; it does not validate what happened in the field at the moment of entry.
+11. **Duplicate Evidence Flagging Catches Exact Hashes Only:** The on-chain `evidenceFirstBatch` mapping and `EvidenceReused` event detect exact cryptographic hash reuse across batches. It cannot detect similar photos, re-compressed photos, or alternate camera angles of the same physical biomass.
 
 For an architectural comparison explaining why a public blockchain is used rather than a centralized database or signed log, see [Why ZiwaChain Uses a Blockchain](whyBlockchain.md).
 
@@ -144,7 +157,7 @@ For an architectural comparison explaining why a public blockchain is used rathe
 
 ## 5. Automated Security Test Results
 
-All 94 automated security and functional tests pass against the in-process Hardhat network:
+All 99 automated security and functional tests pass against the in-process Hardhat network:
 
 ```bash
 $ npx hardhat test
@@ -159,6 +172,7 @@ $ npx hardhat test
     correctRecord (7 tests passing, including zero-hash InvalidHash check)
     work credit non-transferability (2 tests passing)
     view helpers (4 tests passing)
+    duplicate evidence flagging (4 tests passing)
 
   Certificate Module
     shortCode Crockford Base32 (3 tests passing)
@@ -184,6 +198,7 @@ $ npx hardhat test
     Pseudonym integrity validation (1 test passing)
     Payment reference validation (1 test passing)
     Rejected batch amber status handling (1 test passing)
+    Duplicate evidence amber notice handling (1 test passing)
 
   SMS Flow
     Phone masking privacy (3 tests passing)
@@ -191,5 +206,5 @@ $ npx hardhat test
     Settlement on-chain recording & re-entry refusal (3 tests passing)
     PROOF delivery & not-found handling (2 tests passing)
 
-  94 passing (4s)
+  99 passing (5s)
 ```

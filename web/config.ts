@@ -47,6 +47,7 @@ export const ZIWACHAIN_ABI = [
   "function getBatch(bytes32 batchId) view returns (tuple(uint8 stage, address custodian, address buyer, address processor, bytes32 harvesterId, bytes32 hotspotRef, uint256 harvestedKg, uint256 acceptedKg, uint256 processedKg, uint256 endUseKgTotal, bytes32 paymentRefHash, bytes32 settlementConfirmation, bool settled))",
   "function workCreditsOf(bytes32 harvesterId) view returns (uint256)",
   "function supersededBy(bytes32 batchId, bytes32 hash) view returns (bytes32)",
+  "function evidenceFirstBatch(bytes32 evidenceHash) view returns (bytes32)",
   "event HarvestLogged(bytes32 indexed batchId, bytes32 indexed harvesterId, bytes32 hotspotRef, uint256 quantityKg, bytes32 evidenceHash, bytes32 payloadHash)",
   "event BatchVerified(bytes32 indexed batchId, address indexed verifier, bool approved, bytes32 evidenceHash, bytes32 payloadHash)",
   "event BatchAccepted(bytes32 indexed batchId, address indexed buyer, uint256 acceptedKg, bytes32 paymentRefHash, bytes32 payloadHash)",
@@ -54,5 +55,6 @@ export const ZIWACHAIN_ABI = [
   "event BatchProcessed(bytes32 indexed batchId, address indexed processor, bytes32 processType, uint256 inputKg, uint256 outputUnits, bytes32 payloadHash)",
   "event EndUseRecorded(bytes32 indexed batchId, bytes32 endUseType, uint256 endUseKg, uint256 outputUnits, bytes32 payloadHash)",
   "event RecordCorrected(bytes32 indexed batchId, address indexed author, bytes32 supersededHash, bytes32 newHash, bytes32 reasonHash)",
-  "event CreditsIssued(bytes32 indexed batchId, bytes32 indexed harvesterId, uint256 amount)"
+  "event CreditsIssued(bytes32 indexed batchId, bytes32 indexed harvesterId, uint256 amount)",
+  "event EvidenceReused(bytes32 indexed batchId, bytes32 indexed firstBatchId, bytes32 evidenceHash)"
 ];

@@ -91,6 +91,10 @@ contract ZiwaChain is ERC1155, AccessControl {
     /// @dev _supersededByMap[batchId][oldHash] = newHash (zero means not yet superseded).
     mapping(bytes32 => mapping(bytes32 => bytes32)) private _supersededByMap;
 
+    /// @notice Records the first batchId that used a given evidence hash.
+    ///         evidenceHash => first batchId that used it.
+    mapping(bytes32 => bytes32) public evidenceFirstBatch;
+
     /// @dev Total work credits attributed to a pseudonymous harvester ID across all end-use calls.
     ///      A harvester's full history across batches is assembled off-chain from their certificates.
     mapping(bytes32 => uint256) private _workCredits;
@@ -162,6 +166,14 @@ contract ZiwaChain is ERC1155, AccessControl {
         bytes32 indexed batchId,
         bytes32 indexed harvesterId,
         uint256         amount
+    );
+
+    /// @notice Emitted when a harvest reuses an evidence hash that was already recorded for another batch.
+    ///         FLAG ONLY: never reverts and never declares fraud.
+    event EvidenceReused(
+        bytes32 indexed batchId,
+        bytes32 indexed firstBatchId,
+        bytes32         evidenceHash
     );
 
     // ─── Custom errors ────────────────────────────────────────────────────────
@@ -247,6 +259,14 @@ contract ZiwaChain is ERC1155, AccessControl {
     ) external onlyRole(RELAYER_ROLE) {
         if (_batches[batchId].stage != Stage.None) revert BatchAlreadyExists(batchId);
         if (quantityKg == 0) revert InvalidQuantity();
+
+        if (evidenceHash != bytes32(0)) {
+            if (evidenceFirstBatch[evidenceHash] == bytes32(0)) {
+                evidenceFirstBatch[evidenceHash] = batchId;
+            } else {
+                emit EvidenceReused(batchId, evidenceFirstBatch[evidenceHash], evidenceHash);
+            }
+        }
 
         Batch storage b = _batches[batchId];
         b.stage       = Stage.Harvested;

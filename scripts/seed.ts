@@ -614,6 +614,57 @@ async function main() {
   };
 
   // ════════════════════════════════════════════════════════════════════════════
+  // BATCH D: Duplicate Evidence Flag Demonstration (Reuses Batch A evidence hash)
+  // ════════════════════════════════════════════════════════════════════════════
+  console.log("\n--------------------------------------------------------------------------------");
+  console.log("Executing BATCH D (Duplicate Evidence Flag: Reuses Batch A harvest evidence hash)");
+  console.log("--------------------------------------------------------------------------------");
+
+  const batchIdD = ethers.id("ziwachain-batch-2026-004");
+  const pseudonymD = derivePseudonym(pseudonymSecret, "group-kendu-04", batchIdD);
+  const hotspotRefD = ethers.id("hotspot-kendu-bay-04");
+  const stagesD: Record<string, StageRecord> = {};
+
+  const harvestSaltD = newSalt();
+  const harvestPayloadD: HarvestPayload = {
+    schemaVersion: 1,
+    eventType: "HARVEST_LOGGED",
+    batchId: batchIdD,
+    hotspotRef: hotspotRefD,
+    quantityKg: 600,
+    harvestedAt: Math.floor(Date.now() / 1000) - 1800,
+    region: "Kendu Bay",
+    source: "ziwaclear-v1"
+  };
+  const harvestHashD = hashRecord(harvestPayloadD, harvestSaltD);
+
+  console.log("  [1/1] logHarvest (reusing Batch A evidence hash)...");
+  const txHarvestD = await zc.connect(relayer).logHarvest(
+    batchIdD,
+    pseudonymD,
+    hotspotRefD,
+    600,
+    harvestEvidenceA, // Reuses Batch A evidence hash
+    harvestHashD
+  );
+  const rcptHarvestD = await txHarvestD.wait();
+  stagesD["HARVEST_LOGGED"] = {
+    stage: "Harvested",
+    txHash: txHarvestD.hash,
+    blockNumber: rcptHarvestD!.blockNumber,
+    payload: harvestPayloadD,
+    salt: harvestSaltD,
+    hash: harvestHashD
+  };
+
+  demoData.batches["batchD"] = {
+    batchId: batchIdD,
+    pseudonym: pseudonymD,
+    status: "Harvested (Flagged Duplicate Evidence)",
+    stages: stagesD
+  };
+
+  // ════════════════════════════════════════════════════════════════════════════
   // Write Demo Data File
   // ════════════════════════════════════════════════════════════════════════════
   const demoDataPath = path.join(demoDir, "demo-data.json");
@@ -627,10 +678,12 @@ async function main() {
   const batchARecord = await zc.getBatch(batchIdA);
   const batchBRecord = await zc.getBatch(batchIdB);
   const batchCRecord = await zc.getBatch(batchIdC);
+  const batchDRecord = await zc.getBatch(batchIdD);
 
   const creditsA = await zc.workCreditsOf(pseudonymA);
   const creditsB = await zc.workCreditsOf(pseudonymB);
   const creditsC = await zc.workCreditsOf(pseudonymC);
+  const creditsD = await zc.workCreditsOf(pseudonymD);
 
   console.log("\nSUMMARY OF SEEDED BATCHES:");
   console.log("--------------------------------------------------------------------------------");
@@ -659,6 +712,15 @@ async function main() {
   console.log(`  Superseded Hash:  ${initialEvidenceC}`);
   console.log(`  Replacement Hash: ${await zc.supersededBy(batchIdC, initialEvidenceC)}`);
   console.log(`  Work Credits:     ${creditsC.toString()} WORK_CREDIT tokens`);
+
+  console.log("\nBATCH D (Duplicate Evidence Flag):");
+  console.log(`  Batch ID:         ${batchIdD}`);
+  console.log(`  Pseudonym:        ${pseudonymD}`);
+  console.log(`  Stage:            Harvested (Enum: ${batchDRecord.stage.toString()})`);
+  console.log(`  Harvested:        ${batchDRecord.harvestedKg.toString()} kg`);
+  console.log(`  Reused Evidence:  ${harvestEvidenceA} (First used by Batch A)`);
+  console.log(`  First Batch:      ${await zc.evidenceFirstBatch(harvestEvidenceA)}`);
+  console.log(`  Work Credits:     ${creditsD.toString()} WORK_CREDIT tokens`);
   console.log("================================================================================\n");
 }
 

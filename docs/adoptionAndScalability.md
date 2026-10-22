@@ -82,7 +82,7 @@ The technical evolution of ZiwaChain is organized across three development horiz
 ```mermaid
 timeline
     title ZiwaChain Scalability & Development Milestones
-    Phase 1 (Current Prototype) : Core Smart Contract (Base Sepolia) : 94 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification : Two-Leg SMS Settlement Flow
+    Phase 1 (Current Prototype) : Core Smart Contract (Base Sepolia) : 99 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification : Two-Leg SMS Settlement Flow
     Phase 2 (Months 1-3) : 2-of-N Verifier Consensus : Automated M-Pesa Daraja API Webhooks : Merkle Statement Bundles for SACCOs : Offline-First PWA for Field Verifiers
     Phase 3 (Months 4-12) : Base Mainnet Migration : Account Abstraction (ERC-4337) : Carbon Registry Methodology Alignment : Multi-Lake Expansion (Lake Kyoga, Lake Naivasha)
 ```
@@ -90,10 +90,11 @@ timeline
 ### Horizon 1: Hackathon Prototype (Current Milestone, Oct 2026)
 - **Status: Completed and Built**
 - Full core contract deployed and verified on Base Sepolia (`cancun` EVM target).
-- 94 comprehensive unit tests validating stage monotonicity, role checks, mass-balance limits, non-transferability, hash supersessions, and SMS settlement flows.
+- 99 comprehensive unit tests validating stage monotonicity, role checks, mass-balance limits, non-transferability, hash supersessions, duplicate-evidence flagging, and SMS settlement flows.
 - Client-side canonical serialization (RFC 8785) and salted SHA-256/Keccak-256 payload hashing.
 - Static, zero-backend public verification interface ([web/](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/web/)).
 - Complete two-leg SMS settlement and PROOF flow engine with phone privacy masking ([src/sms/](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/src/sms/)).
+- On-chain duplicate-evidence flagging (`evidenceFirstBatch` registry and `EvidenceReused` event) surfaced via client-side amber notices.
 
 ### Horizon 2: Commercial Pilot and Field Hardening (Q1 2027)
 - **Multi-Verifier Consensus (2-of-N):** Upgrade `verifyBatch` to require threshold attestations from both an independent ecological verifier and a community beach elder, eliminating single-verifier collusion.
@@ -109,7 +110,6 @@ timeline
 - **Regional Lake Expansion:** Extend protocol deployment to additional water bodies severely afflicted by aquatic weed blooms across East Africa, including Lake Kyoga, Lake Albert, and Lake Naivasha.
 - **External Evidence Connectors (Roadmap, not built):** Importers that accept evidence hashes and attestations from satellite platforms, field-sensor systems, or third-party ESG tools via the existing `source` label and `hotspotRef` hash field.
 - **Export Mappings (Roadmap, not built):** Adapter libraries that translate ZiwaChain event logs into formats used by other traceability or reporting systems.
-- **Duplicate-Evidence Flagging (Roadmap, not built):** Cross-batch detection of re-used evidence hashes to flag potential double-submission of the same physical evidence.
 
 ---
 

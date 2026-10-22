@@ -10,6 +10,7 @@ const fileInput = document.getElementById("fileInput") as HTMLInputElement;
 const btnVerify = document.getElementById("btnVerify") as HTMLButtonElement;
 const btnLoadBatchA = document.getElementById("btnLoadBatchA") as HTMLButtonElement;
 const btnLoadBatchC = document.getElementById("btnLoadBatchC") as HTMLButtonElement;
+const btnLoadBatchD = document.getElementById("btnLoadBatchD") as HTMLButtonElement | null;
 const btnTamperTest = document.getElementById("btnTamperTest") as HTMLButtonElement;
 const rpcDisplay = document.getElementById("rpcDisplay") as HTMLSpanElement;
 
@@ -175,12 +176,18 @@ async function runVerification(certJsonString: string) {
     const logs = await provider.getLogs(filter);
     const contractInterface = contract.interface;
     const batchLogs: any[] = [];
+    const evidenceReusedLogs: any[] = [];
 
     for (const log of logs) {
       try {
         const parsed = contractInterface.parseLog(log);
-        if (parsed && parsed.args && parsed.args.batchId === cert.batchId) {
-          batchLogs.push({ ...parsed, txHash: log.transactionHash, blockNumber: log.blockNumber });
+        if (parsed && parsed.args) {
+          if (parsed.args.batchId === cert.batchId) {
+            batchLogs.push({ ...parsed, txHash: log.transactionHash, blockNumber: log.blockNumber });
+          }
+          if (parsed.name === "EvidenceReused") {
+            evidenceReusedLogs.push({ ...parsed, txHash: log.transactionHash, blockNumber: log.blockNumber });
+          }
         }
       } catch {
         // Log is from a different contract or unknown topic, ignore
@@ -266,6 +273,37 @@ async function runVerification(certJsonString: string) {
       );
     }
 
+    // Duplicate evidence check: reads EvidenceReused events where this batch is batchId or firstBatchId
+    const matchingReused = evidenceReusedLogs.filter(
+      (log) =>
+        log.args.batchId?.toLowerCase() === cert.batchId.toLowerCase() ||
+        log.args.firstBatchId?.toLowerCase() === cert.batchId.toLowerCase()
+    );
+
+    if (matchingReused.length > 0) {
+      const seenBatches = new Set<string>();
+      for (const reused of matchingReused) {
+        const otherBatchId =
+          reused.args.batchId?.toLowerCase() === cert.batchId.toLowerCase()
+            ? reused.args.firstBatchId
+            : reused.args.batchId;
+        if (!seenBatches.has(otherBatchId.toLowerCase())) {
+          seenBatches.add(otherBatchId.toLowerCase());
+          addCheckItem(
+            "Duplicate Evidence Flag",
+            "notice",
+            `This evidence also appears in batch ${otherBatchId}. It is flagged for human review. This is not a finding of fraud.`
+          );
+        }
+      }
+    } else {
+      addCheckItem(
+        "Duplicate Evidence Audit",
+        "pass",
+        "No duplicate evidence hash reuse detected across batches."
+      );
+    }
+
     // STEP 4: Query getBatch(batchId) and verify Mass Balance
     const batchData = await contract.getBatch(cert.batchId);
     const stageNum = Number(batchData.stage);
@@ -344,54 +382,62 @@ async function runVerification(certJsonString: string) {
 
     let paymentRefValid = true;
 
-    // 1. Compare BUYER_ACCEPTED payload's paymentRefHash with on-chain paymentRefHash
-    if (
-      !buyerAcceptedPayload ||
-      !buyerAcceptedPayload.paymentRefHash ||
-      buyerAcceptedPayload.paymentRefHash.toLowerCase() !== batchData.paymentRefHash.toLowerCase()
-    ) {
-      paymentRefValid = false;
-      hasFailures = true;
-      addCheckItem(
-        "BUYER_ACCEPTED Payment Reference Hash",
-        "fail",
-        `BUYER_ACCEPTED stage payload paymentRefHash (${buyerAcceptedPayload?.paymentRefHash?.slice(0, 14)}...) does not match on-chain record (${batchData.paymentRefHash.slice(0, 14)}...).`
-      );
-    }
-
-    // 2. Hash the certificate's plain paymentRef exactly as the seed script does
-    if (certPaymentRef) {
-      let recomputedPaymentRefHash: string | null = null;
-      if (certPaymentSalt) {
-        recomputedPaymentRefHash = hashRecord({ receipt: certPaymentRef }, certPaymentSalt);
+    if (buyerAcceptedStage || (batchData.paymentRefHash && batchData.paymentRefHash !== ethers.ZeroHash)) {
+      // 1. Compare BUYER_ACCEPTED payload's paymentRefHash with on-chain paymentRefHash
+      if (
+        !buyerAcceptedPayload ||
+        !buyerAcceptedPayload.paymentRefHash ||
+        buyerAcceptedPayload.paymentRefHash.toLowerCase() !== batchData.paymentRefHash.toLowerCase()
+      ) {
+        paymentRefValid = false;
+        hasFailures = true;
+        addCheckItem(
+          "BUYER_ACCEPTED Payment Reference Hash",
+          "fail",
+          `BUYER_ACCEPTED stage payload paymentRefHash (${buyerAcceptedPayload?.paymentRefHash?.slice(0, 14)}...) does not match on-chain record (${batchData.paymentRefHash.slice(0, 14)}...).`
+        );
       }
 
-      if (recomputedPaymentRefHash) {
-        if (recomputedPaymentRefHash.toLowerCase() !== batchData.paymentRefHash.toLowerCase()) {
-          paymentRefValid = false;
-          hasFailures = true;
-          addCheckItem(
-            "Commercial Payment Reference Verification",
-            "fail",
-            `Hashed plain paymentRef '${certPaymentRef}' with salt does not match on-chain paymentRefHash.`
-          );
+      // 2. Hash the certificate's plain paymentRef exactly as the seed script does
+      if (certPaymentRef) {
+        let recomputedPaymentRefHash: string | null = null;
+        if (certPaymentSalt) {
+          recomputedPaymentRefHash = hashRecord({ receipt: certPaymentRef }, certPaymentSalt);
         }
+
+        if (recomputedPaymentRefHash) {
+          if (recomputedPaymentRefHash.toLowerCase() !== batchData.paymentRefHash.toLowerCase()) {
+            paymentRefValid = false;
+            hasFailures = true;
+            addCheckItem(
+              "Commercial Payment Reference Verification",
+              "fail",
+              `Hashed plain paymentRef '${certPaymentRef}' with salt does not match on-chain paymentRefHash.`
+            );
+          }
+        }
+      } else {
+        paymentRefValid = false;
+        hasFailures = true;
+        addCheckItem(
+          "Commercial Payment Reference Verification",
+          "fail",
+          "Certificate is missing paymentRef."
+        );
+      }
+
+      if (paymentRefValid && batchData.paymentRefHash && batchData.paymentRefHash !== ethers.ZeroHash) {
+        addCheckItem(
+          "Commercial Payment Reference",
+          "pass",
+          `M-Pesa payment reference confirmed on-chain and matches BUYER_ACCEPTED payload (${batchData.paymentRefHash.slice(0, 14)}...).`
+        );
       }
     } else {
-      paymentRefValid = false;
-      hasFailures = true;
-      addCheckItem(
-        "Commercial Payment Reference Verification",
-        "fail",
-        "Certificate is missing paymentRef."
-      );
-    }
-
-    if (paymentRefValid && batchData.paymentRefHash && batchData.paymentRefHash !== ethers.ZeroHash) {
       addCheckItem(
         "Commercial Payment Reference",
         "pass",
-        `M-Pesa payment reference confirmed on-chain and matches BUYER_ACCEPTED payload (${batchData.paymentRefHash.slice(0, 14)}...).`
+        "Batch has not reached buyer acceptance stage; commercial payment reference pending."
       );
     }
 
@@ -621,6 +667,41 @@ const SAMPLE_BATCH_C = {
   verifyUrl: "https://ziwachain.org/verify"
 };
 
+const SAMPLE_BATCH_D = {
+  version: 1,
+  chainId: "31337",
+  contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  batchId: "0x62438758e29069339cee4648ac047282fd4ea6ff7a7933bc44d665a66cc2917e",
+  pseudonym: "0x32e6d3c637e1496439e9d0156b50939415625daffb41c9928242046db16034d1",
+  deploymentBlock: 1,
+  stages: {
+    HARVEST_LOGGED: {
+      eventType: "HARVEST_LOGGED",
+      payload: {
+        schemaVersion: 1,
+        eventType: "HARVEST_LOGGED",
+        batchId: "0x62438758e29069339cee4648ac047282fd4ea6ff7a7933bc44d665a66cc2917e",
+        hotspotRef: "0x08364605cd265b617627ac0ec47097b8445d78131eac25ff3b478b98141e105e",
+        quantityKg: 600,
+        harvestedAt: 1792669534,
+        region: "Kendu Bay",
+        source: "ziwaclear-v1"
+      },
+      salt: "0x065fd5a216b974c7f171914240c9cbf0",
+      payloadHash: "0xd1cd27486a86c23b5056e38d8c593119f5ef85c32de72b93deb13d1a01746c61",
+      txHash: "0x5a6026721750ff4d903610876d97cdaa7a953935b5df43fb161ed4335c9bda0d",
+      blockNumber: 17
+    }
+  },
+  paymentRef: "MPESA-PENDING",
+  settlementConfirmation: {
+    code: "0000",
+    salt: "0x00000000000000000000000000000000"
+  },
+  shortCode: "9791N-8DGHV",
+  verifyUrl: "https://ziwachain.org/verify"
+};
+
 // Event Listeners
 btnVerify.addEventListener("click", () => {
   const val = jsonInput.value.trim();
@@ -636,6 +717,13 @@ btnLoadBatchC.addEventListener("click", () => {
   jsonInput.value = JSON.stringify(SAMPLE_BATCH_C, null, 2);
   runVerification(jsonInput.value);
 });
+
+if (btnLoadBatchD) {
+  btnLoadBatchD.addEventListener("click", () => {
+    jsonInput.value = JSON.stringify(SAMPLE_BATCH_D, null, 2);
+    runVerification(jsonInput.value);
+  });
+}
 
 btnTamperTest.addEventListener("click", () => {
   const tampered = JSON.parse(JSON.stringify(SAMPLE_BATCH_A));

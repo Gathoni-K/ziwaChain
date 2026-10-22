@@ -4,6 +4,41 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 22, 2026, Task 11: Flag Reuse of Evidence Hash Across Batches
+
+### Files added or changed
+| File | Change |
+|---|---|
+| `contracts/ZiwaChain.sol` | Added `mapping(bytes32 => bytes32) public evidenceFirstBatch` and `event EvidenceReused(bytes32 indexed batchId, bytes32 indexed firstBatchId, bytes32 evidenceHash)`. In `logHarvest`, if `evidenceHash != 0`: registers `evidenceFirstBatch` on first use, or emits `EvidenceReused` on reuse and continues normally without reverting or declaring fraud. |
+| `scripts/seed.ts` | Added Batch D which logs a harvest reusing Batch A's field photo evidence hash (`harvestEvidenceA`), demonstrating on-chain reuse flagging without modifying Batches A through C. |
+| `web/config.ts` | Added `evidenceFirstBatch` view function and `EvidenceReused` event declaration to `ZIWACHAIN_ABI`. |
+| `web/index.html` | Added "Load Batch D (Duplicate Evidence)" quick demo button. |
+| `web/main.ts` | Added duplicate evidence audit check querying `EvidenceReused` events where the batch is `batchId` or `firstBatchId`. If found, displays amber notice: "This evidence also appears in batch `<id>`. It is flagged for human review. This is not a finding of fraud." Configured to never turn a valid certificate red. Added `SAMPLE_BATCH_D` and click listener. |
+| `web/style.css` | Styled `.check-item.notice` with amber background (`var(--warning-light)`) to complement amber border. |
+| `test/ZiwaChain.ts` | Added 4 automated unit tests for duplicate evidence flagging: first use sets `evidenceFirstBatch` with no event; reuse emits `EvidenceReused` and both batches continue normally; zero evidence hash is never flagged; mass balance and credits are unaffected. |
+| `test/verify.test.ts` | Added automated verification algorithm test validating that duplicate evidence triggers the amber notice without failing verification or turning red. |
+| `docs/security/securityAndDataIntegrity.md` | Added Threat 2.10 explaining what duplicate evidence flagging does and what it does not detect (strictly detects identical byte-for-byte evidence hashes, not similar or re-compressed photos; flag only without reverting); added Limitation 11; updated test count to 99 tests. |
+| `docs/architecture/eventSchema.md` | Documented `EvidenceReused` event in stage events and added Rule 8 in State Machine and Enforced Rules. |
+| `README.md` | Added duplicate-evidence flagging to built features; updated test count to 99; removed duplicate-evidence flagging from Roadmap; added Honest Limitation 10. |
+| `docs/adoptionAndScalability.md` | Updated test count from 94 to 99; added duplicate evidence flagging to Horizon 1 built features; removed it from Horizon 3 roadmap items. |
+| `docs/overview.md` | Updated contract test count from 44 to 48 and total test suite count from 94 to 99. |
+| `docs/demoScript.md` | Added a dedicated 20-second duplicate evidence demonstration moment (2:25 - 2:45) submitting Batch D with reused evidence and showing the amber notice; updated test count to 99 tests; replaced em dashes. |
+
+### What changed and why
+1. **Contract minimal change:** `evidenceFirstBatch` mapping and `EvidenceReused` event added to `ZiwaChain.sol`. In `logHarvest`, non-zero evidence hashes record the initial batch or emit the event. Strictly non-reverting and does not declare fraud, adhering to the "flag only" principle.
+2. **Demo seeding:** Batch D added to `seed.ts` reusing Batch A's evidence hash. Demonstrates that both batches exist and can proceed normally.
+3. **Verify page audit check:** Browser client collects `EvidenceReused` events. If a batch is involved either as original creator (`firstBatchId`) or subsequent submitter (`batchId`), an amber notice is rendered pointing to the other batch. Valid certificates retain green verified status.
+4. **Comprehensive testing:** 5 new tests added (4 smart contract, 1 client verification algorithm), bringing test suite from 94 to 99 passing tests.
+5. **Roadmap and docs cleanup:** Removed duplicate-evidence flagging from roadmap sections across README and adoption docs since it is now built; documented boundary limits (catches bit-for-bit identical hashes only, not similar photos).
+
+### Tests
+- 99 / 99 passing (`npm test`).
+
+### Deviations from spec
+None.
+
+---
+
 ## Oct 22, 2026, Task 10: Positioning Pass Over Judge-Facing Documents
 
 ### Files added or changed

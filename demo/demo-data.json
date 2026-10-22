@@ -12,7 +12,7 @@
       "stages": {
         "HARVEST_LOGGED": {
           "stage": "Harvested",
-          "txHash": "0x24c0f8c80f52af36fc8ec2e7ef44d785df94ff725f5c7b2d6f5187d97959dfb1",
+          "txHash": "0x9a6580153812906a192108eebff364d839b09b5da0ca83b004593561e2804523",
           "blockNumber": 6,
           "payload": {
             "schemaVersion": 1,
@@ -20,16 +20,16 @@
             "batchId": "0x2979c3606b661c258449350a53dd28384d5d42d8032e35ac9bc98739b5e17bcd",
             "hotspotRef": "0xeac18fa56b101183f0195523039405f1118811619adfc499bcdcfff5f22cdc0a",
             "quantityKg": 1000,
-            "harvestedAt": 1792061849,
+            "harvestedAt": 1792498534,
             "region": "Winam Gulf",
             "source": "ziwaclear-v1"
           },
-          "salt": "0xfaf588a781c7870eafc0b1acdafeefc3",
-          "hash": "0x063ad2fbbda5d561593e597e6f8168154deaa2ed27848c42a729254bd3e281a1"
+          "salt": "0x70294875e04db2a8829022b70ce0c4aa",
+          "hash": "0xadf8a1ac52cbfea981817fe90e9dd7ddabb040c0856306dde021e41d527592fb"
         },
         "VERIFIED": {
           "stage": "Verified",
-          "txHash": "0x4c30dfb1af59adbd0516f37bc5eee41df6dc45663b547fd83f39399ae88c8a3c",
+          "txHash": "0x4051f269b8eb870abf3ba84cb67dbe584c202b96032bb39f110e5227f8f31471",
           "blockNumber": 7,
           "payload": {
             "schemaVersion": 1,
@@ -37,15 +37,15 @@
             "batchId": "0x2979c3606b661c258449350a53dd28384d5d42d8032e35ac9bc98739b5e17bcd",
             "verifier": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
             "approved": true,
-            "verifiedAt": 1792148249,
+            "verifiedAt": 1792584934,
             "method": "physical_sampling_scale"
           },
-          "salt": "0xaf7316d599ca91b5efb8dd9e9e4d692d",
-          "hash": "0x7e0b1145d9ace52b7af1bbbf98d52ad0afd78b3c0e15b450b9be1932206b264f"
+          "salt": "0xd0cbbd78ea43a668a91e603977d7af87",
+          "hash": "0x510841dd5c24cf150260eb40107160ed70724755a856146536b6a2f899fbce61"
         },
         "BUYER_ACCEPTED": {
           "stage": "Accepted",
-          "txHash": "0x87ef10020fef7f3ac6575e05eb06943f276f28403d79cdce6f94a2d00d1754e1",
+          "txHash": "0x455b8b02955518878a70120766c8c45653c3488e27ef137f778ab052d0802e93",
           "blockNumber": 8,
           "payload": {
             "schemaVersion": 1,
@@ -53,30 +53,30 @@
             "batchId": "0x2979c3606b661c258449350a53dd28384d5d42d8032e35ac9bc98739b5e17bcd",
             "buyer": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
             "acceptedKg": 900,
-            "paymentRefHash": "0x54f7765e3c68dc855964d177cd63c54e9945cc94ce1cd71d77f901ed7ebd2435",
-            "acceptedAt": 1792191449
+            "paymentRefHash": "0x03d0f1dfb262bd4a49e10cbfaaad91bc8df94ef9ad5c81ace61a17dbd81acc3a",
+            "acceptedAt": 1792628134
           },
-          "salt": "0x448d4bc4e41fc2740f04d0771e1b8de9",
-          "paymentSalt": "0x52acf1f407ad08432d468d18e26c7518",
-          "hash": "0x5a110ab61a31c745faf94bf74db6b588e4df148b70dcffc7a3a12a1042136e6c"
+          "salt": "0xd957bb9e811e2faf9ea975d9b635cb4a",
+          "paymentSalt": "0x6c401d5fababd3dd583331c8e42189ec",
+          "hash": "0x65ad49a480a360e822672720f1fcec1baadeaa1684af0f7c9595036ca56d65e6"
         },
         "SETTLEMENT_CONFIRMED": {
           "stage": "Settled",
-          "txHash": "0x4b5b8c927d42788be172910553032e88d0386edccecce8c18462ab7e9cf9aaca",
+          "txHash": "0x209faa04ddd164e1eedef4351e4ac82bc26e7db396a2e0823095015ad3b6f4f5",
           "blockNumber": 9,
           "payload": {
             "schemaVersion": 1,
             "eventType": "SETTLEMENT_CONFIRMED",
             "batchId": "0x2979c3606b661c258449350a53dd28384d5d42d8032e35ac9bc98739b5e17bcd",
-            "confirmationHash": "0x36f36d80f9cfceb2b0b26b8edcb57513fb984ce65603c9b8e88187075def7fc6",
-            "confirmedAt": 1792213049
+            "confirmationHash": "0xb5440f0a9dc4ffe3432a3c5bb49d4eaf288dd65598770409e689895cc21832c4",
+            "confirmedAt": 1792649734
           },
-          "salt": "0x622bddf922e604afe29e1a8e682e4b92",
-          "hash": "0x958e3b9dcba07d0ef8b47b6872cb3bebcc7fab25f155ce12aff4b42b537e2630"
+          "salt": "0x80a4d1c02765a4ea693c1f739999959d",
+          "hash": "0x93d41df6799c9c89b8774cfccb9a30a87571a0bce5e4edb49b433edb5f72355d"
         },
         "PROCESSED": {
           "stage": "Processed",
-          "txHash": "0x60de1a8439ddd57458d0cae02ce5f2db0a830bf73034056ffebb6ea7d14a352e",
+          "txHash": "0x7c242390de84ef9b47809b259abba3bee9b9a4b40dac8ddea4d23cdf6d589d17",
           "blockNumber": 10,
           "payload": {
             "schemaVersion": 1,
@@ -86,14 +86,14 @@
             "processType": "biogas",
             "inputKg": 800,
             "outputUnits": 120,
-            "processedAt": 1792223849
+            "processedAt": 1792660534
           },
-          "salt": "0x47514b9932b18fd625fd0e14ed0f287e",
-          "hash": "0x9eddc831aa293df340e589c9faaba00548d4bd4b075b8d825023f43ba6d698ae"
+          "salt": "0x30ca4a3049f16338096337fdb1d09f32",
+          "hash": "0xe9b546e7e90a85680c06714815849d98f64dc92fd4f544ef197bf3889116edf5"
         },
         "END_USE_1": {
           "stage": "EndUse",
-          "txHash": "0x3981feafe6f5babaf056a3a38cc012620753b4b15920faad72f9ddd92598b554",
+          "txHash": "0xc8a7fe8c32f235b08872f435ba6736852419ab651fc8a4cd07d0101d7e7f239f",
           "blockNumber": 11,
           "payload": {
             "schemaVersion": 1,
@@ -103,14 +103,14 @@
             "endUseType": "bioenergy",
             "endUseKg": 500,
             "outputUnits": 75,
-            "endUseAt": 1792231049
+            "endUseAt": 1792667734
           },
-          "salt": "0x8242b0b3f9a56b88b8ae7e52bb3e8e9f",
-          "hash": "0xc6e5a8224ced15625172d7a71e8231010f59511185bf554cc021fc49071dc92d"
+          "salt": "0x2ad7b442494591c92188ccc8160979ed",
+          "hash": "0x6060d76901d12c61cb424c30a2e3a5a1255905fba32eccaaa3de3388c0b7f0d1"
         },
         "END_USE_2": {
           "stage": "EndUse",
-          "txHash": "0xa6b4a4cf23beee7cc687df8299cde3049009c544273de5f4a52a63e59397d31a",
+          "txHash": "0x13b4a821c00cc5a507dfe1f0251e34672c28c88c996d2f021f4cf08adb4ce49a",
           "blockNumber": 12,
           "payload": {
             "schemaVersion": 1,
@@ -120,10 +120,10 @@
             "endUseType": "bioenergy",
             "endUseKg": 300,
             "outputUnits": 45,
-            "endUseAt": 1792234049
+            "endUseAt": 1792670734
           },
-          "salt": "0xad9d982c1d6ca6fdd99002280fd299d3",
-          "hash": "0x1f8867b31a989e382f6bd5010b1d8a15fe0c1c50bcd568e964eaedde56f42362"
+          "salt": "0xa1984f7e5b8e695713b5324f03cabcce",
+          "hash": "0x3415a909564d3a3704cb48c05fd37cbf536957efca923d89c3d33d4aea398cb7"
         }
       }
     },
@@ -134,7 +134,7 @@
       "stages": {
         "HARVEST_LOGGED": {
           "stage": "Harvested",
-          "txHash": "0x1e320036b90063f2a827311ab26645182ba99958ac538c19ebfd356778597e81",
+          "txHash": "0x95ec519f39c2e210111fe553fa8731c77754f472e75e1731a9e05ce718d3fe0f",
           "blockNumber": 13,
           "payload": {
             "schemaVersion": 1,
@@ -142,16 +142,16 @@
             "batchId": "0x2b6293d3dc213c071c149c2c6f793cdd8811b7645e49ff163207f1a8e5d60b2b",
             "hotspotRef": "0x793bdfbb4bc4216c31b6bf722c00a0581e8d8ef446d9ac6d928a2af2460c72c3",
             "quantityKg": 1000,
-            "harvestedAt": 1792148249,
+            "harvestedAt": 1792584934,
             "region": "Usenge Bay",
             "source": "ziwaclear-v1"
           },
-          "salt": "0xded1346a797c7591e86aa703dff94b92",
-          "hash": "0xf08914434824bdc9c39ecb7692908a4247c758831426ded5875d323f8bf0ba34"
+          "salt": "0x343633363d8e4a3d4d865aaa731a75c3",
+          "hash": "0xee94b846262d7c1b6ac43f885e187c0aae7a8c003f7850657b2801fb75451d80"
         },
         "VERIFIED": {
           "stage": "Rejected",
-          "txHash": "0xe11555de4206f969d96a04dc5e2c9847040b9426281a4b57d44c992abc5e79b4",
+          "txHash": "0xd4f8acafd41a6f1b2509c2228bc5af1fafe0f59bb868a8761da5954a38780aa7",
           "blockNumber": 14,
           "payload": {
             "schemaVersion": 1,
@@ -159,11 +159,11 @@
             "batchId": "0x2b6293d3dc213c071c149c2c6f793cdd8811b7645e49ff163207f1a8e5d60b2b",
             "verifier": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
             "approved": false,
-            "verifiedAt": 1792231049,
+            "verifiedAt": 1792667734,
             "method": "visual_and_scale_moisture_exceeded"
           },
-          "salt": "0x9aa7fd719dbb75627300c96bcef7244c",
-          "hash": "0x06e744efc476b04649bfc748f67183e90f2e9061fcb0e144360941a343a634c7"
+          "salt": "0xb7ca4b99517d867f9e610f43f8235188",
+          "hash": "0xbe04637a4b2006d7b9ba90359957472234ccd68467873609005a68299ed73303"
         }
       }
     },
@@ -174,7 +174,7 @@
       "stages": {
         "HARVEST_LOGGED": {
           "stage": "Harvested",
-          "txHash": "0xc5ac1dea90069125fcd6e7190016054c7e8e89fd1a24158d029bf44f8e0443f3",
+          "txHash": "0x1abf2ab61d0e9fbff1efe7088e344e71f9cb9cbc7e907e416bcffd782526ac10",
           "blockNumber": 15,
           "payload": {
             "schemaVersion": 1,
@@ -182,23 +182,47 @@
             "batchId": "0xd40a728929587fa4c1da8091b20cdfd2c377f2052bb08ceda61e3f5affc559d7",
             "hotspotRef": "0x678bc2d8912051a0ca00eaf1e2e21984028b5dc21a59a1311886ca9aca97ce65",
             "quantityKg": 1000,
-            "harvestedAt": 1792231049,
+            "harvestedAt": 1792667734,
             "region": "Homa Bay",
             "source": "ziwaclear-v1"
           },
-          "salt": "0x210e3cb4263ec7481f1cb53b0dae344b",
-          "hash": "0x1943bbeff9dfd122171734d0af0c2db83ddaefc18abe95f5b4b0879e627a6a15"
+          "salt": "0x469cdada7f520981db6dcb2538495f1a",
+          "hash": "0xf6b4356d87b706256c8965f664782758032db977111f62b224bf3f8b23a006c0"
         }
       },
       "supersededRecords": [
         {
-          "targetHash": "0x42ac4664aa55c03931c8bc41495f548f06e181448aa8d9193b7780cf7402c7a2",
-          "newHash": "0x1a872822d9e0e9a4fc0219a64e9cbf3bbb12d2efe88319048b69a34155a1ce4b",
+          "targetHash": "0x2163eec9300a3a44da95c4c780211ee172d40ae013d713e96bfa941a421c0f4d",
+          "newHash": "0xf844e47e46dc120126de82fdc0bf11593669ee7c3b910fe08b0e1d09df6df504",
           "reasonHash": "0xed3ccf93af9fa86b7a7ae66476bfe6f94cbee9b1e1515d2b3345a9e50182fb6c",
-          "txHash": "0xcde606c1313bea2ad2f15829095cb39f5ef703e43900c75305a923edcfea9659",
+          "txHash": "0x6c2f9d726d8a2b4e311488516eb301d350a0605bb0e61f88bb6b7a74abb69218",
           "blockNumber": 16
         }
       ]
+    },
+    "batchD": {
+      "batchId": "0x62438758e29069339cee4648ac047282fd4ea6ff7a7933bc44d665a66cc2917e",
+      "pseudonym": "0x32e6d3c637e1496439e9d0156b50939415625daffb41c9928242046db16034d1",
+      "status": "Harvested (Flagged Duplicate Evidence)",
+      "stages": {
+        "HARVEST_LOGGED": {
+          "stage": "Harvested",
+          "txHash": "0x5a6026721750ff4d903610876d97cdaa7a953935b5df43fb161ed4335c9bda0d",
+          "blockNumber": 17,
+          "payload": {
+            "schemaVersion": 1,
+            "eventType": "HARVEST_LOGGED",
+            "batchId": "0x62438758e29069339cee4648ac047282fd4ea6ff7a7933bc44d665a66cc2917e",
+            "hotspotRef": "0x08364605cd265b617627ac0ec47097b8445d78131eac25ff3b478b98141e105e",
+            "quantityKg": 600,
+            "harvestedAt": 1792669534,
+            "region": "Kendu Bay",
+            "source": "ziwaclear-v1"
+          },
+          "salt": "0x065fd5a216b974c7f171914240c9cbf0",
+          "hash": "0xd1cd27486a86c23b5056e38d8c593119f5ef85c32de72b93deb13d1a01746c61"
+        }
+      }
     }
   }
 }

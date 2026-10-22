@@ -6,5 +6,5 @@ Status:      Rejected (Terminal Quality Rejection)
 Reason:      Excessive mud and inorganic contamination exceeding threshold.
 Outcome:     In accordance with ZiwaChain protocol rules, stage Rejected is terminal.
              Work credits are not issued and a commercial certificate of custody is withheld.
-Timestamp:   2026-10-17T10:58:01.068Z
+Timestamp:   2026-10-22T12:15:45.400Z
 --------------------------------------------------------------------------------
