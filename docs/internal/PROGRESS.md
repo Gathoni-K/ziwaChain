@@ -4,6 +4,55 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 22, 2026, Task 10: Positioning Pass Over Judge-Facing Documents
+
+### Files added or changed
+| File | Change |
+|---|---|
+| `README.md` | Added shared-trust definition sentence after opening paragraph; added 4 roadmap items (external evidence connectors, verifier correction request state, export mappings, duplicate-evidence flagging); added Honest Limitations 8 (hash proves integrity not truth) and 9 (illustrative demo data). |
+| `docs/overview.md` | Rewrote Executive Summary opening to include shared-trust sentence and dMRV framing with explicit no-standard-compliance caveat; renamed Pillar 2 to "Separation of Duties and Field Attestation" and rephrased to use "attestation"; added Limitations 6 (hash proves integrity not truth) and 7 (illustrative demo data). |
+| `docs/security/whyBlockchain.md` | Added Section 0 "The Shared-Trust Test" answering when a signed log is sufficient and why ZiwaChain still needs a chain; integrated dMRV framing and "attestation" language into Sections 3 and 4; strengthened hash-vs-truth honesty note. Rewritten as a complete file. |
+| `docs/security/securityAndDataIntegrity.md` | Fixed test count 85 -> 94 in executive summary; renamed "Verifier Identity Immutably Logged" to "Verifier Attestation Immutably Logged" and updated wording in §2.2; renamed limitation 5 to "Single Verifier Attestation"; normalised & -> and in limitation 8; added limitation 10 (hash proves integrity not truth). |
+| `docs/adoptionAndScalability.md` | Fixed test count 85 -> 94 in Horizon 1 and in Mermaid timeline; replaced "Completed & Built" with "Completed and Built"; added 3 Horizon 3 roadmap items (external evidence connectors, export mappings, duplicate-evidence flagging) and 1 Horizon 2 item (verifier correction request state); added Section 4 "Existing Tools and Complementary Systems"; replaced Field Findings callout block with structured TO BE ADDED section with three named headings (who would accept, what costly problem, what would make them reject); renumbered Field Findings as Section 5. |
+| `docs/demoScript.md` | Changed verifyBatch visual-column description from "Demo verifier account approves lot" to "issues an on-chain attestation approving the lot". |
+
+### What changed and why
+1. **Shared-trust sentence (Item 1):** Added verbatim to README and overview. Kept Lake Victoria, SMS, harvester-first framing intact. Not generalised.
+2. **Shared-trust test (Item 2):** New Section 0 in whyBlockchain.md. States clearly that a signed log should be used when one operator is trusted; then answers why ZiwaChain still needs a chain.
+3. **Attestation vocabulary (Item 3):** "A verifier's decision" -> "a verifier's attestation" in overview, security, adoption and demo docs. dMRV framing added to overview executive summary and whyBlockchain Section 3. No standard-compliance claim made anywhere.
+4. **Existing tools section (Item 4):** Added to adoptionAndScalability.md Section 4. Describes hotspotRef and source as integration points. No named product cited. No competitor feature claims.
+5. **Hash proves integrity not truth (Item 5):** Added as a dedicated limitation in README, overview, securityAndDataIntegrity, and whyBlockchain. Wording is plain and direct.
+6. **Roadmap additions (Item 6):** Four items added consistently across README and adoptionAndScalability. All labelled "Roadmap, not built".
+7. **Field findings (Item 7):** Replaced opaque NOTE block with three headed placeholder sections exactly as specified.
+
+### Claim-vs-code check on whyBlockchain.md
+- Section 2 table row "Each party's own signature is native" -- verified: buyers, verifiers, processors use own wallets; harvesters go through relayer (disclosed in Section 4).
+- Section 3 "Verification runs in the reader's browser" -- verified by web/main.ts (JsonRpcProvider, no server call).
+- Section 3 "forbids a submitter from verifying its own harvest" -- verified: VerifierCannotBeRelayer check in ZiwaChain.sol.
+- Section 0 "Can two or more independent parties rely on the same record..." -- verified by public contract on Base Sepolia and in-browser verify page.
+- No new factual claims introduced; all additions are either restatements of existing code properties or explicit roadmap labels.
+
+### Tests
+- 94 / 94 passing (no code changes in this task; test run confirms docs-only edits did not disturb any file read by tests).
+
+### Decisions made or clarified
+- dMRV framing: added as "in the spirit of dMRV practice" with explicit "does not claim compliance with any specific dMRV standard" in two places. Not a compliance claim.
+- "Attestation" applied to verifier decisions only, not to harvester SMS confirmation (which remains "telecom-attested co-sign").
+- Named products: none named in Existing Tools section; generic capability description only.
+- Field Findings: HTML comments used for the placeholder instructions so they do not appear in rendered markdown.
+
+### Deviations from spec
+None.
+
+### Open questions and risks
+- Swahili text in web/certificate.html is still marked for owner review (from Task 9). Not touched in this task.
+- Base Sepolia deployment and demo video are manual steps remaining before Oct 24 internal deadline.
+
+### Next step
+Manual steps by owner: Base Sepolia deployment, demo video, hosting, Devpost submission. No further code or doc tasks identified.
+
+---
+
 ## Oct 17, 2026, Task 9: Prototype Improvements
 
 ### Files added or updated

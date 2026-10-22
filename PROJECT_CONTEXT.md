@@ -2,7 +2,7 @@
 
 This file is written for an AI assistant that is continuing the build. Read it fully before doing anything. It covers who you are working with, the hackathon, what the product is, the architecture, every decision made so far, repo state, and what to do next.
 
-Last updated: Oct 15, 2026.
+Last updated: Oct 22, 2026.
 
 ---
 
@@ -194,17 +194,16 @@ ziwachain/
 ```
 
 - **Test run:** `npx hardhat test` → 94 passing (44 contract + 18 hashing + 6 certificate + 10 verify + 13 sms + 3 links).
-- **Remaining tasks:** Task 8 review fixes applied, Base Sepolia deployment, demo video recording, hosting.
+- **Remaining tasks:** All build tasks (Tasks 1-10) complete. Remaining steps are manual: Base Sepolia deployment, demo video recording, hosting, Devpost submission.
 - **Manual steps (done by owner, not tasks):** Base Sepolia deployment, demo video recording, hosting, Devpost submission.
 
 ---
 
 ## 8. Next steps (in order)
 
-1. **Task 6 (complete):** Build simulated SMS settlement and PROOF flow in `src/sms/`, with tests and a `demo:sms` script (completed, 85/85 tests passing).
-2. **Task 7 (complete):** Draft and synchronize all judge-facing documents in `docs/` and root `README.md` (completed, all 7 core documents drafted with consistent schemas, test counts, and citations).
-3. **Task 8 (current):** Skeptical review. Read every judge-facing document as a skeptical judge would. Flag any claim that outpaces the code, any missing limitation, any inconsistency. No new code. Fix prose only.
-4. **Manual steps (owner does these, not tasks):** Base Sepolia deployment (`npx hardhat run scripts/seed.ts --network baseSepolia`), demo video recording following `docs/demo-script.md`, hosting public static verify page, Devpost submission. Internal deadline Oct 24; official close Oct 25 11:59 PM UTC.
+1. **Task 10 (complete):** Positioning pass over judge-facing documents. Added shared-trust definition to README and overview; added shared-trust test and dMRV framing to whyBlockchain.md; introduced "attestation" vocabulary for verifier decisions; added Existing Tools section to adoptionAndScalability.md; added hash-proves-integrity-not-truth limitation across all major docs; added 4 roadmap items (connectors, correction state, export mappings, duplicate-evidence flagging); replaced Field Findings with structured TO BE ADDED placeholders.
+2. **Manual steps (owner does these, not tasks):** Base Sepolia deployment (`npx hardhat run scripts/seed.ts --network baseSepolia`), demo video recording following `docs/demoScript.md`, hosting public static verify page, Devpost submission. Internal deadline Oct 24; official close Oct 25 11:59 PM UTC.
+
 
 ---
 

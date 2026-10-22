@@ -82,40 +82,70 @@ The technical evolution of ZiwaChain is organized across three development horiz
 ```mermaid
 timeline
     title ZiwaChain Scalability & Development Milestones
-    Phase 1 (Current Prototype) : Core Smart Contract (Base Sepolia) : 85 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification : Two-Leg SMS Settlement Flow
+    Phase 1 (Current Prototype) : Core Smart Contract (Base Sepolia) : 94 Automated Unit Tests : Linear Mass Balance : Non-Transferable ERC-1155 Work Credits : In-Browser Hash Verification : Two-Leg SMS Settlement Flow
     Phase 2 (Months 1-3) : 2-of-N Verifier Consensus : Automated M-Pesa Daraja API Webhooks : Merkle Statement Bundles for SACCOs : Offline-First PWA for Field Verifiers
     Phase 3 (Months 4-12) : Base Mainnet Migration : Account Abstraction (ERC-4337) : Carbon Registry Methodology Alignment : Multi-Lake Expansion (Lake Kyoga, Lake Naivasha)
 ```
 
 ### Horizon 1: Hackathon Prototype (Current Milestone, Oct 2026)
-- **Status: Completed & Built**
+- **Status: Completed and Built**
 - Full core contract deployed and verified on Base Sepolia (`cancun` EVM target).
-- 85 comprehensive unit tests validating stage monotonicity, role checks, mass-balance limits, non-transferability, hash supersessions, and SMS settlement flows.
+- 94 comprehensive unit tests validating stage monotonicity, role checks, mass-balance limits, non-transferability, hash supersessions, and SMS settlement flows.
 - Client-side canonical serialization (RFC 8785) and salted SHA-256/Keccak-256 payload hashing.
 - Static, zero-backend public verification interface ([web/](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/web/)).
 - Complete two-leg SMS settlement and PROOF flow engine with phone privacy masking ([src/sms/](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/src/sms/)).
 
-### Horizon 2: Commercial Pilot & Field Hardening (Q1 2027)
-- **Multi-Verifier Consensus (2-of-N):** Upgrade `verifyBatch` to require threshold signatures from both an independent ecological verifier and a community beach elder, eliminating single-verifier collusion.
+### Horizon 2: Commercial Pilot and Field Hardening (Q1 2027)
+- **Multi-Verifier Consensus (2-of-N):** Upgrade `verifyBatch` to require threshold attestations from both an independent ecological verifier and a community beach elder, eliminating single-verifier collusion.
 - **Automated Settlement Reconciliation:** Connect the relayer directly to Safaricom's M-Pesa Daraja B2C API webhooks to automatically trigger `confirmSettlement` upon transaction receipt matching.
-- **Lender Statement Bundles:** Implement an off-chain Merkle tree generator allowing a harvester to combine 30 discrete batch certificates into a single Merkle root. A SACCO loan officer can verify the harvester's cumulative 6-month delivery volume with one zero-knowledge or cryptographic membership proof, preserving privacy over individual transactions.
+- **Lender Statement Bundles:** Implement an off-chain Merkle tree generator allowing a harvester to combine 30 discrete batch certificates into a single Merkle root. A SACCO loan officer can verify the harvester's cumulative 6-month delivery volume with one cryptographic membership proof, preserving privacy over individual transactions.
 - **Offline-First Verifier PWA:** Progressive Web Application for field inspectors with local cryptographic signing and queue synchronization over intermittent lakeside 2G/3G connectivity.
+- **Verifier Correction Request State (Roadmap, not built):** A state allowing a verifier to flag a batch for correction before issuing a final attestation, without the current binary approve/reject outcome.
 
 ### Horizon 3: Multi-Lake Ecosystem & Carbon Methodology Alignment (Q2 to Q4 2027)
 - **Base Mainnet Deployment:** Transition from testnet to Base L2 mainnet, leveraging sub-cent gas fees and Ethereum Layer-1 security guarantees.
 - **ERC-4337 Account Abstraction:** Assign smart contract account wallets to harvester groups, managed via social recovery and session keys, giving informal collectives self-sovereign control over accumulated work credits.
 - **Carbon Registry Methodology Certification:** Partner with carbon methodology developers to establish an accredited aquatic biomass removal methodology (targeting Verra or Gold Standard), allowing future work credits to bridge into accredited voluntary carbon offsets.
 - **Regional Lake Expansion:** Extend protocol deployment to additional water bodies severely afflicted by aquatic weed blooms across East Africa, including Lake Kyoga, Lake Albert, and Lake Naivasha.
+- **External Evidence Connectors (Roadmap, not built):** Importers that accept evidence hashes and attestations from satellite platforms, field-sensor systems, or third-party ESG tools via the existing `source` label and `hotspotRef` hash field.
+- **Export Mappings (Roadmap, not built):** Adapter libraries that translate ZiwaChain event logs into formats used by other traceability or reporting systems.
+- **Duplicate-Evidence Flagging (Roadmap, not built):** Cross-batch detection of re-used evidence hashes to flag potential double-submission of the same physical evidence.
 
 ---
 
-## 4. User Testing & Field Findings
+## 4. Existing Tools and Complementary Systems
+
+ZiwaChain is designed as a provenance and verification layer that sits alongside existing satellite monitoring tools, ESG reporting platforms, and field data systems. It does not compete with those tools; it records whether their outputs were used and whether they were accepted by independent parties.
+
+The contract's `hotspotRef` field is a `bytes32` hash of an off-chain hotspot record. The `source` label (stored in the off-chain payload) identifies which system supplied the hotspot data. This means that evidence gathered by satellite platforms or sensor networks can be referenced by hash without any change to the core contract. A verifier who uses a third-party field data tool can record the hash of that tool's output as `evidenceHash`, tying external evidence directly to the on-chain attestation.
+
+ZiwaChain makes no claims about the features or limitations of any named external product. If an external system can produce a deterministic hash of its output, that output can serve as evidence in ZiwaChain without further integration work.
+
+Complementary roles by current contract support:
+- Satellite or aerial imaging: `hotspotRef` and `source` accept a hash of any platform's output. Supported by the current contract.
+- Field sensor or weighbridge output: hash can be passed as `evidenceHash` during `verifyBatch`. Supported by the current contract.
+- ESG reporting or carbon registry platforms: can consume ZiwaChain event logs directly via the public Base Sepolia RPC. Export mapping adapters to align with specific schema formats are roadmap, not built.
+
+---
+
+## 5. User Testing and Field Findings
 
 ### Field Findings
-> [!NOTE]
-> **Field Validation Status:**  
-> `[TO BE ADDED AFTER KISUMU]`  
-> Formal field user testing with rural harvester Beach Management Units (BMUs), weigh-scale operators, and local SACCO loan officers is scheduled for our upcoming deployment trials in Kisumu County. Test results, user experience observations regarding SMS latency, and feedback on short-code usability will be documented here following field completion.
+
+**[TO BE ADDED]**
+
+The following headings are placeholders for findings from engagement with harvesters, SACCO loan officers, and buyers in the Kisumu pilot area. Fill these in before submission or after the pilot:
+
+**Who would accept the certificate**
+<!-- Who in the harvester's ecosystem would act on this certificate: which SACCO, which buyer, which funder, which government officer. Describe the specific role, not just a category. -->
+
+**What costly problem it solves for them**
+<!-- What dispute, paperwork burden, risk, or compliance requirement does this certificate eliminate or reduce for that person. Put a number on it if possible. -->
+
+**What would make them reject it**
+<!-- What specific concerns, format mismatches, trust gaps, or process conflicts would cause that person to set the certificate aside. -->
+
+
 
 ---
 

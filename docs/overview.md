@@ -8,11 +8,11 @@
 
 ## 1. Executive Summary
 
-Lake Victoria, Africa's largest freshwater lake, is choked by massive recurring mats of invasive water hyacinth (*Pontederia crassipes*). The weed blankets fishing bays, suffocates aquatic biodiversity, impedes municipal water intakes, halts maritime transport, and undergoes rapid anaerobic decay that generates substantial methane ($CH_4$) emissions. 
+Lake Victoria, Africa's largest freshwater lake, is choked by massive recurring mats of invasive water hyacinth (*Pontederia crassipes*). The weed blankets fishing bays, suffocates aquatic biodiversity, impedes municipal water intakes, halts maritime transport, and undergoes rapid anaerobic decay that generates substantial methane ($CH_4$) emissions.
 
 Informal harvesting communities manually clear thousands of metric tons of weed each season. However, because they operate entirely within an informal cash economy, these harvesters remain economically invisible. They lack verifiable records of delivered weights or earnings, leaving them exposed to frequent payment disputes, predatory pricing, and systemic exclusion from formal credit facilities such as agricultural savings and credit cooperatives (SACCOs). Meanwhile, downstream clean-energy processors converting biomass into biogas, biochar, and organic fertilizer cannot reliably prove sustainable provenance or circular outcomes to corporate buyers and carbon registries.
 
-**ZiwaChain** solves this by establishing a decentralized, verified chain of custody that bridges low-connectivity SMS harvesters to an immutable provenance protocol deployed on Base Sepolia. By enforcing strict mass-balance validation, independent role-based verification, and two-sided settlement co-signing, ZiwaChain produces portable, tamper-evident digital certificates for informal workers and issues non-transferable work credits for verified circular diversion.
+**ZiwaChain** lets harvesters, buyers, verifiers and lenders rely on the same delivery record without having to trust a single operator. It establishes a verified chain of custody for invasive water hyacinth biomass from Lake Victoria, operating as a provenance and verification layer in the spirit of digital measurement, reporting and verification (dMRV) practice for biomass removal. By enforcing strict mass-balance validation, independent role-based verification, and two-sided settlement co-signing, ZiwaChain produces portable, tamper-evident digital certificates for informal workers and issues non-transferable work credits for verified circular diversion. ZiwaChain does not claim compliance with any specific dMRV standard.
 
 ---
 
@@ -51,8 +51,8 @@ ZiwaChain does not impose complex crypto-native friction on informal workers. In
 
 1. **Inclusive Onboarding via Relayed Telemetry:**
    Harvesters report harvest tallies through standard SMS/USSD messages. ZiwaClear's relayer logs the harvest on Base Sepolia, anchoring a salted payload hash and an un-linkable HMAC pseudonym without requiring harvesters to hold wallets or pay gas fees. In the current prototype the SMS gateway is simulated; production integration with a telecom operator (such as Africa's Talking) is a planned next step.
-2. **Separation of Duties & Physical Verification:**
-   Biomass cannot advance to commercial sale without physical sampling by an authorized field verifier. The contract explicitly enforces separation of duties: relayers who log harvests are cryptographically prohibited from verifying them (`VerifierCannotBeRelayer`). The field inspection, weighbridge check, and intake sampling described here represent the intended real-world process; in the prototype these steps are carried out by demo accounts running locally, not by physical inspectors.
+2. **Separation of Duties and Field Attestation:**
+   Biomass cannot advance to commercial sale without an attestation from an authorized field verifier. The contract explicitly enforces separation of duties: relayers who log harvests are cryptographically prohibited from verifying them (`VerifierCannotBeRelayer`). The field inspection, weighbridge check, and intake sampling described here represent the intended real-world process; in the prototype these steps are carried out by demo accounts running locally, not by physical inspectors.
 3. **Strict On-Chain Mass Balance:**
    The smart contract natively enforces conservation of mass:
    $$\text{acceptedKg} \le \text{harvestedKg} \quad \text{and} \quad \text{processedKg} \le \text{acceptedKg} \quad \text{and} \quad \sum \text{endUseKg} \le \text{processedKg}$$
@@ -87,3 +87,6 @@ ZiwaChain does not impose complex crypto-native friction on informal workers. In
 3. **Single Verifier Trust Point:** In the current prototype, a single verifier with `VERIFIER_ROLE` can approve or reject a batch. Multi-verifier approval (2-of-N) is scheduled on the roadmap.
 4. **Permanent Mass Balance:** If an erroneous weight is recorded and accepted by the buyer, it cannot be edited on-chain. The batch must be cancelled and re-logged.
 5. **Work Credits are Not Carbon Credits:** Work credits represent kilograms of verified biomass diverted to beneficial circular end use. They do not constitute certified carbon credits.
+6. **Hash Proves Integrity, Not Truth:** A valid certificate hash confirms that a file matches the recorded hash. It does not confirm that the underlying claims in the certificate are accurate. Accuracy at entry depends on the field verifier, the buyer's independent acceptance, and the harvester's own SMS confirmation.
+7. **Illustrative Demo Data:** The seeded batches in `demo/demo-data.json` are synthetic data generated by a local seed script. They are not records of real harvests.
+

@@ -9,7 +9,7 @@
 
 ZiwaChain bridges informal rural labor on Lake Victoria into an immutable provenance system on Base Sepolia. Because informal harvesters lack private keys and operate via standard 2G/3G SMS messaging, the protocol adopts an asymmetric trust design. This design introduces specific threat vectors that differ fundamentally from traditional decentralized finance protocols. 
 
-This document details our threat model, smart contract security controls, cryptographic data integrity guarantees, and the 85 automated unit tests that empirically validate these invariants. We conclude with an unvarnished analysis of our trust assumptions and known operational limitations.
+This document details our threat model, smart contract security controls, cryptographic data integrity guarantees, and the 94 automated unit tests that empirically validate these invariants. We conclude with an unvarnished analysis of our trust assumptions and known operational limitations.
 
 ---
 
@@ -29,8 +29,8 @@ This document details our threat model, smart contract security controls, crypto
 ### 2.2 Threat: Colluding or Dishonest Field Verifier
 **Attack Vector:** A corrupt biological inspector possessing `VERIFIER_ROLE` colludes with an unscrupulous harvester group to approve non-existent or heavily contaminated wet weed.  
 **Mitigating Controls:**
-- **Verifier Identity Immutably Logged:** The verifier's address is stored directly on the batch struct (`b.verifier = msg.sender`) and emitted in the `BatchVerified` event. Any systematic discrepancy triggers audit liability.
-- **Secondary Commercial Gate:** Verification does not trigger payouts or credit issuance. The commercial buyer conducts an independent weighing and moisture inspection at their reception facility before signing `acceptBatch`. If the weed is unviable, the buyer refuses acceptance, permanently stalling the batch at stage `Verified`.
+- **Verifier Attestation Immutably Logged:** The verifier's address is stored directly on the batch struct (`b.verifier = msg.sender`) and emitted in the `BatchVerified` event alongside the evidence hash and payload hash. The verifier's attestation constitutes their independent on-chain decision; any systematic discrepancy triggers audit liability.
+- **Secondary Commercial Gate:** The verifier's attestation does not trigger payouts or credit issuance. The commercial buyer conducts an independent weighing and moisture inspection at their reception facility before signing `acceptBatch`. If the weed is unviable, the buyer refuses acceptance, permanently stalling the batch at stage `Verified`.
 - **Terminal Rejection State:** If a verifier rejects a batch (`verifyBatch(batchId, false, ...)`), the stage transitions irreversibly to `Rejected`. The contract permanently locks the batch, preventing any subsequent resurrection.
 - **Roadmap Mitigation:** Phase 2 implements a 2-of-N threshold signature requirement, requiring co-signing by both an accredited laboratory (e.g. KMFRI) and a community beach management elder.
 - **Automated Test Validation:** Proven by test: `"lets a verifier reject a harvest and makes Rejected terminal"` in [test/ZiwaChain.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/ZiwaChain.ts).
@@ -130,13 +130,15 @@ To ensure transparency with evaluating judges, we explicitly disclose the follow
 2. **Custodian Multi-Relayer Isolation:** In the current prototype, any address with `RELAYER_ROLE` can invoke `confirmSettlement`. Restricting confirmation strictly to `b.custodian` is planned for multi-relayer enterprise scaling.
 3. **Custodian Contract Receiver Requirement:** Work credits are minted to `b.custodian`. If the custodian address is a smart contract wallet, it must implement `IERC1155Receiver`; otherwise `recordEndUse` reverts with `ERC1155InvalidReceiver`.
 4. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature. In the prototype, this SMS gateway is simulated (`src/sms/SimulatedGateway.ts`); live telecom integration is planned for production.
-5. **Single Verifier Trust Point in Prototype:** The current contract relies on a single verifier key per batch. While verifiers cannot hold the relayer role, a dishonest verifier could collude with harvesters to approve sub-standard biomass. Upgrading to 2-of-N threshold verification is scheduled for Phase 2.
+5. **Single Verifier Attestation in Prototype:** The current contract relies on a single verifier key per batch. The verifier's on-chain attestation is permanent and identifies the verifier's wallet address, but a dishonest verifier could collude with harvesters to approve sub-standard biomass. Upgrading to 2-of-N threshold verification is scheduled for Phase 2.
 6. **Permanent Mass Balance:** If a scaling error is accepted by a commercial buyer, the kilogram mass cannot be altered retroactively. The batch must be cancelled and re-logged.
 7. **Work Credits are Not Carbon Credits:** Work credits represent verified kilograms of hyacinth removed and diverted to circular processing. They do not constitute certified carbon credits.
-8. **Field Inspection, Weighbridge & Intake Checks:** Landing-site field inspection, weighbridge calibration, and physical intake sampling describe the intended real-world process; hardware integrations are not built into the software prototype and test runs use simulated development signers.
+8. **Field Inspection, Weighbridge and Intake Checks:** Landing-site field inspection, weighbridge calibration, and physical intake sampling describe the intended real-world process; hardware integrations are not built into the software prototype and test runs use simulated development signers.
 9. **Illustrative Demo Data:** Seeded batches in `demo/demo-data.json` are illustrative demo data for protocol testing, not records of physical harvests.
+10. **Hash Proves Integrity, Not Truth:** A valid certificate hash confirms that a file matches the recorded hash. It does not confirm that the underlying claims in the certificate are accurate. The chain makes fabrication and alteration detectable; it does not validate what happened in the field at the moment of entry.
 
 For an architectural comparison explaining why a public blockchain is used rather than a centralized database or signed log, see [Why ZiwaChain Uses a Blockchain](whyBlockchain.md).
+
 
 ---
 
