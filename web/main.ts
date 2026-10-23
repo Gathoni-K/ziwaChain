@@ -64,7 +64,7 @@ function formatTime(unixSec: number): string {
 }
 
 // Main verification runner
-async function runVerification(certJsonString: string) {
+export async function runVerification(certJsonString: string) {
   resultsArea.style.display = "block";
   checklist.innerHTML = "";
   timelineContainer.innerHTML = "";
@@ -500,7 +500,7 @@ function buildTimeline(cert: HarvesterCertificate, batchLogs: any[]) {
 }
 
 // Embedded sample batches for quick button testing
-const SAMPLE_BATCH_A = {
+export const SAMPLE_BATCH_A = {
   version: 1,
   chainId: "31337",
   contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
@@ -632,7 +632,7 @@ const SAMPLE_BATCH_A = {
   verifyUrl: "https://ziwachain.org/verify"
 };
 
-const SAMPLE_BATCH_C = {
+export const SAMPLE_BATCH_C = {
   version: 1,
   chainId: "31337",
   contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
@@ -667,7 +667,7 @@ const SAMPLE_BATCH_C = {
   verifyUrl: "https://ziwachain.org/verify"
 };
 
-const SAMPLE_BATCH_D = {
+export const SAMPLE_BATCH_D = {
   version: 1,
   chainId: "31337",
   contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
