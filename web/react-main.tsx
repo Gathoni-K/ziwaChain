@@ -154,7 +154,72 @@ function publicTimelineDetails(title: string, details: string) {
   return details;
 }
 
-function App() {
+function SiteNav() {
+  const [open, setOpen] = useState(false);
+  return (
+    <nav className="relative flex items-center justify-between border-b border-slate-200 pb-4" aria-label="Main navigation">
+      <a href="/" className="group" onClick={() => setOpen(false)}>
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-800">ZiwaChain</p>
+        <p className="mt-1 text-sm font-medium text-slate-600">Records for collected water hyacinth</p>
+      </a>
+      <button type="button" className="min-h-11 min-w-11 rounded-lg border border-slate-300 bg-white text-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600 sm:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="site-menu" onClick={() => setOpen(!open)}>
+        <span aria-hidden="true">{open ? "×" : "☰"}</span>
+      </button>
+      <div id="site-menu" className={`${open ? "absolute left-0 right-0 top-full z-10 mt-3 flex" : "hidden"} flex-col gap-1 rounded-xl border border-slate-200 bg-white p-3 shadow-lg sm:static sm:mt-0 sm:flex sm:flex-row sm:items-center sm:gap-5 sm:border-0 sm:p-0 sm:shadow-none`}>
+        <a href="/" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600">Home</a>
+        <a href="/#how-it-works" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600">How it works</a>
+        <a href="/verify" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600">Verify a record</a>
+        <a href="/verify" onClick={() => setOpen(false)} className="rounded-lg bg-teal-800 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2">Check a record</a>
+      </div>
+    </nav>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer className="mt-16 border-t border-slate-200 pt-8 text-sm leading-6 text-slate-600">
+      <div className="grid gap-8 sm:grid-cols-[1fr_auto]">
+        <div><p className="font-bold text-teal-900">ZiwaChain</p><p className="mt-2 max-w-md">A public way to inspect records about collected water hyacinth and what happened at each recorded step.</p><p className="mt-3">A digital match shows that information agrees with saved records. It cannot prove that every real-world activity happened exactly as described.</p></div>
+        <div className="flex flex-col gap-2 sm:min-w-40"><a href="/" className="hover:text-teal-800">Home</a><a href="/#how-it-works" className="hover:text-teal-800">How it works</a><a href="/verify" className="hover:text-teal-800">Verify a record</a></div>
+      </div>
+      <p className="mt-8 border-t border-slate-100 pt-4 text-xs">© {new Date().getFullYear()} ZiwaChain</p>
+    </footer>
+  );
+}
+
+function HomePage() {
+  return (
+    <div className="min-h-screen bg-[#f5f7f4] text-slate-950">
+      <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+        <SiteNav />
+        <main>
+          <section className="grid gap-10 py-14 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div><p className="text-sm font-bold uppercase tracking-[0.2em] text-teal-800">A clearer record of environmental work</p><h1 className="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-slate-950 sm:text-6xl">Follow the journey of collected water hyacinth.</h1><p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">When water hyacinth is collected, different people may handle it before it is put to use. ZiwaChain helps keep a record of what happens along the way, so people can see what has been reported and check the saved information.</p><div className="mt-8 flex flex-wrap gap-3"><a href="/verify" className="rounded-lg bg-teal-800 px-5 py-3 text-center text-sm font-bold text-white hover:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2">Check a record</a><a href="#how-it-works" className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-700 hover:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2">How it works</a></div></div>
+            <div className="rounded-3xl border border-teal-900/10 bg-[#e6f0eb] p-6 sm:p-8" aria-label="A simple picture of a collection record's journey">
+              <div className="flex flex-col gap-3">
+                {["Collection recorded", "Collection checked", "Amount received and processed", "Record available to check"].map((label, index) => <div key={label} className="flex items-center gap-4 rounded-2xl bg-white/80 p-4 shadow-sm"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-800 text-sm font-bold text-white">{index + 1}</span><span className="font-semibold text-slate-800">{label}</span></div>)}
+              </div>
+              <p className="mt-5 text-center text-xs leading-5 text-slate-600">A simple view of the steps a record may contain. Not a report of a particular collection.</p>
+            </div>
+          </section>
+
+          <section className="grid gap-8 border-y border-slate-200 py-14 sm:grid-cols-2 sm:py-16"><div><h2 className="text-3xl font-bold tracking-tight">Why keep a record?</h2></div><div className="space-y-4 text-base leading-7 text-slate-600"><p>Collecting water hyacinth is only one part of the story. Someone may receive it, another person may process it, and someone else may put it to use.</p><p>Without clear records, it can be difficult to follow what happened at each step. ZiwaChain is designed to make those steps easier to follow.</p></div></section>
+
+          <section id="how-it-works" className="scroll-mt-6 py-14 sm:py-20"><div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.2em] text-teal-800">How it works</p><h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Four simple steps.</h2></div><div className="mt-8 grid gap-4 md:grid-cols-4">{[["A collection is recorded", "The system records the amount of water hyacinth reported as collected."], ["The collection is checked", "An authorised person can approve or reject the record."], ["The journey is recorded", "The system can record how much was accepted, processed, and put to use as the collection moves forward."], ["People can check the record", "A certificate lets someone inspect the information saved about the collection."]].map(([title, text], index) => <article key={title} className="rounded-2xl border border-slate-200 bg-white p-5"><p className="text-sm font-bold text-teal-800">0{index + 1}</p><h3 className="mt-5 text-lg font-bold">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p></article>)}</div></section>
+
+          <section className="rounded-3xl bg-[#e6f0eb] px-6 py-12 sm:px-10"><h2 className="max-w-2xl text-3xl font-bold tracking-tight">One record. A clearer picture of what happened.</h2><div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{["How much was reported as collected.", "How much was accepted and processed.", "How much was recorded as put to use.", "Whether the collection was approved or rejected.", "Whether a payment confirmation was recorded.", "Whether the digital details match saved records."].map((item) => <div key={item} className="rounded-xl bg-white/80 p-4 text-sm font-semibold text-slate-700">{item}</div>)}</div></section>
+
+          <section className="grid gap-6 py-14 sm:grid-cols-2 sm:py-20"><div><h2 className="text-3xl font-bold tracking-tight">What a digital record can — and cannot — tell you.</h2></div><div className="space-y-4"><div className="rounded-2xl border border-teal-200 bg-teal-50 p-5"><h3 className="font-bold text-teal-950">What it can tell you</h3><p className="mt-2 text-sm leading-6 text-teal-900">The system can check whether the information on a certificate matches the digital records saved for it.</p></div><div className="rounded-2xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-bold text-amber-950">What it cannot prove by itself</h3><p className="mt-2 text-sm leading-6 text-amber-900">A matching digital record does not, on its own, prove that every real-world event happened exactly as described.</p></div></div></section>
+
+          <section className="rounded-3xl bg-teal-900 px-6 py-12 text-white sm:px-10"><h2 className="text-3xl font-bold tracking-tight">Have a collection certificate?</h2><p className="mt-3 max-w-xl leading-7 text-teal-50">Open its certificate or enter its code to see what has been recorded and check the digital details.</p><a href="/verify" className="mt-7 inline-block rounded-lg bg-white px-5 py-3 text-sm font-bold text-teal-900 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-teal-900">Check a record</a></section>
+        </main>
+        <SiteFooter />
+      </div>
+    </div>
+  );
+}
+
+function VerifyPage() {
   const [json, setJson] = useState("");
   const [results, setResults] = useState<Results | null>(null);
   const [verifier, setVerifier] = useState<typeof import("./main") | null>(null);
@@ -229,22 +294,15 @@ function App() {
     <div className="min-h-screen bg-[#f5f7f4] text-slate-950">
       <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
         <header className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <a href={window.location.pathname} className="group" aria-label="ZiwaChain certificate lookup">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-800">ZiwaChain</p>
-              <p className="mt-1 text-sm font-medium text-slate-600">Proof of environmental work, from collection to end use.</p>
-            </a>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500">Public record check</span>
-          </div>
+          <SiteNav />
           <div className="mt-10 max-w-2xl">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-5xl">What happened to this water hyacinth?</h1>
-            <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">ZiwaChain keeps a record of collected water hyacinth and follows what happens to it next.</p>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">When water hyacinth is collected, different people may handle it before it is put to use. ZiwaChain helps keep a record of what each person reports and what happens at each recorded step.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-5xl">Check a collection record</h1>
+            <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">Enter the code on a certificate, or open the certificate link you were given.</p>
           </div>
         </header>
 
         <main className="space-y-6">
-          <Card title="Check a collection record">
+          <Card title="Open the certificate link">
             <p className="text-sm leading-6 text-slate-600">Open the certificate link you received or scan its QR code. The record will open here automatically.</p>
             <p className="mt-3 text-sm leading-6 text-slate-600">If you are testing or have the certificate file, use the extra options below.</p>
             <details className="mt-5 border-t border-slate-100 pt-4">
@@ -323,7 +381,7 @@ function App() {
           )}
         </main>
 
-        <footer className="mt-10 border-t border-slate-200 py-6 text-sm leading-6 text-slate-600">ZiwaChain helps people inspect recorded environmental-work records. A digital check can show whether the information matches the saved records; it cannot independently prove that every real-world claim is true.</footer>
+        <SiteFooter />
       </div>
 
       <div aria-hidden="true" className="hidden">
@@ -332,6 +390,10 @@ function App() {
       </div>
     </div>
   );
+}
+
+function App() {
+  return window.location.pathname === "/verify" || window.location.pathname.startsWith("/verify/") ? <VerifyPage /> : <HomePage />;
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
