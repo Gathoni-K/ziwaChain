@@ -4,6 +4,31 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 24, 2026, Task 13b: Add Provisional Two-Sided Trust Observation
+
+### Files added or changed
+| File | Change |
+|---|---|
+| `README.md` | Added the provisional reported funder-side scam observation and stated that paid-removal schemes appear to fail on trust from both sides. |
+| `docs/overview.md` | Added the same provisional motivation; distinguished activity evidence from outcome evidence in the limits; and marked independent outcome evidence as an unvalidated roadmap item. |
+| `docs/adoptionAndScalability.md` | Added the funder-side observation to Field Findings and identified funders and county programmes as prospective users of verified removal evidence, explicitly as an unvalidated hypothesis. |
+| `docs/security/securityAndDataIntegrity.md` | Distinguished activity evidence from outcome evidence, stated the payment implication of missing verified harvest records, and documented unvalidated outcome-evidence roadmap ideas and limits. |
+| `docs/security/whyBlockchain.md` | Added the activity-versus-outcome evidence boundary and the same unvalidated outcome-evidence roadmap limits. |
+| `docs/demoScript.md` | Added the payment-against-records sentence. |
+
+### What changed and why
+- Recorded the reported, provisional funder-side scam alongside the reported harvester-side registration-fee scam without naming parties or adding unvalidated factual claims.
+- Clarified that the current protocol supports activity evidence, not proof that ecological outcomes were caused by the activity.
+- Kept independent outcome evidence, including satellite observation only after ZiwaVision validation, comparison sites, and seasonal baselines, clearly on the unvalidated roadmap.
+
+### Tests
+- Documentation-only change; no code or tests changed.
+
+### Deviations from spec
+None.
+
+---
+
 ## Oct 22, 2026, Task 12: Integrate Field Findings into Judge-Facing Documents
 
 ### Files added or changed

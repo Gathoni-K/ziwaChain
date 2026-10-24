@@ -149,6 +149,9 @@ To ensure transparency with evaluating judges, we explicitly disclose the follow
 9. **Illustrative Demo Data:** Seeded batches in `demo/demo-data.json` are illustrative demo data for protocol testing, not records of physical harvests.
 10. **Hash Proves Integrity, Not Truth:** A valid certificate hash confirms that a file matches the recorded hash. It does not confirm that the underlying claims in the certificate are accurate. The chain makes fabrication and alteration detectable; it does not validate what happened in the field at the moment of entry.
 11. **Duplicate Evidence Flagging Catches Exact Hashes Only:** The on-chain `evidenceFirstBatch` mapping and `EvidenceReused` event detect exact cryptographic hash reuse across batches. It cannot detect similar photos, re-compressed photos, or alternate camera angles of the same physical biomass.
+12. **Activity vs Outcome Evidence:** Activity evidence records what was removed, when, weighed, and independently attested. Outcome evidence would show cleared water attributable to that activity. ZiwaChain addresses the former: a claim with no verified harvest records has nothing to pay against. It cannot show that the weed would not have receded naturally, and it cannot show that submitted photos or weights are true.
+
+**Roadmap, unvalidated:** Independent outcome evidence could include before-and-after satellite observation, but only once ZiwaVision is validated, as well as nearby comparison sites and seasonal baselines. These are not current security or verification capabilities.
 
 For an architectural comparison explaining why a public blockchain is used rather than a centralized database or signed log, see [Why ZiwaChain Uses a Blockchain](whyBlockchain.md).
 

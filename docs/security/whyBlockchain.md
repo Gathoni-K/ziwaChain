@@ -46,11 +46,13 @@ ZiwaChain operates as a provenance and verification layer in the spirit of digit
 ## 4. What the blockchain does not do
 
 - **It does not verify the real world.** It cannot know whether a harvest happened or whether the biomass was water hyacinth. A valid hash confirms that a file matches the recorded hash; it does not confirm that the claims in the file are true. Accuracy at entry depends on the field verifier's attestation, the buyer's independent acceptance, the payment reference, and the harvester's own SMS confirmation. Making later alteration or denial of recorded facts detectable is what the chain provides.
+- **It records activity evidence, not outcome evidence.** Activity evidence covers what was removed, when, weighed and independently attested. Outcome evidence would show cleared water attributable to that activity. ZiwaChain addresses the former: a claim with no verified harvest records has nothing to pay against. It cannot show that the weed would not have receded naturally, and it cannot show that submitted photos or weights are true.
 - **Harvesters do not sign for themselves.** They report by SMS, and a ZiwaClear relayer submits their harvest. Their SMS confirmation adds agreement but is not a cryptographic signature, so harvester-side non-repudiation depends on the platform's custody of the relayer key.
 - **Trust points remain.** One admin wallet grants roles and a single verifier role issues attestations. A multisignature admin and multi-verifier approval are on the roadmap.
 - **The prototype runs on a testnet,** so it carries no real economic security yet.
 - **Buyer validation & pilot design:** In the field, no commercial buyer was validated (local biogas demonstration sites source their own feedstock). The "buyer" role represents any accepting and paying party (programme, donor, or processor), and downstream stages beyond verification are a pilot design with illustrative demo data.
 - **Provisional field findings:** Field observations are provisional and based on informal fieldwork around Dunga, Homa Bay, and Kendu Bay on Lake Victoria (Oct 18 to 19, 2026, across a small number of conversations).
+- **Roadmap, unvalidated:** Independent outcome evidence could include before-and-after satellite observation, but only once ZiwaVision is validated, as well as nearby comparison sites and seasonal baselines. These are not current capabilities.
 
 ## 5. Summary
 
