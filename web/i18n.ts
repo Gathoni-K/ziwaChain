@@ -106,6 +106,11 @@ export interface Translations {
     contract: string;
     chain: string;
     paymentRef: string;
+    qrTitle: string;
+    qrDesc: string;
+    qrCopyLink: string;
+    qrLinkCopied: string;
+    qrAlt: string;
     dates: {
       collectedOn: string;
       checkedOn: string;
@@ -294,6 +299,12 @@ export const translations: Record<Language, Translations> = {
       contract: "Contract",
       chain: "Chain",
       paymentRef: "Payment reference",
+      qrTitle: "Scan to open this collection record",
+      qrDesc:
+        "Scanning this code opens the public record-checking page with this certificate pre-loaded, so anyone can verify the details.",
+      qrCopyLink: "Copy certificate link",
+      qrLinkCopied: "Link copied!",
+      qrAlt: "QR code for this certificate",
       dates: {
         collectedOn: "Collected on",
         checkedOn: "Checked on",
@@ -482,6 +493,12 @@ export const translations: Record<Language, Translations> = {
       contract: "Mkataba wa mnyororo",
       chain: "Mnyororo (Chain)",
       paymentRef: "Kumbukumbu ya malipo",
+      qrTitle: "Changanua ili ufungue rekodi hii ya mkusanyiko",
+      qrDesc:
+        "Kuchanganua msimbo huu kunafungua ukurasa wa ukaguzi wa umma na cheti hiki kimepakiwa tayari, ili mtu yeyote aweze kuthibitisha maelezo.",
+      qrCopyLink: "Nakili kiungo cha cheti",
+      qrLinkCopied: "Kiungo kimeakiliwa!",
+      qrAlt: "Msimbo wa QR wa cheti hiki",
       dates: {
         collectedOn: "Kukusanywa tarehe",
         checkedOn: "Kukaguliwa tarehe",

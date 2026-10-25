@@ -1,6 +1,6 @@
 import { ethers, Contract, JsonRpcProvider } from "ethers";
 import { hashRecord, hashConfirmation } from "../src/hashing/hash";
-import { fromBase64Url, HarvesterCertificate } from "../src/certificate/build";
+import { fromBase64Url, toBase64Url, HarvesterCertificate } from "../src/certificate/build";
 import { shortCode } from "../src/certificate/shortCode";
 import { getRpcUrl, STAGE_NAMES, ZIWACHAIN_ABI } from "./config";
 import { batchA, batchB, batchC, batchD } from "./demo-fixtures";
@@ -27,6 +27,8 @@ export interface VerificationResult {
   stageName: string;
   isSyntheticDemo: boolean;
   rejectionReason?: string;
+  /** The full public verification URL for this certificate (e.g. https://ziwachain.org/verify#c=...) */
+  verifyUrl?: string;
   recordedDates: {
     collectedAt?: string;
     verifiedAt?: string;
@@ -771,12 +773,29 @@ export async function runVerification(certJsonString: string): Promise<Verificat
 
   const stageDisplay = batchStageName || (cert.status === "Rejected" ? "Rejected" : "Harvested");
 
+  // Derive the public verification deep-link from the certificate.
+  // The certificate's own verifyUrl field already encodes the full payload
+  // as a base64url fragment (/verify#c=...). If the field is absent (e.g.
+  // hand-built or older cert), rebuild it from the raw cert JSON so the
+  // QR code always points to the correct record.
+  let resolvedVerifyUrl: string | undefined;
+  if (typeof cert.verifyUrl === "string" && cert.verifyUrl.includes("#c=")) {
+    resolvedVerifyUrl = cert.verifyUrl;
+  } else if (cert.batchId) {
+    // Re-derive: strip verifyUrl itself before encoding to avoid recursion
+    const { verifyUrl: _drop, ...certForQr } = cert as any;
+    void _drop;
+    const encoded = toBase64Url(JSON.stringify(certForQr));
+    resolvedVerifyUrl = `https://ziwachain.org/verify#c=${encoded}`;
+  }
+
   return {
     status: finalStatus,
     statusText: finalStatusText,
     stageName: stageDisplay,
     isSyntheticDemo,
     rejectionReason,
+    verifyUrl: resolvedVerifyUrl,
     recordedDates,
     mass,
     massStatus: massStatusText,

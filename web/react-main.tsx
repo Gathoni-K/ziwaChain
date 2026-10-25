@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useRef, useState, type ReactNode } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { fromBase64Url } from "../src/certificate/build";
 import {
@@ -174,6 +174,137 @@ function Card({
     </section>
   );
 }
+
+/**
+ * QrShareCard – generates and displays a QR code for the certificate's public
+ * verification deep-link entirely in the browser. The `qrcode` package is already
+ * a runtime dependency (used server-side in src/certificate/qr.ts), so no new
+ * dependency is needed. We use the browser-safe `QRCode.toDataURL()` API.
+ *
+ * The QR code encodes the certificate's own `verifyUrl` field, which is
+ * `https://ziwachain.org/verify#c=<base64url(certJSON)>`. Scanning it opens the
+ * public verification page with the full certificate pre-loaded in the URL fragment,
+ * triggering the same cryptographic + on-chain checks as any other certificate load.
+ */
+function QrShareCard({ verifyUrl }: { verifyUrl: string }) {
+  const { t } = useAppPreferences();
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Generate QR whenever the verifyUrl changes
+  useEffect(() => {
+    let cancelled = false;
+    setQrDataUrl(null);
+    setQrError(null);
+
+    import("qrcode").then((QRCode) => {
+      // Use errorCorrectionLevel L for maximum data capacity (the URL may be ~6 kB)
+      return QRCode.default.toDataURL(verifyUrl, {
+        errorCorrectionLevel: "L",
+        margin: 2,
+        scale: 6,
+        color: {
+          dark: "#004d43",  // dark lake-green matches brand primary
+          light: "#ffffff",
+        },
+      });
+    }).then((dataUrl) => {
+      if (!cancelled) setQrDataUrl(dataUrl);
+    }).catch((err: unknown) => {
+      if (!cancelled) setQrError(String(err));
+    });
+
+    return () => { cancelled = true; };
+  }, [verifyUrl]);
+
+  const handleCopyLink = useCallback(() => {
+    void navigator.clipboard?.writeText(verifyUrl).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    });
+  }, [verifyUrl]);
+
+  return (
+    <Card>
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-8">
+        {/* QR image */}
+        <div className="shrink-0">
+          {qrDataUrl ? (
+            <img
+              src={qrDataUrl}
+              alt={t.verify.qrAlt}
+              width={192}
+              height={192}
+              className="rounded-2xl border-2 border-[var(--border-subtle)] bg-white shadow-md"
+            />
+          ) : qrError ? (
+            <div className="flex h-48 w-48 items-center justify-center rounded-2xl border-2 border-[var(--error-border)] bg-[var(--error-bg)] p-4 text-center text-xs text-[var(--error-text)]">
+              QR unavailable
+            </div>
+          ) : (
+            /* skeleton while generating */
+            <div className="flex h-48 w-48 animate-pulse items-center justify-center rounded-2xl border-2 border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+              <svg className="h-10 w-10 text-[var(--text-subtle)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+            </div>
+          )}
+        </div>
+
+        {/* Text + copy action */}
+        <div className="flex min-w-0 flex-col gap-3">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight text-[var(--text-heading)]">
+              {t.verify.qrTitle}
+            </h2>
+            <p className="mt-1.5 text-sm leading-6 text-[var(--text-muted)]">
+              {t.verify.qrDesc}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              id="btn-copy-cert-link"
+              onClick={handleCopyLink}
+              className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] ${
+                linkCopied
+                  ? "border border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
+                  : "border border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--primary)] hover:bg-[var(--primary-light)] shadow-sm"
+              }`}
+              aria-live="polite"
+            >
+              {linkCopied ? (
+                <>
+                  {/* checkmark */}
+                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {t.verify.qrLinkCopied}
+                </>
+              ) : (
+                <>
+                  {/* link icon */}
+                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  {t.verify.qrCopyLink}
+                </>
+              )}
+            </button>
+
+            {/* Monospace truncated URL for desktop readability */}
+            <p className="hidden truncate font-mono text-[11px] text-[var(--text-subtle)] sm:block max-w-xs" title={verifyUrl}>
+              {verifyUrl.length > 60 ? `${verifyUrl.slice(0, 60)}…` : verifyUrl}
+            </p>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 
 function SiteNav() {
   const [open, setOpen] = useState(false);
@@ -997,6 +1128,11 @@ function VerifyPage() {
           {/* Verification Results Cards */}
           {results && results.status !== "loading" && (
             <section className="space-y-6" aria-label="Certificate results details">
+              {/* QR code share card — only shown when certificate has a public deep-link */}
+              {results.verifyUrl && (
+                <QrShareCard verifyUrl={results.verifyUrl} />
+              )}
+
               {/* Batch at a glance */}
               <Card title={t.verify.glanceTitle}>
                 <div className="grid gap-6 sm:grid-cols-[1fr_auto]">
