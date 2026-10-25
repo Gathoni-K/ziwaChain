@@ -1,6 +1,6 @@
 # ZiwaChain
 
-**ZiwaChain** is a verified chain of custody and provenance protocol for invasive water hyacinth biomass harvested from Lake Victoria. Built as an extension to the ZiwaClear marketplace, it anchors harvest, verification, commercial acceptance, processing, and circular end use on Base Sepolia. The protocol equips informal harvesters with portable, tamper-evident digital proof of their work without requiring smartphone ownership or crypto wallet management.
+**ZiwaChain** is a verified chain of custody and provenance protocol for invasive water hyacinth biomass harvested from Lake Victoria. Built as an extension to the [ZiwaClear](https://ziwa-clear.vercel.app/) marketplace, it anchors harvest, verification, commercial acceptance, processing, and circular end use on Base Sepolia. The protocol equips informal harvesters with portable, tamper-evident digital proof of their work without requiring smartphone ownership or crypto wallet management.
 
 ZiwaChain lets harvesters, buyers (the accepting and paying party: processors, programmes, or funders), verifiers and lenders rely on the same delivery record without having to trust a single operator.
 
