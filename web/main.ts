@@ -1,7 +1,7 @@
 import { ethers, Contract, JsonRpcProvider } from "ethers";
 import { hashRecord, hashConfirmation } from "../src/hashing/hash";
-import { fromBase64Url, toBase64Url, HarvesterCertificate } from "../src/certificate/build";
-import { shortCode } from "../src/certificate/shortCode";
+import { fromBase64Url, toBase64Url } from "../src/certificate/build";
+// import { shortCode } from "../src/certificate/shortCode";
 import { getRpcUrl, STAGE_NAMES, ZIWACHAIN_ABI } from "./config";
 import { batchA, batchB, batchC, batchD } from "./demo-fixtures";
 
@@ -19,6 +19,10 @@ export interface TimelineItem {
   meta: string;
   details: string;
   tx: string;
+  blockNumber?: number;
+  actor?: string;
+  rawTxHash?: string;
+  stageKey?: string;
 }
 
 export interface VerificationResult {
@@ -531,7 +535,7 @@ export async function runVerification(certJsonString: string): Promise<Verificat
         endUseKgTotal <= processedKg;
 
       if (massBalanceValid) {
-        massStatusText = `✓ Mass Balance Invariant Preserved: ${harvestedKg.toLocaleString()} kg harvested → ${acceptedKg.toLocaleString()} kg accepted → ${processedKg.toLocaleString()} kg processed → ${endUseKgTotal.toLocaleString()} kg end-use.`;
+        massStatusText = `The recorded amounts fit together: ${harvestedKg.toLocaleString()} kg collected → ${acceptedKg.toLocaleString()} kg accepted → ${processedKg.toLocaleString()} kg processed → ${endUseKgTotal.toLocaleString()} kg recorded as put to use.`;
         addCheckItem(
           "Conservation of Mass Invariant",
           "pass",
@@ -539,7 +543,7 @@ export async function runVerification(certJsonString: string): Promise<Verificat
         );
       } else {
         hasFailures = true;
-        massStatusText = "⚠ Mass Balance Invariant Violated!";
+        massStatusText = "⚠ Mass balance warning: recorded quantities exceed physical limits!";
         addCheckItem(
           "Conservation of Mass Invariant",
           "fail",
@@ -547,7 +551,7 @@ export async function runVerification(certJsonString: string): Promise<Verificat
         );
       }
     } else {
-      massStatusText = `Collection recorded (${harvestedKg.toLocaleString()} kg). Subsequent processing stages are not yet recorded.`;
+      massStatusText = `Collection recorded (${harvestedKg.toLocaleString()} kg). Subsequent processing stages are not recorded yet.`;
       addCheckItem(
         "Conservation of Mass Invariant",
         "pass",
@@ -677,23 +681,66 @@ export async function runVerification(certJsonString: string): Promise<Verificat
     const timestamp = payload.harvestedAt || payload.verifiedAt || payload.acceptedAt || payload.confirmedAt || payload.processedAt || payload.endUseAt;
     const actor = payload.verifier || payload.buyer || payload.processor || "Relayer";
 
+    let titleStr = "";
     let details = "";
-    if (payload.quantityKg) details = `Quantity: ${payload.quantityKg} kg | Region: ${payload.region || "N/A"}`;
-    if (payload.acceptedKg) details = `Accepted Mass: ${payload.acceptedKg} kg | Payment Ref Hash: ${payload.paymentRefHash?.slice(0, 14)}...`;
-    if (payload.approved !== undefined) details = `Result: ${payload.approved ? "APPROVED" : "REJECTED"} | Method: ${payload.method || "Physical Inspection"}`;
-    if (payload.confirmationHash) details = `Settlement Co-Sign confirmed by harvester SMS code`;
-    if (payload.inputKg) details = `Processing Feedstock: ${payload.inputKg} kg into ${payload.processType || "biogas"}`;
-    if (payload.endUseKg) details = `Final End Use: ${payload.endUseKg} kg converted into ${payload.endUseType || "bioenergy"}`;
 
-    const titleStr = `${key.replace(/_/g, " ")} (${actor})`;
-    const metaStr = `${formatTime(timestamp)} • Block #${stage.blockNumber}`;
+    if (key === "HARVEST_LOGGED") {
+      const kg = payload.quantityKg ? `${Number(payload.quantityKg).toLocaleString()} kg` : "Material";
+      titleStr = `Collection recorded — ${kg}`;
+      const location = payload.region ? ` in ${payload.region}` : "";
+      details = `${kg} collected${location} and logged into the system.`;
+    } else if (key === "VERIFIED") {
+      if (payload.approved === false || cert.status === "Rejected") {
+        titleStr = "Collection rejected";
+        details = rejectionReason
+          ? `Inspection did not approve this lot: ${rejectionReason}`
+          : "Collection did not pass physical quality inspection.";
+      } else {
+        titleStr = "Collection approved";
+        details = "Inspected and approved by independent verifier.";
+      }
+    } else if (key === "BUYER_ACCEPTED") {
+      const kg = payload.acceptedKg ? `${Number(payload.acceptedKg).toLocaleString()} kg` : "";
+      titleStr = kg ? `Receiving party accepted ${kg}` : "Collection accepted";
+      details = kg
+        ? `Receiving party accepted ${kg} for downstream processing.`
+        : "Receiving party accepted the verified batch.";
+    } else if (key === "SETTLEMENT_CONFIRMED") {
+      titleStr = "Payment confirmation recorded";
+      details = "Harvester payment confirmed on-chain via SMS co-sign.";
+    } else if (key === "PROCESSED") {
+      const kg = payload.inputKg ? `${Number(payload.inputKg).toLocaleString()} kg` : "";
+      titleStr = kg ? `${kg} processed` : "Material processed";
+      const processType = payload.processType || "biogas";
+      const units = payload.outputUnits ? ` (${payload.outputUnits} output units)` : "";
+      details = kg
+        ? `${kg} processed into ${processType}${units}.`
+        : `Material processed into ${processType}.`;
+    } else if (key.startsWith("END_USE")) {
+      const kg = payload.endUseKg ? `${Number(payload.endUseKg).toLocaleString()} kg` : "";
+      titleStr = kg ? `${kg} recorded as put to use` : "Recorded as put to use";
+      const endUseType = payload.endUseType || "bioenergy";
+      const units = payload.outputUnits ? ` (${payload.outputUnits} output units)` : "";
+      details = kg
+        ? `${kg} converted into ${endUseType}${units}.`
+        : `Material put to ${endUseType}.`;
+    } else {
+      titleStr = key.replace(/_/g, " ");
+      details = "Stage event recorded.";
+    }
+
+    const metaStr = timestamp ? formatTime(timestamp) : "Date not recorded";
     const txStr = stage.txHash ? `Tx: ${stage.txHash.slice(0, 24)}...` : "";
 
     timeline.push({
       title: titleStr,
       meta: metaStr,
       details,
-      tx: txStr
+      tx: txStr,
+      blockNumber: stage.blockNumber,
+      actor,
+      rawTxHash: stage.txHash,
+      stageKey: key
     });
 
     if (timelineContainer) {
@@ -714,16 +761,19 @@ export async function runVerification(certJsonString: string): Promise<Verificat
   // Include correction event in timeline if present
   if (Array.isArray(cert.supersededRecords)) {
     for (const rec of cert.supersededRecords) {
-      const correctionTitle = "RECORD CORRECTED (Author)";
-      const correctionMeta = `Block #${rec.blockNumber}`;
-      const correctionDetails = `Earlier record ${rec.targetHash.slice(0, 14)}... was replaced by corrected record ${rec.newHash.slice(0, 14)}...`;
-      const correctionTx = `Tx: ${rec.txHash.slice(0, 24)}...`;
+      const correctionTitle = "Record corrected";
+      const correctionMeta = rec.blockNumber ? `Block #${rec.blockNumber}` : "Record updated";
+      const correctionDetails = "An earlier record was updated and superseded by the author on-chain.";
+      const correctionTx = rec.txHash ? `Tx: ${rec.txHash.slice(0, 24)}...` : "";
 
       timeline.push({
         title: correctionTitle,
         meta: correctionMeta,
         details: correctionDetails,
-        tx: correctionTx
+        tx: correctionTx,
+        blockNumber: rec.blockNumber,
+        rawTxHash: rec.txHash,
+        stageKey: "RECORD_CORRECTED"
       });
 
       if (timelineContainer) {

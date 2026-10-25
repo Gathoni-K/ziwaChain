@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { fromBase64Url } from "../src/certificate/build";
 import {
@@ -18,7 +18,6 @@ import {
   useAppPreferences,
 } from "./context";
 import {
-  formatLocaleDate,
   getStatusBannerCopy,
   getTranslatedCheck,
   getTranslatedTimeline,
@@ -108,6 +107,7 @@ function Button({
   type = "button",
   disabled = false,
   ariaLabel,
+  id,
 }: {
   children: ReactNode;
   variant?: "outline" | "danger" | "primary" | "ghost" | "active";
@@ -116,6 +116,7 @@ function Button({
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
   ariaLabel?: string;
+  id?: string;
 }) {
   const baseStyles =
     "min-h-11 inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
@@ -135,6 +136,7 @@ function Button({
 
   return (
     <button
+      id={id}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -186,44 +188,99 @@ function Card({
  * public verification page with the full certificate pre-loaded in the URL fragment,
  * triggering the same cryptographic + on-chain checks as any other certificate load.
  */
-function QrShareCard({ verifyUrl }: { verifyUrl: string }) {
+function QrShareCard({
+  verifyUrl,
+  metadata,
+}: {
+  verifyUrl: string;
+  metadata?: {
+    batchId?: string;
+    contract?: string;
+    chainId?: string;
+  };
+}) {
   const { t } = useAppPreferences();
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [qrError, setQrError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
-  // Generate QR whenever the verifyUrl changes
+  // Dynamically resolve the active base URL (e.g. http://localhost:5173 when developing locally)
+  // so that clicking the link, copying it, or scanning the QR code resolves to the active instance.
+  const activeOrigin =
+    typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : "https://ziwachain.org";
+
+  const activeVerifyUrl = useMemo(() => {
+    if (!verifyUrl) return "";
+    return verifyUrl.replace(/^https?:\/\/[^/]+/, activeOrigin);
+  }, [verifyUrl, activeOrigin]);
+
+  // Generate QR whenever the verifyUrl or metadata changes
   useEffect(() => {
     let cancelled = false;
     setQrDataUrl(null);
     setQrError(null);
 
-    import("qrcode").then((QRCode) => {
-      // Use errorCorrectionLevel L for maximum data capacity (the URL may be ~6 kB)
-      return QRCode.default.toDataURL(verifyUrl, {
-        errorCorrectionLevel: "L",
-        margin: 2,
-        scale: 6,
-        color: {
-          dark: "#004d43",  // dark lake-green matches brand primary
-          light: "#ffffff",
-        },
-      });
-    }).then((dataUrl) => {
-      if (!cancelled) setQrDataUrl(dataUrl);
-    }).catch((err: unknown) => {
-      if (!cancelled) setQrError(String(err));
-    });
+    import("qrcode")
+      .then(async (QRCode) => {
+        // Attempt 1: full payload URL if within safe QR size (< 2,000 characters)
+        if (activeVerifyUrl.length <= 2000) {
+          try {
+            return await QRCode.default.toDataURL(activeVerifyUrl, {
+              errorCorrectionLevel: "L",
+              margin: 2,
+              scale: 6,
+              color: {
+                dark: "#004d43",
+                light: "#ffffff",
+              },
+            });
+          } catch {
+            // fall through to lightweight fallback
+          }
+        }
 
-    return () => { cancelled = true; };
-  }, [verifyUrl]);
+        // Attempt 2: lightweight reference URL with on-chain identifiers (matches src/certificate/qr.ts)
+        const baseUrl = `${activeOrigin}/verify`;
+        const batchId = metadata?.batchId && metadata.batchId !== "-" ? metadata.batchId : "";
+        const contract = metadata?.contract && metadata.contract !== "-" ? metadata.contract : "";
+        const chainId = metadata?.chainId && metadata.chainId !== "-" ? metadata.chainId : "";
+
+        const fallbackUrl = batchId
+          ? `${baseUrl}?batchId=${encodeURIComponent(batchId)}${
+              contract ? `&contract=${encodeURIComponent(contract)}` : ""
+            }${chainId ? `&chainId=${encodeURIComponent(chainId)}` : ""}`
+          : activeVerifyUrl;
+
+        return await QRCode.default.toDataURL(fallbackUrl, {
+          errorCorrectionLevel: "M",
+          margin: 2,
+          scale: 6,
+          color: {
+            dark: "#004d43",
+            light: "#ffffff",
+          },
+        });
+      })
+      .then((dataUrl) => {
+        if (!cancelled) setQrDataUrl(dataUrl);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setQrError(String(err));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeVerifyUrl, activeOrigin, metadata?.batchId, metadata?.contract, metadata?.chainId]);
 
   const handleCopyLink = useCallback(() => {
-    void navigator.clipboard?.writeText(verifyUrl).then(() => {
+    void navigator.clipboard?.writeText(activeVerifyUrl).then(() => {
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2500);
     });
-  }, [verifyUrl]);
+  }, [activeVerifyUrl]);
 
   return (
     <Card>
@@ -294,10 +351,19 @@ function QrShareCard({ verifyUrl }: { verifyUrl: string }) {
               )}
             </button>
 
-            {/* Monospace truncated URL for desktop readability */}
-            <p className="hidden truncate font-mono text-[11px] text-[var(--text-subtle)] sm:block max-w-xs" title={verifyUrl}>
-              {verifyUrl.length > 60 ? `${verifyUrl.slice(0, 60)}…` : verifyUrl}
-            </p>
+            {/* Clickable link for desktop readability & immediate browser opening */}
+            <a
+              href={activeVerifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden truncate font-mono text-[11px] text-[var(--primary)] hover:underline sm:inline-flex items-center gap-1 max-w-xs"
+              title={activeVerifyUrl}
+            >
+              <span className="truncate">{activeVerifyUrl.length > 50 ? `${activeVerifyUrl.slice(0, 50)}…` : activeVerifyUrl}</span>
+              <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
@@ -310,16 +376,17 @@ function SiteNav() {
   const [open, setOpen] = useState(false);
   const { language, setLanguage, theme, toggleTheme, t } = useAppPreferences();
 
-  const handleHowItWorksClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleHowItWorksClick = () => {
     setOpen(false);
     if (window.location.pathname === "/" || window.location.pathname === "") {
       const el = document.getElementById("how-it-works");
       if (el) {
-        e.preventDefault();
         el.scrollIntoView({ behavior: "smooth" });
         window.history.pushState(null, "", "#how-it-works");
+        return;
       }
     }
+    window.location.href = "/#how-it-works";
   };
 
   return (
@@ -354,13 +421,13 @@ function SiteNav() {
             >
               {t.nav.home}
             </a>
-            <a
-              href="/#how-it-works"
+            <button
+              type="button"
               onClick={handleHowItWorksClick}
               className="rounded-lg px-3 py-2 text-sm font-semibold text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-main)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)]"
             >
               {t.nav.howItWorks}
-            </a>
+            </button>
           </div>
 
           <div className="h-5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
@@ -368,9 +435,8 @@ function SiteNav() {
           {/* Controls: Language and Theme */}
           <div className="flex items-center gap-3">
             {/* Language Segmented Control */}
-            <div
-              className="inline-flex items-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-card)] p-1 shadow-sm"
-              role="group"
+            <fieldset
+              className="m-0 inline-flex items-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-card)] p-1 shadow-sm"
               aria-label="Language selection"
             >
               <button
@@ -397,7 +463,7 @@ function SiteNav() {
               >
                 SW
               </button>
-            </div>
+            </fieldset>
 
             {/* Theme Toggle Button */}
             <button
@@ -479,13 +545,13 @@ function SiteNav() {
             >
               {t.nav.home}
             </a>
-            <a
-              href="/#how-it-works"
+            <button
+              type="button"
               onClick={handleHowItWorksClick}
-              className="rounded-xl px-3 py-2.5 text-base font-semibold text-[var(--text-main)] hover:bg-[var(--bg-secondary)]"
+              className="text-left rounded-xl px-3 py-2.5 text-base font-semibold text-[var(--text-main)] hover:bg-[var(--bg-secondary)]"
             >
               {t.nav.howItWorks}
-            </a>
+            </button>
 
             <div className="my-1 h-px bg-[var(--border-subtle)]" />
 
@@ -598,11 +664,7 @@ function HomePage() {
           {/* Hero Section */}
           <section className="grid gap-12 py-10 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-card)] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)] shadow-xs">
-                <span className="h-2 w-2 rounded-full bg-[var(--primary)] animate-pulse" />
-                {t.home.heroBadge}
-              </div>
-              <h1 className="mt-5 max-w-2xl text-4xl font-extrabold tracking-tight text-[var(--text-heading)] sm:text-6xl">
+              <h1 className="max-w-2xl text-4xl font-extrabold tracking-tight text-[var(--text-heading)] sm:text-6xl">
                 {t.home.heroTitle}
               </h1>
               <p className="mt-6 max-w-xl text-base leading-8 text-[var(--text-muted)] sm:text-lg">
@@ -625,10 +687,7 @@ function HomePage() {
             </div>
 
             {/* Interactive Journey Diagram */}
-            <div
-              className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-secondary)] p-6 shadow-md sm:p-8"
-              aria-label={t.home.journeyTitle}
-            >
+            <div className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-secondary)] p-6 shadow-md sm:p-8">
               <div className="mb-4">
                 <h3 className="text-sm font-extrabold uppercase tracking-wider text-[var(--primary)]">
                   {t.home.journeyTitle}
@@ -830,7 +889,47 @@ function VerifyPage() {
   const [results, setResults] = useState<Results | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeDemo, setActiveDemo] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
+
+  const handleCodeLookup = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = codeInput.trim();
+    if (!query) return;
+    const samples = [
+      { tag: "batchA", cert: SAMPLE_BATCH_A },
+      { tag: "batchB", cert: SAMPLE_BATCH_B },
+      { tag: "batchC", cert: SAMPLE_BATCH_C },
+      { tag: "batchD", cert: SAMPLE_BATCH_D },
+    ];
+    const match = samples.find(
+      (s: any) =>
+        s.cert?.shortCode?.toUpperCase() === query.toUpperCase() ||
+        s.cert?.batchId?.toLowerCase() === query.toLowerCase() ||
+        (s.cert?.batchId && s.cert.batchId.toLowerCase().includes(query.toLowerCase()))
+    );
+    if (match) {
+      loadSample(match.cert, match.tag);
+    } else if (query.startsWith("{")) {
+      void verify(query, "manual");
+    } else {
+      setResults({
+        ...emptyResults,
+        status: "failed",
+        statusText:
+          language === "sw"
+            ? `Msimbo "${query}" haukupatikana kwenye kumbukumbu za mfano. Tafadhali thibitisha msimbo au fungua kiungo cha cheti.`
+            : `Code "${query}" was not found in sample records. Please check the code or use a certificate link.`,
+      });
+    }
+  };
+
+  const formatMassValue = (val: string) => {
+    if (!val || val === "-" || val.toLowerCase().includes("not recorded")) {
+      return language === "sw" ? "Haijarekodiwa bado" : "Not recorded yet";
+    }
+    return val;
+  };
 
   const verify = async (value: string, demoTag?: string) => {
     if (!value.trim()) {
@@ -883,7 +982,7 @@ function VerifyPage() {
   };
 
   useEffect(() => {
-    const checkHash = () => {
+    const checkUrl = () => {
       const hash = window.location.hash;
       if (hash && hash.includes("#c=")) {
         try {
@@ -897,19 +996,47 @@ function VerifyPage() {
             statusText: "Checking the certificate in your browser...",
           });
           void runVerification(value).then((res) => setResults(res || readResults()));
+          return;
         } catch {
           setResults({
             ...emptyResults,
             status: "failed",
             statusText: "Certificate not found — check the link and try again.",
           });
+          return;
+        }
+      }
+
+      // Handle ?batchId= from scanned fallback QR codes
+      const searchParams = new URLSearchParams(window.location.search);
+      const batchIdParam = searchParams.get("batchId");
+      if (batchIdParam) {
+        const samples = [
+          { tag: "batchA", cert: SAMPLE_BATCH_A },
+          { tag: "batchB", cert: SAMPLE_BATCH_B },
+          { tag: "batchC", cert: SAMPLE_BATCH_C },
+          { tag: "batchD", cert: SAMPLE_BATCH_D },
+        ];
+        const match = samples.find(
+          (s: any) => s.cert?.batchId?.toLowerCase() === batchIdParam.toLowerCase()
+        );
+        if (match) {
+          const value = JSON.stringify(match.cert, null, 2);
+          setActiveDemo(match.tag);
+          setJson(value);
+          setResults({
+            ...emptyResults,
+            status: "loading",
+            statusText: "Checking the certificate in your browser...",
+          });
+          void runVerification(value).then((res) => setResults(res || readResults()));
         }
       }
     };
 
-    checkHash();
-    window.addEventListener("hashchange", checkHash);
-    return () => window.removeEventListener("hashchange", checkHash);
+    checkUrl();
+    window.addEventListener("hashchange", checkUrl);
+    return () => window.removeEventListener("hashchange", checkUrl);
   }, []);
 
   const copy = (key: string, value: string) => {
@@ -988,23 +1115,80 @@ function VerifyPage() {
         </header>
 
         <main className="space-y-6">
-          {/* Main Certificate Input / Demo Loader */}
+          {/* Top Card: Public Verification & Code Search */}
           <Card title={t.verify.openCardTitle}>
             <p className="text-sm leading-6 text-[var(--text-muted)]">
               {t.verify.openCardDesc1}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
-              {t.verify.openCardDesc2}
-            </p>
 
-            <details className="mt-5 border-t border-[var(--border-subtle)] pt-4">
-              <summary className="cursor-pointer text-sm font-bold text-[var(--primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] rounded py-1">
-                {t.verify.moreWaysSummary}
+            {/* Quick search by certificate code or batch ID */}
+            <form onSubmit={handleCodeLookup} className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <input
+                id="inputCertCode"
+                type="text"
+                value={codeInput}
+                onChange={(e) => setCodeInput(e.target.value)}
+                placeholder={t.verify.searchPlaceholder}
+                className="min-h-11 flex-1 rounded-xl border border-[var(--border-main)] bg-[var(--bg-input)] px-4 py-2 font-mono text-sm text-[var(--text-main)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
+              />
+              <Button variant="primary" type="submit">
+                {t.verify.btnSearch}
+              </Button>
+            </form>
+
+            {/* Working Demonstration Examples - prominent and clearly labeled */}
+            <div className="mt-6 border-t border-[var(--border-subtle)] pt-4">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
+                {t.verify.demoExamplesTitle}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  id="btnLoadBatchA"
+                  variant={activeDemo === "batchA" ? "active" : "outline"}
+                  onClick={() => loadSample(SAMPLE_BATCH_A, "batchA")}
+                >
+                  {t.verify.demoWorking}
+                </Button>
+                <Button
+                  id="btnLoadBatchB"
+                  variant={activeDemo === "batchB" ? "active" : "outline"}
+                  onClick={() => loadSample(SAMPLE_BATCH_B, "batchB")}
+                >
+                  {t.verify.demoRejected}
+                </Button>
+                <Button
+                  id="btnLoadBatchC"
+                  variant={activeDemo === "batchC" ? "active" : "outline"}
+                  onClick={() => loadSample(SAMPLE_BATCH_C, "batchC")}
+                >
+                  {t.verify.demoCorrected}
+                </Button>
+                <Button
+                  id="btnLoadBatchD"
+                  variant={activeDemo === "batchD" ? "active" : "outline"}
+                  onClick={() => loadSample(SAMPLE_BATCH_D, "batchD")}
+                >
+                  {t.verify.demoRepeated}
+                </Button>
+                <Button
+                  id="btnTamperTest"
+                  variant={activeDemo === "tampered" ? "danger" : "outline"}
+                  onClick={loadTampered}
+                >
+                  {t.verify.demoChanged}
+                </Button>
+              </div>
+            </div>
+
+            {/* Advanced Section: Developer / Testing tools (JSON paste & upload) */}
+            <details className="mt-5 border-t border-[var(--border-subtle)] pt-3 group">
+              <summary className="cursor-pointer text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--primary)] focus:outline-none py-1">
+                {t.verify.advancedJsonTitle}
               </summary>
-              <div className="mt-4">
+              <div className="mt-3 space-y-3">
                 <label
                   htmlFor="certificateJson"
-                  className="block text-sm font-semibold text-[var(--text-main)]"
+                  className="block text-xs font-semibold text-[var(--text-main)]"
                 >
                   {t.verify.pasteLabel}
                 </label>
@@ -1013,20 +1197,20 @@ function VerifyPage() {
                   value={json}
                   onChange={(event) => setJson(event.target.value)}
                   placeholder={t.verify.pastePlaceholder}
-                  className="mt-3 min-h-32 w-full resize-y rounded-xl border border-[var(--border-main)] bg-[var(--bg-input)] p-3 font-mono text-xs text-[var(--text-main)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
+                  className="mt-1 min-h-28 w-full resize-y rounded-xl border border-[var(--border-main)] bg-[var(--bg-input)] p-3 font-mono text-xs text-[var(--text-main)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)]"
                   aria-describedby="lookup-help"
                 />
-                <p id="lookup-help" className="mt-2 text-xs text-[var(--text-subtle)]">
+                <p id="lookup-help" className="text-[11px] text-[var(--text-subtle)]">
                   {t.verify.pasteHelp}
                 </p>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <Button variant="primary" onClick={() => void verify(json, "manual")}>
                     {t.verify.btnCheck}
                   </Button>
                   <label
                     htmlFor="fileInputReact"
-                    className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-main)] shadow-sm hover:border-[var(--primary)] hover:text-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--ring-focus)]"
+                    className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-card)] px-4 py-2 text-xs font-semibold text-[var(--text-main)] shadow-sm hover:border-[var(--primary)] hover:text-[var(--primary)]"
                   >
                     {t.verify.btnChooseFile}
                     <input
@@ -1039,63 +1223,34 @@ function VerifyPage() {
                     />
                   </label>
                 </div>
-
-                {/* Demo record buttons */}
-                <div className="mt-6 border-t border-[var(--border-subtle)] pt-4">
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
-                    {t.verify.demoHeader}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant={activeDemo === "batchA" ? "active" : "outline"}
-                      onClick={() => loadSample(SAMPLE_BATCH_A, "batchA")}
-                    >
-                      {t.verify.demoWorking}
-                    </Button>
-                    <Button
-                      variant={activeDemo === "batchB" ? "active" : "outline"}
-                      onClick={() => loadSample(SAMPLE_BATCH_B, "batchB")}
-                    >
-                      {t.verify.demoRejected}
-                    </Button>
-                    <Button
-                      variant={activeDemo === "tampered" ? "danger" : "outline"}
-                      onClick={loadTampered}
-                    >
-                      {t.verify.demoChanged}
-                    </Button>
-                    <Button
-                      variant={activeDemo === "batchC" ? "active" : "outline"}
-                      onClick={() => loadSample(SAMPLE_BATCH_C, "batchC")}
-                    >
-                      {t.verify.demoCorrected}
-                    </Button>
-                    <Button
-                      variant={activeDemo === "batchD" ? "active" : "outline"}
-                      onClick={() => loadSample(SAMPLE_BATCH_D, "batchD")}
-                    >
-                      {t.verify.demoRepeated}
-                    </Button>
-                  </div>
-                </div>
               </div>
             </details>
           </Card>
 
-          {/* Testnet demonstration notice */}
-          {results && results.isSyntheticDemo && (
+          {/* 1. Label indicating real or synthetic demonstration record */}
+          {results && (
             <div
               role="note"
               className="flex items-center justify-between rounded-xl border border-[var(--badge-demo-border)] bg-[var(--badge-demo-bg)] px-4 py-3 text-xs font-semibold text-[var(--badge-demo-text)] shadow-xs"
             >
-              <span>{t.verify.demoRecordNotice}</span>
+              <span>
+                {results.isSyntheticDemo
+                  ? t.verify.demoRecordNotice
+                  : language === "sw"
+                    ? "Rekodi halisi ya mkusanyiko"
+                    : "Real collection record"}
+              </span>
               <span className="rounded-md border border-[var(--badge-demo-border)] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
-                {t.verify.demoBadge}
+                {results.isSyntheticDemo
+                  ? t.verify.demoBadge
+                  : language === "sw"
+                    ? "HALISI"
+                    : "REAL"}
               </span>
             </div>
           )}
 
-          {/* Dynamic Status Banner */}
+          {/* 2. Plain Language Certificate-Check Result (Status Banner) */}
           {results && copyText && (
             <div
               role="status"
@@ -1125,114 +1280,93 @@ function VerifyPage() {
             </div>
           )}
 
-          {/* Verification Results Cards */}
+          {/* Verification Results: Items 3 through 7 */}
           {results && results.status !== "loading" && (
             <section className="space-y-6" aria-label="Certificate results details">
-              {/* QR code share card — only shown when certificate has a public deep-link */}
-              {results.verifyUrl && (
-                <QrShareCard verifyUrl={results.verifyUrl} />
-              )}
-
-              {/* Batch at a glance */}
-              <Card title={t.verify.glanceTitle}>
-                <div className="grid gap-6 sm:grid-cols-[1fr_auto]">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
-                      {t.verify.harvestedLabel}
-                    </p>
-                    <p className="mt-1 text-3xl font-extrabold text-[var(--primary)]">
-                      {results.mass.harvested}
-                    </p>
-                    <p className="mt-1 text-sm text-[var(--text-muted)]">
-                      {t.verify.harvestedDesc}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 sm:min-w-56">
-                    <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
-                      {t.verify.progressLabel}
-                    </p>
-                    <p className="mt-1 text-xl font-bold text-[var(--text-heading)]">
-                      {latestStage}
-                    </p>
-                    <p className="mt-1 text-xs text-[var(--text-muted)]">
-                      {t.verify.progressNote}
-                    </p>
-                  </div>
+              {/* 3. Simple Summary of the Amounts (Collected, Accepted, Processed, Put to Use) */}
+              <Card title={t.verify.amountsTitle}>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {massItems.map(([label, value]) => {
+                    const displayVal = formatMassValue(value);
+                    const isMissing =
+                      displayVal === "Not recorded yet" || displayVal === "Haijarekodiwa bado";
+                    return (
+                      <div
+                        key={label}
+                        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4"
+                      >
+                        <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
+                          {label}
+                        </p>
+                        <p
+                          className={`mt-2 text-xl font-extrabold ${
+                            isMissing
+                              ? "text-sm font-semibold text-[var(--text-muted)] italic"
+                              : "text-[var(--text-heading)]"
+                          }`}
+                        >
+                          {displayVal}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                {/* Localized Dates */}
-                {results.recordedDates && (
-                  <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-[var(--border-subtle)] pt-4 sm:grid-cols-3">
-                    {results.recordedDates.collectedAt && (
-                      <div>
-                        <dt className="text-xs font-medium text-[var(--text-subtle)]">
-                          {t.verify.dates.collectedOn}
-                        </dt>
-                        <dd className="mt-0.5 text-sm font-semibold text-[var(--text-main)]">
-                          {formatLocaleDate(results.recordedDates.collectedAt, language)}
-                        </dd>
-                      </div>
-                    )}
-                    {results.recordedDates.verifiedAt && (
-                      <div>
-                        <dt className="text-xs font-medium text-[var(--text-subtle)]">
-                          {t.verify.dates.checkedOn}
-                        </dt>
-                        <dd className="mt-0.5 text-sm font-semibold text-[var(--text-main)]">
-                          {formatLocaleDate(results.recordedDates.verifiedAt, language)}
-                        </dd>
-                      </div>
-                    )}
-                    {results.recordedDates.acceptedAt && (
-                      <div>
-                        <dt className="text-xs font-medium text-[var(--text-subtle)]">
-                          {t.verify.dates.acceptedOn}
-                        </dt>
-                        <dd className="mt-0.5 text-sm font-semibold text-[var(--text-main)]">
-                          {formatLocaleDate(results.recordedDates.acceptedAt, language)}
-                        </dd>
-                      </div>
-                    )}
-                    {results.recordedDates.settledAt && (
-                      <div>
-                        <dt className="text-xs font-medium text-[var(--text-subtle)]">
-                          {t.verify.dates.settledOn}
-                        </dt>
-                        <dd className="mt-0.5 text-sm font-semibold text-[var(--text-main)]">
-                          {formatLocaleDate(results.recordedDates.settledAt, language)}
-                        </dd>
-                      </div>
-                    )}
-                    {results.recordedDates.processedAt && (
-                      <div>
-                        <dt className="text-xs font-medium text-[var(--text-subtle)]">
-                          {t.verify.dates.processedOn}
-                        </dt>
-                        <dd className="mt-0.5 text-sm font-semibold text-[var(--text-main)]">
-                          {formatLocaleDate(results.recordedDates.processedAt, language)}
-                        </dd>
-                      </div>
-                    )}
-                    {results.recordedDates.endUseAt && (
-                      <div>
-                        <dt className="text-xs font-medium text-[var(--text-subtle)]">
-                          {t.verify.dates.putToUseOn}
-                        </dt>
-                        <dd className="mt-0.5 text-sm font-semibold text-[var(--text-main)]">
-                          {formatLocaleDate(results.recordedDates.endUseAt, language)}
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
+                {results.massStatus && (
+                  <p
+                    className={`mt-4 text-sm font-bold ${
+                      results.massStatus.includes("warning") ||
+                      results.massStatus.includes("Violated")
+                        ? "text-[var(--error)]"
+                        : "text-[var(--primary)]"
+                    }`}
+                  >
+                    {getTranslatedMassStatus(results.massStatus, language)}
+                  </p>
                 )}
-
-                <dl className="mt-6 grid gap-x-8 border-t border-[var(--border-subtle)] pt-3 sm:grid-cols-2">
-                  {copyable("shortCode", t.verify.certificateCode, results.metadata.shortCode)}
-                  {copyable("batchId", t.verify.batchId, results.metadata.batchId)}
-                </dl>
+                <p className="mt-4 text-xs leading-5 text-[var(--text-subtle)]">
+                  {t.verify.amountsDisclaimer}
+                </p>
               </Card>
 
-              {/* Rejection outcome details */}
+              {/* 4. The Collection's Recorded Journey (Chronological Order) */}
+              <Card title={t.verify.timelineTitle}>
+                <div className="space-y-0">
+                  {results.timeline.length ? (
+                    results.timeline.map((event) => {
+                      const translatedEvent = getTranslatedTimeline(
+                        event.title,
+                        event.details,
+                        language
+                      );
+                      return (
+                        <div
+                          key={`${event.stageKey || event.title}-${event.rawTxHash || event.tx || event.meta}`}
+                          className="relative flex gap-4 border-l-2 border-[var(--border-main)] pb-7 pl-6 last:border-transparent last:pb-0"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 border-[var(--bg-card)] bg-[var(--primary)]"
+                          />
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-[var(--text-heading)]">
+                              {translatedEvent.title}
+                            </h3>
+                            <p className="mt-0.5 text-xs text-[var(--text-subtle)]">{event.meta}</p>
+                            <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
+                              {translatedEvent.details}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-[var(--text-muted)]">{t.verify.timelineEmpty}</p>
+                  )}
+                </div>
+              </Card>
+
+              {/* 5. Relevant Warnings or Missing Information */}
+              {/* Rejection outcome card */}
               {results.status === "rejected" && (
                 <Card title={t.verify.rejectionTitle}>
                   <div className="rounded-2xl border border-[var(--error-border)] bg-[var(--error-bg)] p-5 text-[var(--error-text)]">
@@ -1255,78 +1389,7 @@ function VerifyPage() {
                 </Card>
               )}
 
-              {/* Amounts recorded */}
-              <Card title={t.verify.amountsTitle}>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                  {massItems.map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4"
-                    >
-                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
-                        {label}
-                      </p>
-                      <p className="mt-2 text-xl font-extrabold text-[var(--text-heading)]">
-                        {value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                {results.massStatus && (
-                  <p
-                    className={`mt-4 text-sm font-bold ${
-                      results.massStatus.includes("Violated")
-                        ? "text-[var(--error)]"
-                        : "text-[var(--primary)]"
-                    }`}
-                  >
-                    {getTranslatedMassStatus(results.massStatus, language)}
-                  </p>
-                )}
-                <p className="mt-4 text-xs leading-5 text-[var(--text-subtle)]">
-                  {t.verify.amountsDisclaimer}
-                </p>
-              </Card>
-
-              {/* Lifecycle Timeline */}
-              <Card title={t.verify.timelineTitle}>
-                <div className="space-y-0">
-                  {results.timeline.length ? (
-                    results.timeline.map((event, index) => {
-                      const translatedEvent = getTranslatedTimeline(event.title, event.details, language);
-                      return (
-                        <div
-                          key={`${event.title}-${index}`}
-                          className="relative flex gap-4 border-l-2 border-[var(--border-main)] pb-7 pl-6 last:border-transparent last:pb-0"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 border-[var(--bg-card)] bg-[var(--primary)]"
-                          />
-                          <div className="min-w-0">
-                            <h3 className="font-bold text-[var(--text-heading)]">
-                              {translatedEvent.title}
-                            </h3>
-                            <p className="mt-0.5 text-xs text-[var(--text-subtle)]">{event.meta}</p>
-                            <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
-                              {translatedEvent.details}
-                            </p>
-                            {event.tx && event.tx !== "tx: pending" && (
-                              <p className="mt-1 font-mono text-[11px] text-[var(--primary)]">
-                                {event.tx}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-sm text-[var(--text-muted)]">{t.verify.timelineEmpty}</p>
-                  )}
-                </div>
-              </Card>
-
-              {/* Things to look at (Notices) */}
+              {/* Notice Cards (duplicate evidence flag, correction notice, etc.) */}
               {results.checks.some((check) => check.status === "notice") && (
                 <Card title={t.verify.thingsTitle}>
                   <ul className="space-y-3">
@@ -1336,7 +1399,7 @@ function VerifyPage() {
                         const publicCheck = getTranslatedCheck(check, language);
                         return (
                           <li
-                            key={`${check.title}-${index}`}
+                            key={`notice-${check.title || index}`}
                             className="rounded-2xl border border-[var(--warning-border)] bg-[var(--warning-bg)] p-4 text-[var(--warning-text)]"
                           >
                             <p className="font-bold">{publicCheck.title}</p>
@@ -1350,66 +1413,170 @@ function VerifyPage() {
                 </Card>
               )}
 
-              {/* Work credits */}
-              <Card title={t.verify.creditsTitle}>
-                <p className="text-sm leading-6 text-[var(--text-muted)]">
-                  {t.verify.creditsDesc}
-                </p>
-                <p className="mt-4 text-3xl font-extrabold text-[var(--primary)]">
-                  {results.credits}{" "}
-                  <span className="text-base font-semibold text-[var(--text-muted)]">
-                    {t.verify.creditsRecordedSuffix}
-                  </span>
-                </p>
-              </Card>
+              {/* Notice if collection has not completed later stages */}
+              {results.status === "verified" &&
+                results.mass.accepted === "Not recorded yet" &&
+                results.mass.processed === "Not recorded yet" && (
+                  <div
+                    role="note"
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 text-xs text-[var(--text-muted)]"
+                  >
+                    {t.verify.missingDownstreamNotice}
+                  </div>
+                )}
 
-              {/* Technical Inspection Details */}
+              {/* 6. Certificate Code & Working QR / Link Section */}
+              {results.verifyUrl && (
+                <Card title={t.verify.codeCardTitle}>
+                  <div className="space-y-6">
+                    <dl className="grid gap-4 sm:grid-cols-2">
+                      {copyable("shortCode", t.verify.certificateCode, results.metadata.shortCode)}
+                    </dl>
+                    <QrShareCard verifyUrl={results.verifyUrl} metadata={results.metadata} />
+                  </div>
+                </Card>
+              )}
+
+              {/* 7. Expandable Section for Technical Details */}
               <Card>
                 <details className="group">
                   <summary className="flex cursor-pointer items-center justify-between text-base font-bold text-[var(--text-heading)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] rounded py-1">
                     <span>{t.verify.techTitle}</span>
-                    <span className="text-xs transition-transform group-open:rotate-180" aria-hidden="true">
+                    <span
+                      className="text-xs transition-transform group-open:rotate-180"
+                      aria-hidden="true"
+                    >
                       ▼
                     </span>
                   </summary>
                   <div className="mt-5 space-y-6 border-t border-[var(--border-subtle)] pt-4">
-                    <ul className="space-y-3">
-                      {results.checks.map((check, index) => {
-                        const publicCheck = getTranslatedCheck(check, language);
-                        return (
-                          <li
-                            key={`${check.title}-${index}`}
-                            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4"
-                          >
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="font-semibold text-[var(--text-main)]">
-                                {publicCheck.title}
-                              </span>
-                              <span
-                                className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
-                                  check.status === "pass"
-                                    ? "bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]"
-                                    : check.status === "fail"
-                                      ? "bg-[var(--error-bg)] text-[var(--error-text)] border border-[var(--error-border)]"
-                                      : "bg-[var(--warning-bg)] text-[var(--warning-text)] border border-[var(--warning-border)]"
-                                }`}
-                              >
-                                {check.status === "pass"
-                                  ? t.verify.badgeMatched
-                                  : check.status === "fail"
-                                    ? t.verify.badgeNotMatched
-                                    : t.verify.badgeLookCloser}
-                              </span>
-                            </div>
-                            <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
-                              {publicCheck.description}
-                            </p>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    {/* Internal Batch ID */}
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
+                        {t.verify.batchId}
+                      </h4>
+                      <div className="mt-1 flex items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3">
+                        <span className="font-mono text-xs text-[var(--text-main)] break-all">
+                          {results.metadata.batchId}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copy("batchId", results.metadata.batchId)}
+                          className="ml-3 shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold border border-[var(--border-main)] hover:bg-[var(--bg-card)]"
+                        >
+                          {copiedKey === "batchId" ? t.verify.copied : t.verify.copy}
+                        </button>
+                      </div>
+                    </div>
 
-                    <dl className="border-t border-[var(--border-subtle)] pt-2">
+                    {/* Work Credits attribution */}
+                    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[var(--text-heading)]">
+                          {t.verify.creditsTitle}
+                        </span>
+                        <span className="text-lg font-extrabold text-[var(--primary)]">
+                          {results.credits} {t.verify.creditsRecordedSuffix}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">
+                        {t.verify.creditsDesc}
+                      </p>
+                    </div>
+
+                    {/* Cryptographic & Protocol Verification Checklist */}
+                    <div>
+                      <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
+                        {language === "sw"
+                          ? "Ukaguzi wa Kriptografia na Kanuni za Mnyororo"
+                          : "Cryptographic & Protocol Verification Checklist"}
+                      </h4>
+                      <ul className="space-y-3">
+                        {results.checks.map((check, index) => {
+                          const publicCheck = getTranslatedCheck(check, language);
+                          return (
+                            <li
+                              key={`check-${check.title}`}
+                              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <span className="font-semibold text-[var(--text-main)]">
+                                  {publicCheck.title}
+                                </span>
+                                <span
+                                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                                    check.status === "pass"
+                                      ? "bg-[var(--success-bg)] text-[var(--success-text)] border border-[var(--success-border)]"
+                                      : check.status === "fail"
+                                        ? "bg-[var(--error-bg)] text-[var(--error-text)] border border-[var(--error-border)]"
+                                        : "bg-[var(--warning-bg)] text-[var(--warning-text)] border border-[var(--warning-border)]"
+                                  }`}
+                                >
+                                  {check.status === "pass"
+                                    ? t.verify.badgeMatched
+                                    : check.status === "fail"
+                                      ? t.verify.badgeNotMatched
+                                      : t.verify.badgeLookCloser}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
+                                {publicCheck.description}
+                              </p>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+
+                    {/* Technical Stage References (Block numbers, actor addresses, tx hashes) */}
+                    <div>
+                      <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
+                        {language === "sw"
+                          ? "Kumbukumbu za Hatua kwenye Mnyororo"
+                          : "On-Chain Stage References"}
+                      </h4>
+                      <div className="space-y-2">
+                        {results.timeline.map((ev, idx) => (
+                          <div
+                            key={`tech-${ev.stageKey ?? ev.title}-${ev.blockNumber ?? ""}-${ev.actor ?? ""}`}
+                            className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3 text-xs space-y-1"
+                          >
+                            <div className="flex justify-between font-semibold text-[var(--text-main)]">
+                              <span>{ev.stageKey || ev.title}</span>
+                              {ev.blockNumber && (
+                                <span className="font-mono text-[var(--text-subtle)]">
+                                  Block #{ev.blockNumber}
+                                </span>
+                              )}
+                            </div>
+                            {ev.actor && (
+                              <div className="text-[var(--text-muted)] font-mono text-[11px] break-all">
+                                Actor: {ev.actor}
+                              </div>
+                            )}
+                            {ev.tx && (
+                              <div className="flex items-center justify-between pt-1">
+                                <span className="font-mono text-[11px] text-[var(--primary)] break-all">
+                                  {ev.rawTxHash || ev.tx}
+                                </span>
+                                {ev.rawTxHash && (
+                                  <button
+                                    type="button"
+                                    onClick={() => copy(`tx-${idx}`, ev.rawTxHash!)}
+                                    className="ml-2 shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold border border-[var(--border-main)] hover:bg-[var(--bg-card)]"
+                                  >
+                                    {copiedKey === `tx-${idx}` ? t.verify.copied : t.verify.copy}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Contract, Chain, Payment Reference */}
+                    <dl className="border-t border-[var(--border-subtle)] pt-3 grid gap-3 sm:grid-cols-3">
                       {copyable("contract", t.verify.contract, results.metadata.contract)}
                       {copyable("chainId", t.verify.chain, results.metadata.chainId)}
                       {copyable("paymentRef", t.verify.paymentRef, results.metadata.paymentRef)}
@@ -1446,12 +1613,12 @@ function VerifyPage() {
         </div>
         <textarea id="jsonInput" />
         <input id="fileInputLegacy" />
-        <button id="btnVerify" />
-        <button id="btnLoadBatchA" />
-        <button id="btnLoadBatchB" />
-        <button id="btnTamperTest" />
-        <button id="btnLoadBatchC" />
-        <button id="btnLoadBatchD" />
+        <button id="btnVerify" type="button" />
+        <button id="btnLoadBatchA" type="button" />
+        <button id="btnLoadBatchB" type="button" />
+        <button id="btnTamperTest" type="button" />
+        <button id="btnLoadBatchC" type="button" />
+        <button id="btnLoadBatchD" type="button" />
         <input id="fileInput" />
       </div>
     </div>

@@ -240,8 +240,8 @@
       <div class="qr-desc">
         <strong>Verify online / Thibitisha mtandaoni</strong><br>
         <!--[SW: Verify online]-->
-        Scan the QR code or visit the link below to check this certificate on the blockchain.<br>
-        <span style="font-family:monospace; font-size:7.5pt;" id="certVerifyUrl">–</span>
+        Scan the QR code or click the link below to check this certificate on the blockchain.<br>
+        <a href="#" style="font-family:monospace; font-size:7.5pt; color:inherit; text-decoration:underline; word-break:break-all;" id="certVerifyUrl" target="_blank" rel="noopener noreferrer">–</a>
       </div>
     </div>
 
@@ -423,10 +423,12 @@
       el("certContract").textContent  = cert.contractAddress || "–";
 
       // Verify URL
-      const verifyUrl = cert.verifyUrl
-        ? `${cert.verifyUrl}#c=<base64url-of-json>`
-        : "https://ziwachain.org/verify";
-      el("certVerifyUrl").textContent = verifyUrl;
+      const origin = (typeof window !== "undefined" && window.location.origin) ? window.location.origin : "https://ziwachain.org";
+      const rawVerifyUrl = cert.verifyUrl || "https://ziwachain.org/verify";
+      const activeVerifyUrl = rawVerifyUrl.replace(/^https?:\/\/[^/]+/, origin);
+      const verifyLink = el("certVerifyUrl");
+      verifyLink.textContent = activeVerifyUrl;
+      verifyLink.href = activeVerifyUrl;
 
       // QR code (use certificate's own QR if present)
       const qrImg = el("certQR");

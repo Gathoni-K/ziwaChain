@@ -58,6 +58,12 @@ export interface Translations {
     openCardTitle: string;
     openCardDesc1: string;
     openCardDesc2: string;
+    searchPlaceholder: string;
+    btnSearch: string;
+    demoExamplesTitle: string;
+    advancedJsonTitle: string;
+    codeCardTitle: string;
+    missingDownstreamNotice: string;
     moreWaysSummary: string;
     pasteLabel: string;
     pastePlaceholder: string;
@@ -248,6 +254,12 @@ export const translations: Record<Language, Translations> = {
       openCardDesc1:
         "Open the certificate link you received or scan its QR code. The record will open here automatically.",
       openCardDesc2: "If you are testing or have the certificate file, use the extra options below.",
+      searchPlaceholder: "Enter certificate code (e.g. EHCQJ-3GMNQ) or batch ID…",
+      btnSearch: "Check code",
+      demoExamplesTitle: "Try working demonstration examples (Synthetic test data):",
+      advancedJsonTitle: "Advanced testing: Check with certificate JSON or file",
+      codeCardTitle: "Certificate code & shareable link",
+      missingDownstreamNotice: "Downstream stages beyond this point have not been recorded yet.",
       moreWaysSummary: "More ways to check a record",
       pasteLabel: "Paste the certificate file (JSON)",
       pastePlaceholder: "Paste certificate details here…",
@@ -277,10 +289,10 @@ export const translations: Record<Language, Translations> = {
       amountsHarvested: "Amount collected",
       amountsAccepted: "Amount accepted",
       amountsProcessed: "Amount processed",
-      amountsEndUse: "Amount put to use",
+      amountsEndUse: "Amount recorded as put to use",
       amountsDisclaimer:
         "These amounts come from the saved record. They do not prove by themselves that a photograph or physical weighing is true.",
-      timelineTitle: "What happened next?",
+      timelineTitle: "The collection's recorded journey",
       timelineEmpty: "No steps have been recorded yet.",
       thingsTitle: "Things to look at",
       creditsTitle: "Work credits",
@@ -442,6 +454,12 @@ export const translations: Record<Language, Translations> = {
       openCardDesc1:
         "Fungua kiungo cha cheti ulichopokea au changanua msimbo wake wa QR. Rekodi itafunguka hapa kiotomatiki.",
       openCardDesc2: "Ikiwa unafanya majaribio au una faili ya cheti, tumia machaguo ya ziada hapa chini.",
+      searchPlaceholder: "Weka msimbo wa cheti (mfano EHCQJ-3GMNQ) au utambulisho wa mzigo…",
+      btnSearch: "Kagua msimbo",
+      demoExamplesTitle: "Jaribu mifano ya majaribio (Data ya mfano wa majaribio):",
+      advancedJsonTitle: "Ukaguzi wa kina: Kagua kwa faili au JSON ya cheti",
+      codeCardTitle: "Msimbo wa cheti na kiungo cha kushiriki",
+      missingDownstreamNotice: "Hatua zifuatazo baada ya hapa hazijarekodiwa bado.",
       moreWaysSummary: "Njia zaidi za kukagua rekodi",
       pasteLabel: "Bandika faili ya cheti (JSON)",
       pastePlaceholder: "Bandika maelezo ya cheti hapa…",
@@ -474,7 +492,7 @@ export const translations: Record<Language, Translations> = {
       amountsEndUse: "Kiasi kilichorekodiwa kuwa kimetumika",
       amountsDisclaimer:
         "Vipimo hivi vinatokana na rekodi iliyohifadhiwa. Havitibitishi peke yake kwamba picha au upimaji halisi ni wa kweli.",
-      timelineTitle: "Nini kilifanyika baadaye?",
+      timelineTitle: "Safari ya mkusanyiko iliyorekodiwa",
       timelineEmpty: "Bado hakuna hatua zilizorekodiwa.",
       thingsTitle: "Mambo ya kuchunguza kwa makini",
       creditsTitle: "Mikopo ya kazi",
@@ -809,70 +827,56 @@ export function getTranslatedTimeline(
   lang: Language
 ): { title: string; details: string } {
   if (lang === "en") {
-    let tTitle = title;
-    let tDetails = details;
-    if (title.includes("HARVEST") || title.includes("Harvest")) {
-      tTitle = "The collection was recorded.";
-      tDetails = "The amount collected was written into the record.";
-    } else if (title.includes("VERIFIED") || title.includes("Verified")) {
-      if (details.toLowerCase().includes("rejected")) {
-        tTitle = "This collection was not approved.";
-        tDetails = "The record says this collection was not approved.";
-      } else {
-        tTitle = "The collection was checked and approved.";
-        tDetails = "The record says this collection was checked and approved.";
-      }
-    } else if (title.includes("ACCEPTED") || title.includes("Accepted")) {
-      tTitle = "A receiving party recorded how much it accepted.";
-      tDetails = "The receiving party recorded the amount it accepted.";
-    } else if (title.includes("PROCESSED") || title.includes("Processed")) {
-      tTitle = "The processing step was recorded.";
-      tDetails = "The record includes a processing step.";
-    } else if (title.includes("END_USE") || title.includes("End Use")) {
-      tTitle = "The record says that some material was put to use.";
-      tDetails = "The record includes material put to use.";
-    } else if (title.includes("SETTLEMENT") || title.includes("Settlement")) {
-      tTitle = "A payment confirmation was recorded.";
-      tDetails =
-        "The record says that payment was confirmed. This does not mean ZiwaChain independently checked the payment with M-Pesa.";
-    } else if (title.includes("CORRECTED") || title.includes("Corrected")) {
-      tTitle = "An earlier record was corrected on-chain.";
-      tDetails = details || "An earlier evidence hash was superseded by a corrected record.";
-    }
-    return { title: tTitle, details: tDetails };
+    return { title, details };
   }
 
-  // Kiswahili
+  // Kiswahili translation
   let swTitle = title;
   let swDetails = details;
 
-  if (title.includes("HARVEST") || title.includes("Harvest")) {
-    swTitle = "Mkusanyiko ulirekodiwa.";
-    swDetails = "Kiasi kilichokusanywa kiliandikwa kwenye rekodi.";
-  } else if (title.includes("VERIFIED") || title.includes("Verified")) {
-    if (details.toLowerCase().includes("rejected")) {
-      swTitle = "Mkusanyiko huu haukuidhinishwa.";
-      swDetails = "Rekodi inasema mkusanyiko huu haukuidhinishwa.";
+  if (title.includes("Collection recorded") || title.includes("HARVEST")) {
+    swTitle = title
+      .replace("Collection recorded —", "Mkusanyiko ulirekodiwa —")
+      .replace("Collection recorded", "Mkusanyiko ulirekodiwa")
+      .replace(/HARVEST.*$/, "Mkusanyiko ulirekodiwa");
+    swDetails = details
+      .replace("collected in", "zilizokusanywa katika eneo la")
+      .replace("collected and logged into the system.", "zilizokusanywa na kurekodiwa kwenye mfumo.")
+      .replace("and logged into the system.", "na kurekodiwa kwenye mfumo.");
+  } else if (title.includes("Collection approved") || title.includes("VERIFIED")) {
+    if (title.includes("rejected") || details.toLowerCase().includes("rejected") || details.toLowerCase().includes("did not approve")) {
+      swTitle = "Mkusanyiko ulikataliwa";
+      swDetails = details
+        .replace("Inspection did not approve this lot:", "Ukaguzi haukuidhinisha fungu hili:")
+        .replace("Excessive mud and inorganic contamination exceeding threshold.", "Matope mengi na uchafu usio wa kibaolojia uliovuka kiwango kinachoruhusiwa.")
+        .replace("Collection did not pass physical quality inspection.", "Mkusanyiko haukufaulu ukaguzi wa kimwili.");
     } else {
-      swTitle = "Mkusanyiko ulikaguliwa na kuidhinishwa.";
-      swDetails = "Rekodi inasema mkusanyiko huu ulikaguliwa na kuidhinishwa.";
+      swTitle = "Mkusanyiko uliidhinishwa";
+      swDetails = "Ulikaguliwa na kuidhinishwa na mkaguzi huru.";
     }
-  } else if (title.includes("ACCEPTED") || title.includes("Accepted")) {
-    swTitle = "Mhusika aliyepokea alirekodi kiasi alichopokea.";
-    swDetails = "Mhusika aliyepokea alirekodi kiasi kilichokubaliwa.";
-  } else if (title.includes("PROCESSED") || title.includes("Processed")) {
-    swTitle = "Hatua ya uchakataji ilirekodiwa.";
-    swDetails = "Rekodi inajumuisha hatua ya uchakataji.";
-  } else if (title.includes("END_USE") || title.includes("End Use")) {
-    swTitle = "Rekodi inasema kuwa sehemu ya malighafi ilitumika.";
-    swDetails = "Rekodi inajumuisha malighafi iliyotumika.";
-  } else if (title.includes("SETTLEMENT") || title.includes("Settlement")) {
-    swTitle = "Uthibitisho wa malipo ulirekodiwa.";
-    swDetails =
-      "Rekodi inasema kwamba malipo yalithibitishwa. Hii haimaanishi ZiwaChain ilithibitisha malipo hayo moja kwa moja na M-Pesa.";
-  } else if (title.includes("CORRECTED") || title.includes("Corrected")) {
-    swTitle = "Rekodi ya awali ilisahihishwa kwenye mnyororo.";
-    swDetails = "Ushahidi wa awali ulibadilishwa na rekodi iliyosahihishwa.";
+  } else if (title.includes("Receiving party accepted") || title.includes("ACCEPTED")) {
+    swTitle = title
+      .replace("Receiving party accepted", "Mhusika aliyepokea alikubali")
+      .replace(/BUYER_ACCEPTED.*$/, "Mhusika aliyepokea alikubali");
+    swDetails = details
+      .replace("Receiving party accepted", "Mhusika aliyepokea alikubali")
+      .replace("for downstream processing.", "kwa ajili ya uchakataji wa baadaye.");
+  } else if (title.includes("Payment confirmation recorded") || title.includes("SETTLEMENT")) {
+    swTitle = "Uthibitisho wa malipo ulirekodiwa";
+    swDetails = "Malipo ya mvunaji yalithibitishwa kwenye mnyororo kupitia ujumbe wa SMS.";
+  } else if (title.includes("processed") || title.includes("PROCESSED")) {
+    swTitle = title.replace("processed", "zilichakatwa").replace(/PROCESSED.*$/, "Uchakataji ulirekodiwa");
+    swDetails = details
+      .replace("processed into", "zilichakatwa kuwa")
+      .replace("output units", "vizio vya pato");
+  } else if (title.includes("recorded as put to use") || title.includes("END_USE") || title.includes("End Use")) {
+    swTitle = title.replace("recorded as put to use", "zilirekodiwa kama zimetumika").replace(/END_USE.*$/, "Kutumika kulirekodiwa");
+    swDetails = details
+      .replace("converted into", "zilibadilishwa kuwa")
+      .replace("output units", "vizio vya pato");
+  } else if (title.includes("Record corrected") || title.includes("CORRECTED")) {
+    swTitle = "Rekodi ilisahihishwa";
+    swDetails = "Rekodi ya awali ilisahihishwa na kubadilishwa na mwandishi kwenye mnyororo.";
   }
 
   return { title: swTitle, details: swDetails };
@@ -885,11 +889,25 @@ export function getTranslatedMassStatus(status: string, lang: Language): string 
   if (!status) return "";
   if (lang === "en") return status;
 
-  if (status.includes("Violated") || status.includes("violated")) {
-    return "Tahadhari: Uwiano wa uzito umekiukwa — uzito wa hatua za baadaye umezidi kiasi kilichokusanywa.";
+  if (status.includes("warning") || status.includes("Violated") || status.includes("violated")) {
+    return "Tahadhari: Kiasi kilichorekodiwa kinazidi kiwango kinachoruhusiwa na kanuni za uzito.";
   }
-  if (status.includes("Satisfied") || status.includes("holds")) {
-    return "Uwiano wa uzito umeridhishwa (Mass Balance Holds): Kiasi kilichosindikwa kinalingana na pembejeo halisi.";
+  if (status.includes("fit together") || status.includes("Preserved") || status.includes("Satisfied") || status.includes("holds")) {
+    return status
+      .replace("The recorded amounts fit together:", "Vipimo vilivyorekodiwa vinaendana sawa:")
+      .replace("collected", "zilizokusanywa")
+      .replace("accepted", "zilizokubaliwa")
+      .replace("processed", "zilizochakatwa")
+      .replace("recorded as put to use", "zilizorekodiwa kama zimetumika");
+  }
+  if (status.includes("rejected")) {
+    return "Mkusanyiko ulikataliwa wakati wa ukaguzi wa kimwili. Hatua zilizofuata za uchakataji hazikufanyika.";
+  }
+  if (status.includes("not yet recorded") || status.includes("not recorded yet")) {
+    return status
+      .replace("Collection recorded", "Mkusanyiko umerekodiwa")
+      .replace("Subsequent processing stages are not recorded yet.", "Hatua zifuatazo za uchakataji hazijarekodiwa bado.")
+      .replace("Subsequent processing stages are not yet recorded.", "Hatua zifuatazo za uchakataji hazijarekodiwa bado.");
   }
   return status;
 }
