@@ -71,11 +71,16 @@ npx hardhat run scripts/seed.ts
 Outputs are written to `demo/demo-data.json`.
 
 ### Build & Open Public Verify Page
-Compile the zero-framework verification engine with esbuild and open the static client:
+Build the static site with Vite:
 ```bash
 npm run web:build
 ```
-Open `web/dist/index.html` directly in any web browser (no local server or internet backend needed), or run the local development server:
+This produces `web/dist/` with two routes:
+- `web/dist/index.html` — home and code-lookup page
+- `web/dist/verify/index.html` — certificate verification page
+- `web/dist/certificate.html` — printable A5 certificate template (copied verbatim)
+
+Open any of the above directly in a browser (no local server or internet backend required for verification), or run the Vite development server:
 ```bash
 npm run web:dev
 ```
@@ -133,7 +138,8 @@ ziwachain/
 ├── scripts/
 │   ├── seed.ts                        # End-to-end deployment and demo batch seed runner
 │   ├── makeCertificates.ts            # Certificate generation pipeline (JSON, QR, audit notes)
-│   └── demoSms.ts                     # Simulated SMS settlement and PROOF conversation runner
+│   ├── demoSms.ts                     # Simulated SMS settlement and PROOF conversation runner
+│   └── verify.ts                      # Basescan contract verification helper
 ├── test/
 │   ├── ZiwaChain.ts                   # Contract test suite (44 unit tests)
 │   ├── hashing.test.ts                # RFC 8785 canonical JSON, salt, and pseudonym suite (18 tests)
@@ -148,11 +154,23 @@ ziwachain/
 │   └── modules/
 │       └── ZiwaChain.ts               # Hardhat Ignition deployment module
 ├── web/
-│   ├── index.html                     # Public verify page: static entry point
-│   ├── main.ts                        # In-browser verification engine (all 5 checks + event binding)
-│   ├── style.css                      # High-contrast responsive stylesheet (light/dark mode)
-│   ├── config.ts                      # RPC URL config and contract ABI
-│   └── dist/                          # Bundled distribution (esbuild output, no CDN)
+│   ├── index.html                     # Home page shell (mounts React root)
+│   ├── verify/
+│   │   └── index.html                 # Verification page shell (mounts same React root)
+│   ├── react-main.tsx                 # React 19 SPA — home page + verify page + all UI components
+│   ├── main.ts                        # In-browser verification engine (all 5 checks; shared with React UI)
+│   ├── config.ts                      # RPC URL resolver and minimal read-only contract ABI
+│   ├── context.tsx                    # React context: language and theme preferences
+│   ├── i18n.ts                        # UI translations (English and Swahili)
+│   ├── demo-fixtures.ts               # Re-exports bundled demo certificate JSON for the four sample batches
+│   ├── style.css                      # CSS custom-property design system (light/dark tokens)
+│   ├── tailwind.css                   # Tailwind CSS 4 entry point
+│   ├── certificate.html               # Standalone printable A5 certificate page (no build step)
+│   └── dist/                          # Vite production build output
+│       ├── index.html                 # Home page
+│       ├── verify/index.html          # Verification page
+│       ├── certificate.html           # Copied verbatim from web/
+│       └── assets/                    # Hashed JS and CSS bundles
 ├── docs/
 │   ├── architecture/
 │   │   ├── architecture.md            # Primary architecture doc with Mermaid diagrams and tables
@@ -172,6 +190,7 @@ ziwachain/
 │   ├── hashing/                       # RFC 8785 canonical JSON, salted hash, HMAC pseudonym
 │   ├── certificate/                   # Harvester certificate builder, QR generator, short code
 │   └── sms/                           # SMS gateway interface, simulated chat gateway, settlement/PROOF flow
+├── vite.config.mts                    # Vite build config (React + Tailwind plugins, two-page input)
 ├── hardhat.config.ts                  # Hardhat configuration (Solidity 0.8.28, Cancun, Base Sepolia)
 ├── package.json                       # Project dependencies and npm scripts
 ```
@@ -195,7 +214,8 @@ To maintain total transparency with hackathon judges, our implementation status 
 - **Append-Only Tamper-Evident Corrections:** Hashes can only be superseded by their original author with a recorded reason; historical records remain immutable and visible. Only evidence and payload hashes may be superseded (Decision D); `newHash == bytes32(0)` reverts with `InvalidHash`.
 - **Off-Chain Hashing Module (`src/hashing/`):** RFC 8785 canonical JSON serialization, random 128-bit salts, `keccak256` payload hashing, and HMAC-SHA256 per-batch pseudonym derivation. Browser-safe; no Node-only imports in the main export.
 - **Harvester Certificate Pipeline (`src/certificate/`, `scripts/makeCertificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
-- **Public In-Browser Verify Page (`web/`):** Zero-backend static page bundled with esbuild. Runs 5 independent verification checks against the live blockchain with no login and no ZiwaClear server contact. Binds every stage in the certificate directly to its emitted on-chain event log (`payloadHash` and `txHash`), validates `cert.pseudonym` against `batchData.harvesterId`, verifies plain `paymentRef`, and presents an amber banner for authentic rejected batches without granting verified status.
+- **Public In-Browser Verify Page (`web/`):** React 19 + Vite 8 + TailwindCSS 4 two-page SPA (home at `/`, verification at `/verify/`) built as a fully static site — no backend, no CDN dependency, no login. The in-browser verification engine (`web/main.ts`) runs 5 independent checks against the live blockchain via the public Base Sepolia JSON-RPC endpoint: cryptographic hash recomputation, on-chain event provenance, record supersession audit, mass-balance invariant validation, and payment reference verification. Binds every stage in the certificate directly to its emitted on-chain event log (`payloadHash` and `txHash`), validates `cert.pseudonym` against `batchData.harvesterId`, and presents an amber banner for authentic rejected batches without granting verified status. Certificate data travels entirely in the URL hash fragment (`#c=<base64url>`); no server lookup is required to open a QR-scanned link.
+- **Bilingual UI (`web/i18n.ts`):** Full English and Swahili translations across all UI text, status messages, check labels, and timeline descriptions. Language auto-detected from browser locale and persisted in `localStorage`; overridable via `?lang=en` or `?lang=sw` query parameter.
 - **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demoSms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), canonical `SettlementConfirmationPayload` assembly, relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
 - **Duplicate-Evidence Flagging:** On-chain first-use tracking (`evidenceFirstBatch`) and event notification (`EvidenceReused`) that flags reuse of identical field evidence hashes across different batches with an amber notice on the public verify page, without reverting transactions or declaring fraud.
 - **Full Automated Test Suite:** 99 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
