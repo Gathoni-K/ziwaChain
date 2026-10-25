@@ -755,6 +755,43 @@ function HomePage() {
             </div>
           </section>
 
+          {/* Project Resources: Slides & Demo Video */}
+          <section
+            id="project-resources"
+            className="w-full pb-12 pt-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-slate-200 dark:border-[var(--border-subtle)] bg-[var(--bg-card)] p-6 shadow-xs">
+              <div className="max-w-xl">
+                <h2 className="text-xl font-semibold text-[var(--text-heading)]">
+                  Explore ZiwaChain
+                </h2>
+                <p className="mt-2 text-sm text-slate-600 dark:text-[var(--text-muted)]">
+                  Learn how ZiwaChain works and see the traceability prototype in action.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="https://docs.google.com/presentation/d/1C6cs73b2imCDTjHYjH3co-WhEDMRk3Od24Z6zGzapL4/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-[var(--primary)] dark:text-[var(--primary-fg)] dark:hover:bg-[var(--primary-hover)] cursor-pointer"
+                >
+                  View Project Slides ↗
+                </a>
+
+                <a
+                  href="https://youtu.be/jLdPFBq7_no"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 dark:border-[var(--border-main)] bg-[var(--bg-card)] px-5 py-3 text-sm font-medium text-[var(--text-main)] transition hover:bg-slate-100 dark:hover:bg-[var(--bg-secondary)] cursor-pointer"
+                >
+                  Watch Demo Video ↗
+                </a>
+              </div>
+            </div>
+          </section>
+
           {/* Why keep a record? */}
           <section className="grid gap-8 border-y border-[var(--border-subtle)] py-14 sm:grid-cols-2 sm:py-16">
             <div>
