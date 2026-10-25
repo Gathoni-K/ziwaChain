@@ -23,6 +23,7 @@ export interface Translations {
     journeyTitle: string;
     journeySubtitle: string;
     journeyDisclaimer: string;
+    stepPrefix?: string;
     journeySteps: Array<{
       id: string;
       label: string;
@@ -161,30 +162,31 @@ export const translations: Record<Language, Translations> = {
       journeySubtitle: "Select any step to explore what happens at that stage:",
       journeyDisclaimer:
         "A simple view of the steps a record may contain. Not a report of a particular collection.",
+      stepPrefix: "Step",
       journeySteps: [
         {
           id: "harvest",
-          label: "Collection recorded",
+          label: "Record the collection",
           detail:
-            "The system records the amount of water hyacinth reported as collected at the landing site, with harvester group identity and GPS hotspot references.",
+            "Record how much water hyacinth is collected, where it comes from, and an anonymous identifier for the harvesting group.",
         },
         {
           id: "verified",
-          label: "Collection checked",
+          label: "Check the harvest",
           detail:
-            "An authorised verifier inspects the harvested batch for foreign contamination and confirms or rejects the record on-chain.",
+            "The collected material is inspected for contamination, and the batch is recorded as accepted or rejected.",
         },
         {
           id: "processed",
-          label: "Amount received and processed",
+          label: "Track the journey",
           detail:
-            "A receiving processor records how much mass is accepted, converted into biogas or biochar, and put to beneficial end-use under strict mass-balance limits.",
+            "Record how much hyacinth is accepted, what it is turned into—such as biogas or biochar—and the intended use of the resulting products.",
         },
         {
           id: "available",
-          label: "Record available to check",
+          label: "Check the record",
           detail:
-            "Anyone can inspect the tamper-evident certificate, verify cryptographic hashes, and confirm on-chain status independently.",
+            "Anyone can open a batch's digital certificate to review its recorded journey and check the records against the information stored on the blockchain.",
         },
       ],
       whyTitle: "Why keep a record?",
@@ -361,30 +363,31 @@ export const translations: Record<Language, Translations> = {
       journeySubtitle: "Bofya hatua yoyote hapa chini ili uone kinachofanyika:",
       journeyDisclaimer:
         "Mtazamo rahisi wa hatua zinazoweza kuwemo kwenye rekodi. Sio ripoti ya mkusanyiko maalum.",
+      stepPrefix: "Hatua",
       journeySteps: [
         {
           id: "harvest",
-          label: "Mkusanyiko unarekodiwa",
+          label: "Rekodi mkusanyiko",
           detail:
-            "Mfumo huandika kiasi cha gugu maji kilichoripotiwa kuvunwa katika kituo cha kutua, pamoja na utambulisho wa kikundi cha wavunaji na eneo la GPS.",
+            "Rekodi kiasi cha gugu maji kilichokusanywa, mahali linapotoka, na kitambulisho kisichotaja jina la kikundi cha uvunaji.",
         },
         {
           id: "verified",
-          label: "Mkusanyiko unakaguliwa",
+          label: "Kagua mavuno",
           detail:
-            "Mkaguzi aliyeidhinishwa hukagua mzigo uliovunwa kubaini iwapo una uchafu au matope na kuthibitisha au kukataa rekodi kwenye mnyororo.",
+            "Mzigo uliokusanywa hukaguliwa kubaini iwapo una uchafu, na kundi hilo hurekodiwa kama limekubaliwa au limekataliwa.",
         },
         {
           id: "processed",
-          label: "Kiasi kupokelewa na kuchakatwa",
+          label: "Fuatilia safari",
           detail:
-            "Mchakataji anayepokea hurekodi kiasi alichokubali, kilichobadilishwa kuwa bayogasi au mkaa mbadala, na kutumika chini ya viwango sahihi vya uwiano wa uzito.",
+            "Rekodi kiasi cha gugu maji kilichokubaliwa, kile kinachotengenezwa—kama vile bayogasi au mkaa mbadala—na matumizi yaliyokusudiwa ya bidhaa zinazopatikana.",
         },
         {
           id: "available",
-          label: "Rekodi kupatikana kwa ukaguzi",
+          label: "Kagua rekodi",
           detail:
-            "Mtu yeyote anaweza kukagua cheti hiki, kuthibitisha saini za siri za kidijitali, na kuhakiki hali halisi kwenye mnyororo wa data.",
+            "Mtu yeyote anaweza kufungua cheti cha kidijitali cha kundi ili kupitia safari iliyorekodiwa na kulinganisha rekodi hizo na taarifa zilizohifadhiwa kwenye blockchain.",
         },
       ],
       whyTitle: "Kwa nini kuweka rekodi?",

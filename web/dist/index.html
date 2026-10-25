@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZiwaChain, Records for Collected Water Hyacinth</title>
+  <title>ZiwaChain | Records for Collected Water Hyacinth</title>
   <meta name="description" content="Learn how ZiwaChain records collected water hyacinth and check a collection record.">
   <script>
-    (function() {
+    (() => {
       try {
-        var params = new URLSearchParams(window.location.search);
-        var urlTheme = params.get("theme");
-        var theme = (urlTheme === "light" || urlTheme === "dark") ? urlTheme : (localStorage.getItem("ziwachain_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+        const params = new URLSearchParams(window.location.search);
+        const urlTheme = params.get("theme");
+        const theme = (urlTheme === "light" || urlTheme === "dark") ? urlTheme : (localStorage.getItem("ziwachain_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
         document.documentElement.setAttribute("data-theme", theme);
         if (theme === "dark") {
           document.documentElement.classList.add("dark");
         } else {
           document.documentElement.classList.remove("dark");
         }
-        var urlLang = params.get("lang");
-        var lang = (urlLang === "en" || urlLang === "sw") ? urlLang : (localStorage.getItem("ziwachain_lang") || (navigator.language && navigator.language.startsWith("sw") ? "sw" : "en"));
+        const urlLang = params.get("lang");
+        const lang = (urlLang === "en" || urlLang === "sw") ? urlLang : (localStorage.getItem("ziwachain_lang") || (navigator.language && navigator.language.startsWith("sw") ? "sw" : "en"));
         document.documentElement.setAttribute("lang", lang);
-      } catch (e) {}
+      } catch {}
     })();
   </script>
-  <script type="module" crossorigin src="/assets/home-B--7k787.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/react-main-ChwRO-sZ.js">
+  <script type="module" crossorigin src="/assets/home-CxMPnzaE.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/react-main-BOVWzrdK.js">
   <link rel="stylesheet" crossorigin href="/assets/react-main-D4Gg-IjE.css">
 </head>
 <body>

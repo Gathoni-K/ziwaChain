@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { translations, type Language, type Theme, type Translations } from "./i18n";
+import { translations, type Language, type Theme, type Translations } from "./translations";
 
 export interface AppPreferencesContextType {
   language: Language;

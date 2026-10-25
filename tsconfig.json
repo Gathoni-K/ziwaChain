@@ -10,5 +10,7 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true
-  }
+  },
+  "include": ["contracts", "scripts", "test", "web", "ignition", "typechain-types", "hardhat.config.ts", "vite.config.mts"],
+  "exclude": ["node_modules", "web/dist", "artifacts", "cache"]
 }

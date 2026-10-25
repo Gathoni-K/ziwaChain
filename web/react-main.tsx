@@ -23,7 +23,7 @@ import {
   getTranslatedTimeline,
   getTranslatedMassStatus,
   getTranslatedStageName,
-} from "./i18n";
+} from "./translations";
 import "./tailwind.css";
 
 type Check = CheckItem;
@@ -741,7 +741,7 @@ function HomePage() {
               {/* Dynamic Detail Card for selected step */}
               <div className="mt-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 shadow-sm transition-all duration-200">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--primary)]">
-                  <span>Step 0{selectedJourneyStep + 1}:</span>
+                  <span>{t.home.stepPrefix || "Step"} 0{selectedJourneyStep + 1}:</span>
                   <span>{currentStep.label}</span>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-[var(--text-main)]">
