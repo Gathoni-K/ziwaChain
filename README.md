@@ -1,251 +1,624 @@
 # ZiwaChain
 
-**ZiwaChain** is a verified chain of custody and provenance protocol for invasive water hyacinth biomass harvested from Lake Victoria. Built as an extension to the [ZiwaClear](https://ziwa-clear.vercel.app/) marketplace, it anchors harvest, verification, commercial acceptance, processing, and circular end use on Base Sepolia. The protocol equips informal harvesters with portable, tamper-evident digital proof of their work without requiring smartphone ownership or crypto wallet management.
+**Verifiable chain of custody for environmental work on Lake Victoria.**
 
-ZiwaChain lets harvesters, buyers (the accepting and paying party: processors, programmes, or funders), verifiers and lenders rely on the same delivery record without having to trust a single operator.
+ZiwaChain is a blockchain-based traceability prototype for documenting the journey of harvested water hyacinth biomass—from collection and verification through acceptance, processing, and intended end use.
 
----
+Developed by Gathoni Karume for the IEEE Global ClimateChain Hackathon 2026, Track 3: Sustainable Supply Chains, ZiwaChain explores a practical question: **How can environmental work be recorded and independently checked when multiple parties must trust the same delivery record?**
 
-## The Problem: Trust in Paid Removal on Lake Victoria
+The prototype uses a Solidity smart contract deployed on Base Sepolia, cryptographic evidence hashes, batch-specific harvester pseudonyms, digital certificates, and non-transferable work credits to demonstrate how a shared record could support accountability across an informal biomass supply chain.
 
-Provisional informal fieldwork conducted around Lake Victoria (Dunga, Homa Bay, and Kendu Bay, Oct 18 to 19, 2026, across a small sample of conversations) revealed the central barrier to managing water hyacinth (*Pontederia crassipes*): **trust in paid removal**.
+ZiwaChain is designed to complement [ZiwaClear](https://ziwa-clear.vercel.app/), a Lake Victoria water-hyacinth initiative. It is currently a standalone prototype; it is not yet integrated with ZiwaClear's operational workflows.
 
-Fishers reported that they would harvest hyacinth if paid, but they expect immediate payment and deeply distrust paid harvesting schemes after a reported scam where people paid registration fees to an organizer who disappeared. A second reported scam concerned the funder side: parties reportedly claimed to be managing the weed, then waited for it to recede naturally instead of carrying out the funded removal. These provisional reports suggest that paid-removal schemes can fail on trust from both sides. Furthermore, weed presence is seasonal and localized (reported as arriving around July and leaving around August, blocking landings for about a week, but absent at Dunga for roughly three years and minimal at Homa Bay during field visits), and no dependable commercial buyer was found (local biogas demonstration sites source their own feedstock).
+> **Current status:** Smart contract deployed on Base Sepolia; automated tests and a static web interface implemented; lifecycle demonstrated using synthetic batches. Live SMS/USSD integration, real payment reconciliation, commercial offtake, and field validation remain outstanding.
 
-Where weed arrives, fishers clear narrow paths around their boats and leave weed on the shore, or wait for wind to blow it out. Information flows strictly through county fisheries officers and Beach Management Unit (BMU) officials down to fishers.
+## Table of contents
 
-**What ZiwaChain addresses:**
-- **Verifiable proof of delivery, verification, and payment:** Equip informal harvesters with portable, tamper-evident digital proof of their work and two-sided settlement confirmation that they hold independently on their phone or on paper.
-- **Operator-independent shared trust:** A shared record on Base Sepolia that harvesters, accepting payers, verifiers, and community lenders can verify directly without trusting any single platform or middleman database.
+- [The problem](#the-problem)
+- [What ZiwaChain does](#what-ziwachain-does)
+- [What the prototype demonstrates](#what-the-prototype-demonstrates)
+- [How it works](#how-it-works)
+- [Why blockchain](#why-blockchain)
+- [Architecture](#architecture)
+- [Technology stack](#technology-stack)
+- [Getting started](#getting-started)
+- [Running the tests](#running-the-tests)
+- [Running the simulated SMS demo](#running-the-simulated-sms-demo)
+- [Demo batches](#demo-batches)
+- [Deployment and verification](#deployment-and-verification)
+- [Privacy and data integrity](#privacy-and-data-integrity)
+- [Field observations and problem validation](#field-observations-and-problem-validation)
+- [Limitations and assumptions](#limitations-and-assumptions)
+- [Roadmap](#roadmap)
+- [Project documentation](#project-documentation)
+- [Repository structure](#repository-structure)
+- [Acknowledgements](#acknowledgements)
 
-**What ZiwaChain does NOT address:**
-- It does not generate biomass supply or eliminate ecological seasonality.
-- It does not create commercial demand or manufacture buyers where none exist.
-- It cannot prevent an organizer from demanding illicit cash registration fees off-chain, though pre-funded commitment and escrow models on our roadmap directly target this vulnerability.
+## The problem
 
----
+Water hyacinth (*Pontederia crassipes*) can obstruct fishing access and boat landings around Lake Victoria. Removing it is only one part of the challenge. Where removal is organised as paid environmental work, participants also need confidence that work will be recognised, accepted and paid for.
 
-## Quick Start
+A potential chain of custody can involve several independent activities:
+
+1. Biomass is collected.
+2. The collection is inspected and verified.
+3. An accepting party confirms the quantity it accepts.
+4. Biomass is processed.
+5. The intended end use is recorded.
+6. Settlement and payment references are documented separately.
+
+Without a consistent record, different participants may maintain separate accounts of what was collected, what was accepted, and what happened afterwards. This can make discrepancies difficult to investigate and delivery claims difficult for other parties to check.
+
+ZiwaChain explores whether a shared, independently inspectable record can improve the traceability of those activities.
+
+### The field context
+
+Informal fieldwork around Dunga, Homa Bay and Kendu Bay on Lake Victoria on 18–19 October 2026 helped refine the problem framing.
+
+Conversations suggested that:
+
+- Some fishers would consider harvesting water hyacinth for financial compensation, but trust in paid-removal schemes is a concern.
+- Participants described alleged scams involving registration fees and funded removal activities. These are reported accounts, not independently verified findings.
+- The presence of hyacinth varied considerably between locations. Some participants described episodic arrivals that can interfere with boat access before wind or water movement shifts the mats.
+- At Dunga, a fisher reported that hyacinth had not been a significant problem there for approximately three years.
+- No dependable commercial biomass buyer was validated during the fieldwork. Local biogas demonstration sites contacted or discussed during the investigation were reported to source their own feedstock.
+
+These observations came from a small number of conversations and site observations. They are provisional, location-specific findings—not a representative survey of Lake Victoria or proof that every reported problem occurs across the region.
+
+The findings also exposed a fundamental constraint: **better records cannot create biomass supply, guarantee payment, or establish a market for harvested material.**
+
+### What ZiwaChain addresses
+
+ZiwaChain focuses on the evidence and traceability layer:
+
+- Recording lifecycle events against a batch.
+- Enforcing quantity constraints between lifecycle stages.
+- Separating submission, verification, acceptance and processing responsibilities.
+- Recording evidence corrections without silently erasing the earlier record.
+- Providing certificate data that can be checked against the blockchain.
+- Demonstrating a workflow for recording a harvester's settlement confirmation.
+
+### What ZiwaChain does not solve
+
+ZiwaChain does not, by itself:
+
+- Ensure that water hyacinth is present at a particular location.
+- Organise or fund harvesting operations.
+- Guarantee that a buyer or processor exists.
+- Prove that a physical collection, inspection or processing event occurred.
+- Guarantee that an M-Pesa payment reached a harvester.
+- Prevent off-chain registration-fee scams.
+- Establish accredited carbon credits or verified emissions reductions.
+
+Those challenges require operational partners, reliable field evidence, funding arrangements and a viable downstream use for the biomass.
+
+## What ZiwaChain does
+
+The prototype combines on-chain lifecycle controls with off-chain evidence and a public verification interface.
+
+| Capability | Purpose |
+|---|---|
+| Lifecycle recording | Records batch progression from collection to end use. |
+| Role-based permissions | Restricts lifecycle actions to authorised roles. |
+| Quantity invariants | Prevents recorded accepted, processed and end-use quantities from exceeding their permitted upstream quantities. |
+| Evidence corrections | Records superseding evidence hashes and correction reasons while retaining the earlier history. |
+| Duplicate-evidence flagging | Flags reuse of an identical evidence hash across different batches. |
+| Harvester pseudonyms | Uses batch-specific pseudonyms instead of publishing a harvester's direct identity. |
+| Digital certificates | Generates portable certificate data, a short code and a QR code. |
+| Public verification interface | Checks certificate data against the deployed contract and its event history. |
+| Non-transferable work credits | Demonstrates recording a work-credit token for each kilogram reaching the recorded end-use stage. |
+| Simulated SMS workflow | Demonstrates settlement-confirmation and proof-delivery logic without a live SMS provider. |
+
+The prototype is intended to make records easier to inspect. It does not make inaccurate information true merely by recording it on a blockchain.
+
+## How it works
+
+The intended batch lifecycle is:
+
+**Collection → Verification or Rejection → Acceptance → Processing → End Use**
+
+Settlement confirmation is recorded as a separate workflow rather than being treated as proof that the physical biomass lifecycle has been completed.
+
+### 1. Collection
+
+A collection record establishes a batch and its reported harvested quantity. The prototype uses a relayer model to submit transactions on behalf of a harvester-facing workflow.
+
+The current demonstration uses synthetic records and development signers. Live SMS/USSD submission from field participants has not been integrated.
+
+### 2. Verification or rejection
+
+An authorised verifier approves or rejects the submitted batch.
+
+The contract enforces role permissions and prevents an address holding the relayer role from also acting as the verifier. The current implementation still relies on a single authorised verifier; multi-verifier consensus is proposed future work.
+
+### 3. Acceptance
+
+An authorised buyer-role account records the quantity accepted.
+
+In the intended operating model, the accepting party may be a commercial processor, a programme or another funder responsible for accepting and paying for the work. No dependable commercial biomass buyer was validated during the field investigation, so this role should not be interpreted as evidence of an established market.
+
+### 4. Processing
+
+An authorised processor records the quantity processed. The contract constrains the recorded quantity to the accepted amount.
+
+### 5. End use
+
+The final lifecycle stage records the quantity assigned to an intended beneficial end use. The cumulative recorded end-use quantity cannot exceed the recorded processed quantity.
+
+The contract mints non-transferable `WORK_CREDIT` tokens at this stage, at a ratio of one token per recorded kilogram reaching end use.
+
+These tokens represent recorded work within the prototype. They are **not money, proof of independently measured environmental impact, or accredited carbon credits**.
+
+### 6. Settlement confirmation
+
+The prototype includes a simulated SMS conversation in which a harvester confirms settlement using a short code. The workflow assembles a settlement-confirmation payload and submits the corresponding record through a relayer.
+
+The payment reference is hashed, and the harvester's confirmation is recorded as an attestation. The workflow does not independently establish that money was transferred or received.
+
+Live telecom integration and automated M-Pesa reconciliation remain future work.
+
+## Why blockchain
+
+A conventional database can also store lifecycle records, enforce quantity rules and maintain an audit log. Blockchain is not inherently necessary for every traceability application.
+
+ZiwaChain explores blockchain because multiple parties may need to inspect a common record without relying solely on one organisation's private database.
+
+The prototype demonstrates three specific design choices:
+
+1. **A shared transaction history:** Lifecycle events are recorded on a public testnet and can be inspected independently.
+2. **Enforced transition rules:** The contract rejects transactions that violate its lifecycle permissions or quantity invariants.
+3. **Checkable evidence references:** Certificates can be checked against hashes and events recorded on-chain, including the history of superseded evidence.
+
+This is an architectural rationale, not evidence that blockchain has already improved accountability in a live Lake Victoria supply chain.
+
+The benefits depend on reliable evidence at the point of collection, appropriate verification, trusted operating arrangements and participation by the relevant parties. A blockchain can preserve an inaccurate claim just as persistently as an accurate one.
+
+## Architecture
+
+ZiwaChain separates transaction enforcement from certificate construction, user-interface logic and the simulated communications workflow.
+
+### On-chain
+
+The Solidity smart contract is responsible for:
+
+- Lifecycle state transitions.
+- Role-based access control.
+- Quantity invariants.
+- Recording lifecycle events and evidence hashes.
+- Tracking first use of evidence hashes and emitting reuse alerts.
+- Recording settlement-confirmation references.
+- Minting non-transferable work-credit tokens.
+
+### Off-chain
+
+The TypeScript modules handle:
+
+- Canonical JSON serialization and hashing.
+- Per-batch pseudonym derivation.
+- Certificate generation and QR-code creation.
+- Simulated SMS settlement and proof delivery.
+- User-interface presentation and certificate verification logic.
+
+The browser-based verification interface queries Base Sepolia through a public JSON-RPC endpoint. It does not require a custom application backend for its static hosting, but blockchain verification requires network access to the RPC service.
+
+### Roles
+
+| Role | Responsibility |
+|---|---|
+| Admin | Manages contract roles and permissions. |
+| Relayer | Submits permitted transactions on behalf of the harvester-facing workflow. |
+| Verifier | Approves or rejects a submitted batch. |
+| Buyer | Records acceptance of a verified batch. In the intended model, this is the accepting and paying party. |
+| Processor | Records processing and the subsequent end-use stage. |
+| Harvester | Participates through the intended low-bandwidth reporting and settlement-confirmation workflow; the current implementation uses a relayer rather than a harvester-controlled EVM wallet. |
+
+The role separation is enforced by contract permissions where implemented. It does not independently establish that a real-world participant is honest or that a physical event occurred.
+
+## Technology stack
+
+| Component | Technology |
+|---|---|
+| Smart contracts | Solidity 0.8.28 |
+| Contract framework | Hardhat |
+| Contract libraries | OpenZeppelin Contracts v5 |
+| Blockchain | Base Sepolia testnet |
+| Off-chain tooling | TypeScript |
+| Frontend | React 19, Vite 8 and Tailwind CSS 4 |
+| Serialization | RFC 8785 JSON Canonicalization Scheme |
+| Evidence hashing | Keccak-256 |
+| Harvester pseudonyms | HMAC-SHA256 |
+| Short codes | Crockford Base32 |
+| Certificate format | Version 1 JSON certificate with QR-code output |
+| Communications prototype | Simulated SMS gateway |
+
+## Getting started
 
 ### Prerequisites
-- Node.js (v18 or v20+)
-- npm (v9+)
 
-### Installation
-Clone the repository and install dependencies:
+- Node.js 18 or later, preferably a supported current release.
+- npm 9 or later.
+- Git.
+
+### 1. Clone the repository
+
 ```bash
 git clone https://github.com/Gathoni-K/ziwaChain.git
 cd ziwaChain
 npm install
 ```
 
-### Compile Smart Contracts
-Compile the Solidity contracts and generate TypeChain TypeScript bindings:
+### 2. Compile the smart contracts
+
 ```bash
-npx hardhat clean && npx hardhat compile
+npx hardhat clean
+npx hardhat compile
 ```
 
-### Run Test Suite
-Run the full automated test suite (99 unit tests covering contract state machine rules, mass-balance invariant checks, non-transferability, hash corrections, duplicate-evidence flagging, RFC 8785 canonical serialization, HMAC pseudonyms, certificate generation, in-browser verification algorithm, simulated SMS settlement flows, and markdown link integrity):
+This cleans previous build output, compiles the contracts and regenerates the associated build artifacts and TypeChain bindings as configured by the project.
+
+### 3. Run the test suite
+
 ```bash
-npx hardhat test
+npm test
 ```
 
-### Run Simulated SMS Settlement & PROOF Demo
-Run the interactive SMS settlement confirmation and certificate delivery flow against a local node:
+The test suite covers contract lifecycle rules, quantity constraints, work-credit transfer restrictions, evidence corrections, duplicate-evidence flagging, hashing, pseudonyms, certificate generation, verification logic, simulated SMS flows and related implementation checks.
+
+The development test suite was reported as passing 99 automated tests. Run it against the current checkout to confirm the result for your environment.
+
+### 4. Build the web interface
+
+```bash
+npm run web:build
+```
+
+The Vite build produces static files under `web/dist/`, including:
+
+- `web/dist/index.html` — home and code-lookup interface.
+- `web/dist/verify/index.html` — certificate verification route.
+- `web/dist/certificate.html` — printable certificate template.
+- `web/dist/assets/` — generated frontend assets.
+
+### 5. Run the development server
+
+```bash
+npm run web:dev
+```
+
+Use the local address printed by Vite to open the application. Live verification against Base Sepolia requires an internet connection and access to the configured RPC endpoint.
+
+### 6. Run the simulated SMS demonstration
+
 ```bash
 npm run demo:sms
 ```
 
-### Typecheck TypeScript Code
-Verify TypeScript types across contracts, off-chain modules, and tests:
-```bash
-npx tsc --noEmit
-```
+This runs the settlement-confirmation and proof-delivery workflow using the simulated chat gateway. It does not send real SMS messages.
 
-### Seed Demo Batches (Local In-Memory Network)
-Run the automated seed script to deploy the contract and execute 4 illustrative demo batches (Batch A full journey, Batch B quality rejection, Batch C hash correction, Batch D duplicate evidence flag; illustrative demo data, not real harvests):
+## Running the simulated SMS demo
+
+The communications prototype demonstrates the intended sequence:
+
+1. A batch has been accepted.
+2. The simulated harvester receives a settlement-confirmation prompt.
+3. The harvester replies with the expected confirmation format and short code.
+4. The workflow validates the reply and assembles a settlement-confirmation payload.
+5. A relayer records the confirmation through the contract workflow.
+6. The simulated system provides a proof short code or link.
+
+The prototype includes retry handling and phone-number masking in its simulated workflow.
+
+**This is a simulation, not a live SMS service.** Africa's Talking or another telecom provider is not integrated into the current release, and the project does not yet use a live USSD gateway or automatically reconcile M-Pesa transactions through Safaricom Daraja.
+
+## Demo batches
+
+ZiwaChain uses four illustrative batches to exercise different parts of the lifecycle. They are synthetic examples, not records of actual water-hyacinth harvesting.
+
+| Batch | Scenario | What it demonstrates |
+|---|---|---|
+| Batch A | Complete illustrative journey | 1,000 kg reported harvested, 900 kg accepted, and 800 kg processed and recorded at end use. |
+| Batch B | Rejected batch | Rejection handling and prevention of progression through the successful lifecycle. |
+| Batch C | Evidence correction | Superseding an earlier evidence hash while preserving the recorded correction history. |
+| Batch D | Reused evidence | Flagging an identical evidence hash reused across different batches. |
+
+For Batch A, the prototype records 800 `WORK_CREDIT` tokens at the final lifecycle stage.
+
+These values exist to demonstrate the contract and interface. They are not measured Lake Victoria harvests, verified field weights, confirmed payments, actual processing records or evidence of environmental outcomes.
+
+The duplicate-evidence mechanism identifies exact cryptographic hash reuse. It cannot establish whether two different files depict the same physical material.
+
+## Deployment and verification
+
+### Existing Base Sepolia deployment
+
+The prototype has been deployed to Base Sepolia.
+
+- **Contract address:** [`0xeFDac2CA0818ac06EdC4184384DAE8B39315ACde`](https://sepolia.basescan.org/address/0xeFDac2CA0818ac06EdC4184384DAE8B39315ACde)
+- **Network:** Base Sepolia testnet
+- **Explorer:** [View the contract on BaseScan](https://sepolia.basescan.org/address/0xeFDac2CA0818ac06EdC4184384DAE8B39315ACde)
+
+Testnet deployment demonstrates that the contract has been deployed to the specified network. It is not a production deployment or an independent security audit.
+
+### Deploying a new instance
+
+For a new deployment, first review the Hardhat configuration and `.env.example`.
+
+1. Copy the example environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Configure the deployment settings required by the project, including the deployer private key, the pseudonym secret and the appropriate testnet funding.
+
+3. Ensure the private key and secret remain local and are never committed to source control or included in a public frontend build.
+
+4. Follow the project's Hardhat deployment configuration and Ignition module instructions for the intended network.
+
+The deployer private key and pseudonym secret serve different purposes. A deployer key authorises blockchain transactions; the pseudonym secret is used by the off-chain pseudonym derivation workflow. Neither should be exposed publicly.
+
+### Seeding illustrative batches
+
+The seed script is intended to create demonstration records and associated metadata.
+
 ```bash
 npx hardhat run scripts/seed.ts
 ```
-Outputs are written to `demo/demo-data.json`.
 
-### Build & Open Public Verify Page
-Build the static site with Vite:
-```bash
-npm run web:build
-```
-This produces `web/dist/` with two routes:
-- `web/dist/index.html` — home and code-lookup page
-- `web/dist/verify/index.html` — certificate verification page
-- `web/dist/certificate.html` — printable A5 certificate template (copied verbatim)
+The default local Hardhat network is suitable for isolated development. A Base Sepolia run requires the network configuration, environment variables and testnet funding described above:
 
-Open any of the above directly in a browser (no local server or internet backend required for verification), or run the Vite development server:
-```bash
-npm run web:dev
-```
-A separate printable certificate page is available at `web/certificate.html`. Open it in a browser, paste a certificate JSON, and use Ctrl+P / ⌘P to save as PDF (A5).
-
-### Deploy & Seed on Base Sepolia
-To deploy and seed on Base Sepolia testnet:
-1. Copy `.env.example` to `.env`.
-2. Configure `DEPLOYER_PRIVATE_KEY` and fund that address with Base Sepolia testnet ETH.
-3. Set `PSEUDONYM_SECRET` to a private server secret.
-4. Run the seed script targeting Base Sepolia:
 ```bash
 npx hardhat run scripts/seed.ts --network baseSepolia
 ```
-The script automatically generates and funds 4 ephemeral testnet wallets (relayer, verifier, buyer, processor), grants on-chain roles, executes all 4 demo batches (illustrative data, not real harvests), and writes output metadata to `demo/demo-data.json`.
 
-### Verify Contract on Basescan (prepare-only, requires Base Sepolia deployment)
-1. Set `ETHERSCAN_API_KEY` in your `.env` file (one Etherscan V2 key covers Base Sepolia; do not use a separate Basescan key).
-2. Ensure `demo/demo-data.json` exists from a Base Sepolia seed run.
-3. Run the verification script:
+The script is designed to create illustrative batch data, including a complete journey, rejection, correction and duplicate-evidence scenario. Inspect the current script and its output before relying on the precise number of records or transactions produced by a particular run.
+
+Generated metadata is written to `demo/demo-data.json`. Treat this file as development output: it can contain sensitive test artefacts, salts, payloads and transaction information. Do not publish private keys or operational secrets.
+
+### Contract verification on the explorer
+
+The repository includes a helper for submitting contract verification through Etherscan V2, configured for the relevant network.
+
 ```bash
 npx hardhat run scripts/verify.ts --network baseSepolia
 ```
-The script reads `contractAddress` and `adminAddress` from `demo/demo-data.json` and submits the verification to Etherscan V2.
 
----
+Review the script's prerequisites and confirm that the deployment metadata matches the contract being verified before running it. A successful deployment does not automatically mean that the source has been verified on the explorer.
 
-## Project Documentation (Judge-Facing)
+### Certificate and QR verification
 
-Judges can review the complete hackathon evaluation documentation via the links below:
+The certificate pipeline generates JSON certificate data, a short code and QR-code output. The browser verification implementation is designed to check certificate information against on-chain records.
+
+The verification design includes:
+
+- Recomputing cryptographic hashes.
+- Checking transaction and event provenance.
+- Reviewing superseded evidence.
+- Checking quantity invariants.
+- Checking the recorded payment-reference evidence.
+
+Automated tests cover the verification logic. The complete deployed journey—from scanning a generated QR code on a separate phone to successfully verifying the correct certificate against the live testnet—must be confirmed through an end-to-end test before it is presented as fully validated.
+
+A successful hash check confirms consistency with the recorded hash; it does not independently prove the truth of the underlying physical claim.
+
+## Privacy and data integrity
+
+ZiwaChain uses cryptographic mechanisms to limit direct identity exposure and make evidence changes inspectable.
+
+### Batch-specific pseudonyms
+
+The off-chain hashing module derives a pseudonym using HMAC-SHA256. Pseudonyms are scoped to individual batches rather than being intended as a single public identity reused across every batch.
+
+This reduces straightforward public linkability across batches, but it is not a guarantee of complete anonymity. Metadata, operational practices, exposed files or compromised secrets could still create privacy risks.
+
+### Canonical serialization and hashes
+
+The hashing module uses RFC 8785 JSON Canonicalization Scheme (JCS) to produce a deterministic representation of JSON data before hashing.
+
+The project uses random salts and Keccak-256 payload hashes. The hash enables a verifier to check whether supplied data matches the recorded digest, subject to the implementation and the availability of the correct payload and salt.
+
+A hash is not encryption. It does not make the underlying data confidential if that data is separately exposed.
+
+### Evidence corrections
+
+When evidence needs correction, the implementation records a superseding hash and a correction reason rather than silently replacing the previous reference. The original history remains inspectable.
+
+This provides a record of changes, not an independent determination that the correction is justified.
+
+### Duplicate-evidence detection
+
+The contract tracks first use of evidence hashes and emits an event when the same hash is reused across batches.
+
+This detects exact hash reuse. It does not identify visually similar evidence, modified copies, different photographs of the same biomass or fabricated evidence that has never been used before.
+
+### Personal information and payment references
+
+Direct personal identifiers should not be placed on-chain. The prototype uses pseudonyms and hashes for the relevant data flows, but off-chain storage and communications still require appropriate safeguards.
+
+A hashed payment reference is a record of a reference, not a payment-provider confirmation. The settlement workflow's harvester reply is an attestation recorded through a relayer, not a native cryptographic signature generated by the harvester's own wallet.
+
+## Field observations and problem validation
+
+Fieldwork is informing the operating model as well as the technical design.
+
+The initial assumption was that traceability could help coordinate a relatively straightforward removal-and-utilisation supply chain. The observations challenged that assumption.
+
+### 1. The problem is episodic and location-dependent
+
+Hyacinth conditions differed between the sites visited and discussed. A site that has little visible hyacinth during a visit may still experience short periods of disruption. Wind and water movement can shift mats between locations.
+
+This suggests that a future operating model should be responsive to actual local conditions rather than assume that a single site continuously supplies biomass.
+
+### 2. Participation depends on trust and incentives
+
+Some fishers expressed willingness to harvest for compensation, while reported experiences with scams contributed to distrust.
+
+A traceability record may help document commitments and work, but it cannot ensure that funding exists or that a payer honours an obligation. A credible pilot would need clear payment terms, identifiable responsible parties and a way for harvesters to check those terms before work begins.
+
+### 3. Downstream demand remains unresolved
+
+The investigation did not establish a dependable commercial buyer ready to purchase harvested hyacinth biomass. Potential uses of the biomass are not the same as confirmed demand, and a demonstration facility is not automatically a buyer.
+
+Any operational pilot must validate the intended end use, acceptance criteria, logistics, unit economics and who pays for collection before assuming the chain can sustain itself.
+
+### 4. Traceability is one component of a wider system
+
+ZiwaChain addresses how evidence and lifecycle records are organised. It does not replace local coordination through Beach Management Units (BMUs), county fisheries officers, field verification, protective equipment, harvesting logistics or downstream processing capacity.
+
+The next stage is to validate whether the record is useful to the people who would actually collect, verify, accept, process and pay for the biomass.
+
+## Limitations and assumptions
+
+The following limitations are material to interpreting the current prototype.
+
+1. **Standalone prototype:** ZiwaChain is not currently integrated with ZiwaClear's operational workflows.
+2. **Synthetic data:** Demonstration batches are illustrative and do not represent actual harvesting, weighing, acceptance, processing or end-use events.
+3. **Testnet only:** The deployed contract is on Base Sepolia, not a production network.
+4. **No live SMS or USSD:** The communications workflow uses a simulated gateway. Field submissions through a live provider are not implemented.
+5. **Relayer trust:** Transactions submitted on behalf of a harvester depend on the relayer's key custody and server integrity. The current workflow does not give the harvester native EVM-wallet signing.
+6. **Settlement is not payment proof:** The prototype records a hashed payment reference and a simulated harvester confirmation. It does not independently confirm that funds reached the intended recipient.
+7. **Single-verifier trust:** An authorised verifier can approve or reject a batch. Multi-verifier consensus is not implemented.
+8. **No established commercial offtake:** A dependable commercial buyer was not validated during the fieldwork. The buyer role can represent an accepting payer, such as a programme or funder, but this is an operating-model possibility, not an established partnership.
+9. **Physical claims require real-world checks:** The contract cannot establish whether reported weights, inspections, processing or end use are physically accurate.
+10. **No independent security audit:** Automated tests are not a substitute for an independent review of the contract, cryptographic implementation, deployment configuration and operating model.
+11. **Certificate journey requires end-to-end validation:** Component tests do not by themselves establish that every generated QR code opens the correct deployed certificate and completes live verification.
+12. **Correction constraints:** Evidence correction preserves history, but the current contract does not provide a general post-acceptance quantity-adjustment or dispute-resolution mechanism.
+13. **Exact-hash reuse only:** Duplicate-evidence detection does not detect altered copies or semantically similar evidence.
+14. **No accredited carbon credits:** `WORK_CREDIT` tokens are non-transferable work-accounting units within the prototype. They do not represent certified carbon offsets, measured methane avoidance or independently verified climate benefits.
+15. **Provisional field evidence:** Findings from 18–19 October 2026 are based on a small number of informal conversations and observations at specific locations. They should not be generalised to the whole lake.
+16. **No demonstrated economic sustainability:** The prototype does not establish who will fund removal, whether the cost per kilogram is viable, whether processing has sufficient demand, or whether any participant will pay for traceability.
+
+These limitations are not incidental to the project. They define what must be validated before the prototype can support real operations.
+
+## Roadmap
+
+The next phase prioritises validating the operating model rather than adding technical complexity for its own sake.
+
+### Phase 1 — Validate the workflow
+
+- Engage potential harvesters, BMU representatives, verifiers and accepting payers.
+- Establish who is responsible for each lifecycle stage.
+- Define evidence requirements, quantity measurement and acceptance criteria.
+- Determine how participants can verify payment commitments and resolve disputes.
+- Confirm whether a traceable batch record is useful to the people expected to use it.
+
+### Phase 2 — Validate the downstream chain
+
+- Identify and assess potential processors and end-use partners.
+- Establish whether there is dependable demand for the material.
+- Determine who funds harvesting and protective equipment.
+- Estimate collection, handling, transport and processing costs.
+- Test whether the proposed incentive model can work without assuming a buyer or grant that has not been secured.
+
+### Phase 3 — Integrate real-world workflows
+
+Subject to the results of validation:
+
+- Connect a live SMS provider and investigate a practical USSD workflow.
+- Integrate with ZiwaClear where the operating model requires it.
+- Develop appropriate payment reconciliation and pre-commitment mechanisms.
+- Validate certificate and QR journeys end to end.
+- Improve verifier independence and dispute handling.
+
+### Phase 4 — Pilot and assess readiness
+
+- Run a limited, consent-based pilot with real participants and documented evidence.
+- Assess usability, data quality, payment reliability and operating costs.
+- Evaluate the usefulness of the traceability record to each participant.
+- Obtain an independent security review before production deployment.
+- Assess environmental outcomes separately using an appropriate, defensible measurement methodology.
+
+**Next milestone:** Validate the workflow, responsibilities, evidence and payment arrangements with real participants before treating the prototype as an operational supply-chain system.
+
+No dates, funding, partnerships or field deployment commitments are implied by this roadmap.
+
+## Project documentation
+
+The repository includes supporting technical and project documents:
 
 | Document | Description |
 |---|---|
-| [System Architecture Specification](docs/architecture/architecture.md) | Component architecture, Mermaid diagrams, on-chain vs off-chain boundary, and roles matrix |
-| [Security & Data Integrity Assessment](docs/security/securityAndDataIntegrity.md) | Threat modeling, RBAC, mass balance preservation, HMAC privacy, and test suite |
-| [Why Blockchain? Architectural Justification](docs/security/whyBlockchain.md) | Honest comparison of blockchain vs signed log vs database for informal-labor provenance |
-| [Climate Impact Assessment](docs/impact/climateImpactAssessment.md) | Methane avoidance projections, fuel displacement models, IPCC sources, and clear estimate labels |
-| [Problem & Solution Overview](docs/overview.md) | 2-page overview of the circular bioeconomy model and informal harvester precarity on Lake Victoria |
-| [Adoption Strategy & Scalability Roadmap](docs/adoptionAndScalability.md) | Three-tiered proof acceptance pathway, Kisumu pilot plan, scaling horizons, and field findings placeholder |
-| [Demo Video Script](docs/demoScript.md) | 3-minute video presentation script with timestamps, visual cues, and voiceover text |
-| [Technical Specification & Test Proofs](docs/architecture/spec.md) | Supplementary deep dive into smart contract rules and unit test mappings |
-| [Gas Cost Estimate](docs/architecture/gasCostEstimate.md) | Measured gas-per-function table and low/high ETH cost estimate with stated assumptions |
-| [Event Schema & Data Model](docs/architecture/eventSchema.md) | Supplementary canonical event envelope and data dictionary |
+| [System Architecture Specification](docs/architecture/architecture.md) | Component architecture, on-chain/off-chain boundaries and role definitions. |
+| [Security & Data Integrity Assessment](docs/security/securityAndDataIntegrity.md) | Threat model, permissions, quantity invariants and privacy considerations. |
+| [Why Blockchain?](docs/security/whyBlockchain.md) | Architectural rationale and comparison with alternative recordkeeping approaches. |
+| [Climate Impact Assessment](docs/impact/climateImpactAssessment.md) | Assumptions and models for exploring potential climate effects. Projections are not verified outcomes. |
+| [Problem & Solution Overview](docs/overview.md) | Project context, field problem and proposed approach. |
+| [Adoption Strategy & Scalability Roadmap](docs/adoptionAndScalability.md) | Proposed adoption pathway, pilot considerations and scaling assumptions. |
+| [Demo Video Script](docs/demoScript.md) | Timed demonstration script and visual cues. |
+| [Technical Specification & Test Proofs](docs/architecture/spec.md) | Contract rules and associated test coverage. |
+| [Gas Cost Estimate](docs/architecture/gasCostEstimate.md) | Gas estimates and assumptions for the documented functions. |
+| [Event Schema & Data Model](docs/architecture/eventSchema.md) | Event structure and data definitions. |
 
----
+These documents describe the current design, test coverage, assumptions and proposed future work. Their inclusion does not imply that every proposed capability has been deployed or validated in the field.
 
-## Repository Layout
+## Repository structure
 
-```
-ziwachain/
+```text
+ziwaChain/
 ├── contracts/
-│   ├── ZiwaChain.sol                  # Core smart contract (ERC-1155, AccessControl, mass balance)
+│   ├── ZiwaChain.sol
 │   └── test/
-│       └── PlainRelayer.sol           # Mock relayer contract without receiver for unit tests
+│       └── PlainRelayer.sol
 ├── scripts/
-│   ├── seed.ts                        # End-to-end deployment and demo batch seed runner
-│   ├── makeCertificates.ts            # Certificate generation pipeline (JSON, QR, audit notes)
-│   ├── demoSms.ts                     # Simulated SMS settlement and PROOF conversation runner
-│   └── verify.ts                      # Basescan contract verification helper
+│   ├── seed.ts
+│   ├── makeCertificates.ts
+│   ├── demoSms.ts
+│   └── verify.ts
 ├── test/
-│   ├── ZiwaChain.ts                   # Contract test suite (48 unit tests)
-│   ├── hashing.test.ts                # RFC 8785 canonical JSON, salt, and pseudonym suite (18 tests)
-│   ├── certificate.test.ts            # Certificate builder, short code, and QR suite (6 tests)
-│   ├── verify.test.ts                 # In-browser verification algorithm suite (11 tests)
-│   ├── sms.test.ts                    # SMS parsing, settlement flow, and phone masking suite (13 tests)
-│   └── links.test.ts                  # Link and script path integrity validator (3 tests)
+│   ├── ZiwaChain.ts
+│   ├── hashing.test.ts
+│   ├── certificate.test.ts
+│   ├── verify.test.ts
+│   ├── sms.test.ts
+│   └── links.test.ts
 ├── demo/
-│   ├── demo-data.json                 # Seeded demo batch records, tx hashes, salts, and payloads
-│   └── certificates/                  # Generated harvester certificates (JSON + QR PNGs)
+│   ├── demo-data.json
+│   └── certificates/
 ├── ignition/
 │   └── modules/
-│       └── ZiwaChain.ts               # Hardhat Ignition deployment module
+│       └── ZiwaChain.ts
 ├── web/
-│   ├── index.html                     # Home page shell (mounts React root)
+│   ├── index.html
 │   ├── verify/
-│   │   └── index.html                 # Verification page shell (mounts same React root)
-│   ├── react-main.tsx                 # React 19 SPA — home page + verify page + all UI components
-│   ├── main.ts                        # In-browser verification engine (all 5 checks; shared with React UI)
-│   ├── config.ts                      # RPC URL resolver and minimal read-only contract ABI
-│   ├── context.tsx                    # React context: language and theme preferences
-│   ├── translations.ts                # UI translations (English and Swahili)
-│   ├── demo-fixtures.ts               # Re-exports bundled demo certificate JSON for the four sample batches
-│   ├── style.css                      # CSS custom-property design system (light/dark tokens)
-│   ├── tailwind.css                   # Tailwind CSS 4 entry point
-│   ├── certificate.html               # Standalone printable A5 certificate page (no build step)
-│   └── dist/                          # Vite production build output
-│       ├── index.html                 # Home page
-│       ├── verify/index.html          # Verification page
-│       ├── certificate.html           # Copied verbatim from web/
-│       └── assets/                    # Hashed JS and CSS bundles
+│   │   └── index.html
+│   ├── react-main.tsx
+│   ├── main.ts
+│   ├── config.ts
+│   ├── context.tsx
+│   ├── i18n.ts
+│   ├── demo-fixtures.ts
+│   ├── style.css
+│   ├── tailwind.css
+│   ├── certificate.html
+│   └── dist/
+├── src/
+│   ├── hashing/
+│   ├── certificate/
+│   └── sms/
 ├── docs/
 │   ├── architecture/
-│   │   ├── architecture.md            # Primary architecture doc with Mermaid diagrams and tables
-│   │   ├── spec.md                    # Detailed technical spec and test rule mapping
-│   │   └── eventSchema.md             # Canonical event envelope and data dictionary
 │   ├── security/
-│   │   ├── securityAndDataIntegrity.md # Primary threat model, RBAC, and integrity analysis
-│   │   └── whyBlockchain.md           # Architectural justification for blockchain in informal labor
 │   ├── impact/
-│   │   └── climateImpactAssessment.md # Primary climate model and carbon projections
-│   ├── overview.md                    # 2-page problem and solution overview
-│   ├── adoptionAndScalability.md      # Adoption strategy and scaling roadmap
-│   ├── demoScript.md                  # 3-minute video presentation script
-│   ├── Learn/                         # Internal developer guides and debugging logs
-│   └── internal/                      # Append-only internal build progress log
-├── src/
-│   ├── hashing/                       # RFC 8785 canonical JSON, salted hash, HMAC pseudonym
-│   ├── certificate/                   # Harvester certificate builder, QR generator, short code
-│   └── sms/                           # SMS gateway interface, simulated chat gateway, settlement/PROOF flow
-├── vite.config.mts                    # Vite build config (React + Tailwind plugins, two-page input)
-├── hardhat.config.ts                  # Hardhat configuration (Solidity 0.8.28, Cancun, Base Sepolia)
-├── package.json                       # Project dependencies and npm scripts
+│   ├── overview.md
+│   ├── adoptionAndScalability.md
+│   ├── demoScript.md
+│   ├── Learn/
+│   └── internal/
+├── vite.config.mts
+├── hardhat.config.ts
+└── package.json
 ```
 
----
+Generated build output, local environment files and demonstration artefacts should be handled according to the repository's `.gitignore` and security practices. Inspect generated demo metadata before sharing it publicly.
 
-## Status: Built vs Roadmap
+## Acknowledgements
 
-To maintain total transparency with hackathon judges, our implementation status is categorized below:
+ZiwaChain was developed by **Gathoni Karume** for the IEEE Global ClimateChain Hackathon 2026, Track 3: Sustainable Supply Chains.
 
-### What Is Built and Proven by Tests
-- **Core Smart Contract (`ZiwaChain.sol`):** Deployed and tested on Solidity 0.8.28 (`cancun` EVM) using OpenZeppelin v5 contracts. Follows strict Checks-Effects-Interactions (CEI) order prior to token minting.
-- **Strict Linear Lifecycle:** Enforced stage transitions: `None` → `Harvested` → `Verified` | `Rejected` → `Accepted` → `Processed` → `EndUse`.
-- **Role-Based Access Control:** Distinct roles for `RELAYER_ROLE`, `VERIFIER_ROLE`, `BUYER_ROLE`, `PROCESSOR_ROLE`, and `DEFAULT_ADMIN_ROLE`.
-- **Separation of Duties:** Relayers cannot act as verifiers (`VerifierCannotBeRelayer`).
-- **Strict Mass-Balance Invariants:** Contract rejects transactions where `acceptedKg > harvestedKg`, `processedKg > acceptedKg`, or `endUseKgTotal > processedKg`.
-- **Harvester Privacy:** Per-batch HMAC-SHA256 pseudonyms preventing public linkability of harvester identities across batches.
-- **Non-Transferable Work Credits:** ERC-1155 token ID 1 (`WORK_CREDIT`) minted 1:1 per kilogram reaching verified circular end use; token transfers are blocked via the `_update` hook.
-  > [!NOTE]
-  > **Custodian Receiver Requirement:** In the prototype, the custodian (`relayer`) address that holds minted credits must be a standard wallet (EOA) or implement `IERC1155Receiver`; otherwise `recordEndUse` reverts with `ERC1155InvalidReceiver`.
-- **Append-Only Tamper-Evident Corrections:** Hashes can only be superseded by their original author with a recorded reason; historical records remain immutable and visible. Only evidence and payload hashes may be superseded (Decision D); `newHash == bytes32(0)` reverts with `InvalidHash`.
-- **Off-Chain Hashing Module (`src/hashing/`):** RFC 8785 canonical JSON serialization, random 128-bit salts, `keccak256` payload hashing, and HMAC-SHA256 per-batch pseudonym derivation. Browser-safe; no Node-only imports in the main export.
-- **Harvester Certificate Pipeline (`src/certificate/`, `scripts/makeCertificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
-- **Public In-Browser Verify Page (`web/`):** React 19 + Vite 8 + TailwindCSS 4 two-page SPA (home at `/`, verification at `/verify/`) built as a fully static site — no backend, no CDN dependency, no login. The in-browser verification engine (`web/main.ts`) runs 5 independent checks against the live blockchain via the public Base Sepolia JSON-RPC endpoint: cryptographic hash recomputation, on-chain event provenance, record supersession audit, mass-balance invariant validation, and payment reference verification. Binds every stage in the certificate directly to its emitted on-chain event log (`payloadHash` and `txHash`), validates `cert.pseudonym` against `batchData.harvesterId`, and presents an amber banner for authentic rejected batches without granting verified status. Certificate data travels entirely in the URL hash fragment (`#c=<base64url>`); no server lookup is required to open a QR-scanned link.
-- **Bilingual UI (`web/translations.ts`):** Full English and Swahili translations across all UI text, status messages, check labels, and timeline descriptions. Language auto-detected from browser locale and persisted in `localStorage`; overridable via `?lang=en` or `?lang=sw` query parameter.
-- **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demoSms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), canonical `SettlementConfirmationPayload` assembly, relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
-- **Duplicate-Evidence Flagging:** On-chain first-use tracking (`evidenceFirstBatch`) and event notification (`EvidenceReused`) that flags reuse of identical field evidence hashes across different batches with an amber notice on the public verify page, without reverting transactions or declaring fraud.
-- **Full Automated Test Suite:** 99 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
+The project builds on the broader problem explored through ZiwaClear: how to support the removal and downstream utilisation of water hyacinth around Lake Victoria. Field observations informed the problem framing, while the current ZiwaChain implementation focuses on the traceability and evidence layer.
 
-### Roadmap Items (Not Yet Built in Current Release)
-- **Commitment Before Work (Payer Pre-Funding / Escrow):** A mechanism allowing the accepting and paying party (programme, funder, or buyer) to lock or commit funds into escrow before harvesting begins, giving harvesters verifiable certainty of payout before doing labor. This directly addresses harvester distrust stemming from past registration fee scams. Today, payment occurs off-chain via M-Pesa, and the chain records a payment reference hash and the harvester's two-way SMS confirmation.
-- **Multi-Verifier Consensus:** Upgrading single verifiers to a 2-of-N threshold signature model.
-- **Custodian Multi-Relayer Isolation:** Adding `msg.sender == b.custodian` check on `confirmSettlement` for multi-relayer operational topologies.
-- **Post-Acceptance Quantity Adjustments:** On-chain dispute resolution for discrepancies discovered after buyer acceptance.
-- **Automated M-Pesa Settlement Reconciliation:** Direct smart-contract reconciliation against Safaricom Daraja API callbacks.
-- **Credit Redemption Mechanisms:** Work-credit redemption for subsidized agricultural inputs, protective equipment, or carbon-finance dividends.
-- **Lender Statement Bundles:** Merkle-tree aggregation allowing harvesters to prove total multi-month delivery volumes to SACCOs via a single root proof.
-- **Accredited Carbon Methodology Mapping:** Bridging work credits to Verra / Gold Standard aquatic biomass methodologies.
-- **External Evidence Connectors (Roadmap):** Importers that accept evidence hashes and attestations from satellite platforms, field-sensor systems, or third-party ESG tools via the existing `source` label and `hotspotRef` hash. Not built.
-- **Verifier Correction Request State (Roadmap):** A state allowing a verifier to flag a batch for correction before issuing a final attestation, without the current binary approve/reject outcome. Not built.
-- **Export Mappings (Roadmap):** Adapter libraries that translate ZiwaChain event logs into formats used by other traceability or reporting systems. Not built.
+## Final note
 
----
+ZiwaChain is an exploration of how blockchain-based records could make environmental work easier to trace and inspect. Its current contribution is a deployed testnet prototype with lifecycle controls, evidence-handling logic, certificates and a simulated settlement workflow.
 
-## Honest Limitations
-
-1. **Relayer Trust Assumption:** Harvesters submit reports via low-bandwidth SMS/USSD without native EVM wallets. Harvest transactions are relayed by ZiwaClear's relayer key. Harvester-level non-repudiation relies on ZiwaClear's key custody and server integrity.
-2. **SMS Settlement Attestation:** The harvester's settlement confirmation ("YES 4821") is verified via telecom SMS routing and hash-anchored on-chain; it is a tamper-evident attestation, not a native asymmetric cryptographic signature.
-3. **Single Verifier Trust Point:** In the current prototype, a single verifier with `VERIFIER_ROLE` can approve or reject a batch. Multi-verifier approval is scheduled on the roadmap.
-4. **Permanent Mass Balance:** If a scaling error occurs and is accepted by the buyer, the mass cannot be retroactively adjusted in the contract without rejecting and re-logging the batch.
-5. **Simulated Role Wallets & Buyer Clarification:** While verifiers, buyers (the accepting and paying party), and processors sign with dedicated private keys, prototype testing uses development signers. In the field, no commercial buyer was validated (local biogas demonstration sites source their own feedstock); the "buyer" role in practice represents any accepting and paying party, such as a county public works programme, environmental donor fund, or commercial off-taker.
-6. **Work Credits are Not Carbon Credits:** Work credits represent kilograms of verified biomass diverted to beneficial end use. They are not accredited carbon offset credits.
-7. **Testnet Deployment:** The current protocol prototype targets the Base Sepolia testnet.
-8. **Hash Proves Integrity, Not Truth:** A valid certificate hash confirms that a file matches the recorded hash. It does not confirm that the underlying claims in the certificate are accurate. Accuracy at entry depends on the field verifier, the buyer's independent acceptance, and the harvester's own SMS confirmation.
-9. **Illustrative Demo Data:** The seeded batches in `demo/demo-data.json` are synthetic data generated by a local seed script. They are not records of real harvests.
-10. **Duplicate Evidence Flagging Detects Exact Hashes Only:** The on-chain `evidenceFirstBatch` mapping and `EvidenceReused` event detect exact cryptographic hash reuse across batches. It cannot detect similar photos, re-compressed photos, or alternate camera angles of the same physical biomass.
-11. **Provisional Field Findings:** Field observations are provisional and derived from informal fieldwork around Dunga, Homa Bay, and Kendu Bay on Lake Victoria (Oct 18 to 19, 2026, across a small number of conversations). They reflect local conditions at those specific sites and must not be generalized lake-wide.
-12. **Pilot Status of Downstream Chain-of-Custody:** Chain-of-custody stages beyond verification (buyer acceptance, processing, and end use) are a pilot design with illustrative demo data, pending commercial offtake establishment.
+The next challenge is not simply to add more code. It is to establish whether the people who would use the system need it, whether the underlying supply chain can operate reliably, and whether the evidence recorded corresponds to real work and real outcomes.
