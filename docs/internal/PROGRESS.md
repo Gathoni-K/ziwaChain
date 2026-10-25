@@ -4,6 +4,31 @@ Append-only. Newest entry at the top.
 
 ---
 
+## Oct 25, 2026, Task 14: Align Documentation with System Architecture and Codebase
+
+### Files added or changed
+| File | Change |
+|---|---|
+| `README.md` | Updated test suite breakdown to match actual counts (48 contract, 11 verify, 3 links = 99 total); corrected translations file from `web/i18n.ts` to `web/translations.ts`; updated Base Sepolia seed batch count from 3 to 4. |
+| `docs/architecture/spec.md` | Included Batch D in seed description; corrected certificate pipeline script to `scripts/makeCertificates.ts`; updated total test count to 99; clarified `SimulatedGateway` location in `src/sms/gateway.ts`. |
+| `docs/architecture/architecture.md` | Updated public verify page bundler reference from esbuild to Vite / React 19; adjusted `SimulatedGateway` path to `src/sms/gateway.ts`. |
+| `docs/security/securityAndDataIntegrity.md` | Clarified that verifier address is emitted in `BatchVerified` event rather than stored in `Batch` struct; corrected non-transferable custom error to `NonTransferable()`; updated `SimulatedGateway` path; corrected `recordEndUse` (10) and `correctRecord` (6) test breakdown counts. |
+| `docs/overview.md` | Updated `SimulatedGateway` path to `SimulatedGateway` in `src/sms/gateway.ts`. |
+| `docs/demoScript.md` | Clarified verify page URL route to `web/dist/verify/index.html`. |
+| `docs/internal/PROGRESS.md` | Added Task 14 progress log entry. |
+
+### What changed and why
+- Brought all markdown documentation into exact synchronization with smart contracts, test suite, and web frontend architecture.
+- Reconciled custom error names, struct storage versus event logging, test counts, and module file paths.
+
+### Tests
+- 99 / 99 passing (`npx hardhat test`).
+
+### Deviations from spec
+None.
+
+---
+
 ## Oct 24, 2026, Task 13b: Add Provisional Two-Sided Trust Observation
 
 ### Files added or changed

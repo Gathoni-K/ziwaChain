@@ -83,7 +83,7 @@ ZiwaChain does not impose complex crypto-native friction on informal workers. In
 | **Settlement** | M-Pesa hash anchoring + SMS two-way co-signing | Automated webhook reconciliation via Safaricom Daraja API |
 | **Credits** | Non-transferable ERC-1155 tokens tracking verified end-use mass | Redemption marketplace for subsidized tools and inputs |
 | **Lender Tools** | Standalone certificate verification via public web tool | Batch Merkle statements for bulk SACCO underwriting |
-| **Telecom Integration** | Simulated SMS gateway (`src/sms/SimulatedGateway`) and end-to-end conversation runner (`npm run demo:sms`). The prototype prints chat to stdout; no real SMS messages are sent. | Production adapter for Africa's Talking and Safaricom USSD gateway |
+| **Telecom Integration** | Simulated SMS gateway (`SimulatedGateway` in `src/sms/gateway.ts`) and end-to-end conversation runner (`npm run demo:sms`). The prototype prints chat to stdout; no real SMS messages are sent. | Production adapter for Africa's Talking and Safaricom USSD gateway |
 
 ---
 

@@ -29,7 +29,7 @@ This document details our threat model, smart contract security controls, crypto
 ### 2.2 Threat: Colluding or Dishonest Field Verifier
 **Attack Vector:** A corrupt biological inspector possessing `VERIFIER_ROLE` colludes with an unscrupulous harvester group to approve non-existent or heavily contaminated wet weed.  
 **Mitigating Controls:**
-- **Verifier Attestation Immutably Logged:** The verifier's address is stored directly on the batch struct (`b.verifier = msg.sender`) and emitted in the `BatchVerified` event alongside the evidence hash and payload hash. The verifier's attestation constitutes their independent on-chain decision; any systematic discrepancy triggers audit liability.
+- **Verifier Attestation Immutably Logged:** The verifier's address is emitted directly in the `BatchVerified` event (`emit BatchVerified(batchId, msg.sender, approved, evidenceHash, payloadHash)`) alongside the evidence hash and payload hash. The verifier's attestation constitutes their independent on-chain decision; any systematic discrepancy triggers audit liability.
 - **Secondary Commercial Gate:** The verifier's attestation does not trigger payouts or credit issuance. The commercial buyer conducts an independent weighing and moisture inspection at their reception facility before signing `acceptBatch`. If the weed is unviable, the buyer refuses acceptance, permanently stalling the batch at stage `Verified`.
 - **Terminal Rejection State:** If a verifier rejects a batch (`verifyBatch(batchId, false, ...)`), the stage transitions irreversibly to `Rejected`. The contract permanently locks the batch, preventing any subsequent resurrection.
 - **Roadmap Mitigation:** Phase 2 implements a 2-of-N threshold signature requirement, requiring co-signing by both an accredited laboratory (e.g. KMFRI) and a community beach management elder.
@@ -92,14 +92,14 @@ This document details our threat model, smart contract security controls, crypto
       address to,
       uint256[] memory ids,
       uint256[] memory values
-  ) internal virtual override {
+  ) internal override {
       if (from != address(0)) {
-          revert WorkCreditsNotTransferable();
+          revert NonTransferable();
       }
       super._update(from, to, ids, values);
   }
   ```
-- **Mint-Only Allowance:** Transfers from any address other than `address(0)` (minting) revert unconditionally with `WorkCreditsNotTransferable()`. Token transfers and token burns are mathematically blocked.
+- **Mint-Only Allowance:** Transfers from any address other than `address(0)` (minting) revert unconditionally with `NonTransferable()`. Token transfers and token burns are mathematically blocked.
 - **Automated Test Validation:** Proven by tests: `"blocks safeTransferFrom for work credits"` and `"blocks safeBatchTransferFrom for work credits"` in [test/ZiwaChain.ts](file:///home/grace/Projects/CODEINE/hackathonTingz/ZiwaChain/test/ZiwaChain.ts).
 
 ### 2.9 Threat: Admin Key Compromise & Centralization Risk
@@ -141,7 +141,7 @@ To ensure transparency with evaluating judges, we explicitly disclose the follow
 1. **Relayer Custody Dependence:** Because harvesters do not manage EVM wallets, initial batch reporting relies on ZiwaClear's relayer key. While cryptographic checks prevent the relayer from verifying its own batches, the relayer is a centralized operational point for SMS intake.
 2. **Custodian Multi-Relayer Isolation:** In the current prototype, any address with `RELAYER_ROLE` can invoke `confirmSettlement`. Restricting confirmation strictly to `b.custodian` is planned for multi-relayer enterprise scaling.
 3. **Custodian Contract Receiver Requirement:** Work credits are minted to `b.custodian`. If the custodian address is a smart contract wallet, it must implement `IERC1155Receiver`; otherwise `recordEndUse` reverts with `ERC1155InvalidReceiver`.
-4. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature. In the prototype, this SMS gateway is simulated (`src/sms/SimulatedGateway.ts`); live telecom integration is planned for production.
+4. **SMS Confirmation vs Cryptographic Signatures:** The harvester's settlement confirmation ("YES 4821") is routed through standard telecom operators. While permanently hash-anchored on Base Sepolia, it represents a telecom-attested co-sign rather than a direct asymmetric ECDSA digital signature. In the prototype, this SMS gateway is simulated (`SimulatedGateway` in `src/sms/gateway.ts`); live telecom integration is planned for production.
 5. **Single Verifier Attestation in Prototype:** The current contract relies on a single verifier key per batch. The verifier's on-chain attestation is permanent and identifies the verifier's wallet address, but a dishonest verifier could collude with harvesters to approve sub-standard biomass. Upgrading to 2-of-N threshold verification is scheduled for Phase 2.
 6. **Permanent Mass Balance:** If a scaling error is accepted by a commercial buyer, the kilogram mass cannot be altered retroactively. The batch must be cancelled and re-logged.
 7. **Work Credits are Not Carbon Credits:** Work credits represent verified kilograms of hyacinth removed and diverted to circular processing. They do not constitute certified carbon credits.
@@ -171,8 +171,8 @@ $ npx hardhat test
     acceptBatch (5 tests passing)
     confirmSettlement (5 tests passing)
     recordProcessing (4 tests passing)
-    recordEndUse (8 tests passing, including CEI and receiver lockout check)
-    correctRecord (7 tests passing, including zero-hash InvalidHash check)
+    recordEndUse (10 tests passing, including CEI and receiver lockout check)
+    correctRecord (6 tests passing, including zero-hash InvalidHash check)
     work credit non-transferability (2 tests passing)
     view helpers (4 tests passing)
     duplicate evidence flagging (4 tests passing)

@@ -58,12 +58,12 @@ flowchart TD
    - Enforces 5 distinct verification checks: client-side hash recomputation (RFC 8785 + keccak256), on-chain event log matching, record supersession audit (`supersededBy`), conservation of mass verification (`getBatch`), and M-Pesa payment reference hash confirmation.
    - Decodes certificate payloads strictly client-side from URL fragments (`#c=<base64url>`) without contacting any central server.
 8. **Demo Batch Seed Runner (`scripts/seed.ts`):**
-   - End-to-end deployment and execution harness that seeds illustrative demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction; illustrative demo data, not real harvests).
+   - End-to-end deployment and execution harness that seeds illustrative demo batches on-chain (Batch A full journey, Batch B quality rejection, Batch C hash correction, Batch D duplicate evidence flag; illustrative demo data, not real harvests).
    - Operates on local in-memory nodes as well as Base Sepolia (automatically funding ephemeral actor wallets).
    - Emits canonical payloads, salts, hashes, and transaction receipts to `demo/demo-data.json` for certificate generation and verify page testing.
 9. **Simulated SMS Gateway & Settlement Flow (`src/sms/`, `scripts/demoSms.ts`):**
    - Two-leg SMS flow for low-bandwidth harvesters: post-acceptance settlement OTP confirmation and on-demand PROOF certificate delivery.
-   - The SMS gateway is simulated in the prototype (`SimulatedGateway.ts`); live telecom integration (e.g. Africa's Talking) is planned for production. Field inspection and weighbridge checks also describe the intended real-world process and are executed by demo accounts in the prototype.
+   - The SMS gateway is simulated in the prototype (`SimulatedGateway` in `src/sms/gateway.ts`); live telecom integration (e.g. Africa's Talking) is planned for production. Field inspection and weighbridge checks also describe the intended real-world process and are executed by demo accounts in the prototype.
    - Strict phone number masking in logs and zero on-chain phone number storage.
 
 ---
@@ -228,7 +228,7 @@ The harvester certificate serves as portable, self-contained proof. It enables a
 1. **Crockford Base32 Short Code (`src/certificate/shortCode.ts`):** A 10-character code derived from the harvest payload hash and formatted into two groups of 5 with a hyphen (e.g. `TR8NZ-A9VC5`). It excludes ambiguous characters (I, L, O, U) so harvesters can easily read it over phone calls or SMS.
 2. **Compact Base64URL Encoding:** The certificate is encoded into a URL fragment (`#c=<base64url>`). Because URL fragments are never sent to web servers, the user's certificate payload remains strictly client-side when the verification page loads.
 3. **High-Density QR Generator (`src/certificate/qr.ts`):** Generates PNG QR codes encoding the complete self-verifying URL. If payload size exceeds optical QR scanning density, it falls back to a query URL containing the on-chain identifiers.
-4. **Batch Certificate Pipeline (`scripts/make-certificates.ts`):** Automated pipeline that reads `demo/demo-data.json`, writes verified JSON certificates and PNG QR codes, and generates formal audit notes for rejected batches.
+4. **Batch Certificate Pipeline (`scripts/makeCertificates.ts`):** Automated pipeline that reads `demo/demo-data.json`, writes verified JSON certificates and PNG QR codes, and generates formal audit notes for rejected batches.
 
 Verified by 6 unit tests in `test/certificate.test.ts`.
 
@@ -278,7 +278,7 @@ sequenceDiagram
 3. **Resilience & Rate Limiting:** Harvesters are given 3 attempts to provide the matching OTP. Exceeding 3 failed attempts invalidates the session and returns an operational support contact notice. Unrecognized phone numbers and malformed messages are silently ignored to prevent enumeration.
 4. **Idempotency & Re-entry Defense:** If a second settlement confirmation is attempted for a batch that is already marked `settled` on-chain, the flow catches the contract revert gracefully and replies that the batch was already confirmed, preventing transaction crash or state corruption.
 
-Verified by 13 unit tests in `test/sms.test.ts`. Full test suite: 85 tests passing.
+Verified by 13 unit tests in `test/sms.test.ts`. Full test suite: 99 tests passing.
 
 
 

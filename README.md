@@ -95,7 +95,7 @@ To deploy and seed on Base Sepolia testnet:
 ```bash
 npx hardhat run scripts/seed.ts --network baseSepolia
 ```
-The script automatically generates and funds 4 ephemeral testnet wallets (relayer, verifier, buyer, processor), grants on-chain roles, executes all 3 demo batches (illustrative data, not real harvests), and writes output metadata to `demo/demo-data.json`.
+The script automatically generates and funds 4 ephemeral testnet wallets (relayer, verifier, buyer, processor), grants on-chain roles, executes all 4 demo batches (illustrative data, not real harvests), and writes output metadata to `demo/demo-data.json`.
 
 ### Verify Contract on Basescan (prepare-only, requires Base Sepolia deployment)
 1. Set `ETHERSCAN_API_KEY` in your `.env` file (one Etherscan V2 key covers Base Sepolia; do not use a separate Basescan key).
@@ -141,12 +141,12 @@ ziwachain/
 │   ├── demoSms.ts                     # Simulated SMS settlement and PROOF conversation runner
 │   └── verify.ts                      # Basescan contract verification helper
 ├── test/
-│   ├── ZiwaChain.ts                   # Contract test suite (44 unit tests)
+│   ├── ZiwaChain.ts                   # Contract test suite (48 unit tests)
 │   ├── hashing.test.ts                # RFC 8785 canonical JSON, salt, and pseudonym suite (18 tests)
 │   ├── certificate.test.ts            # Certificate builder, short code, and QR suite (6 tests)
-│   ├── verify.test.ts                 # In-browser verification algorithm suite (10 tests)
+│   ├── verify.test.ts                 # In-browser verification algorithm suite (11 tests)
 │   ├── sms.test.ts                    # SMS parsing, settlement flow, and phone masking suite (13 tests)
-│   └── links.test.ts                  # Link and script path integrity validator (1 test)
+│   └── links.test.ts                  # Link and script path integrity validator (3 tests)
 ├── demo/
 │   ├── demo-data.json                 # Seeded demo batch records, tx hashes, salts, and payloads
 │   └── certificates/                  # Generated harvester certificates (JSON + QR PNGs)
@@ -161,7 +161,7 @@ ziwachain/
 │   ├── main.ts                        # In-browser verification engine (all 5 checks; shared with React UI)
 │   ├── config.ts                      # RPC URL resolver and minimal read-only contract ABI
 │   ├── context.tsx                    # React context: language and theme preferences
-│   ├── i18n.ts                        # UI translations (English and Swahili)
+│   ├── translations.ts                # UI translations (English and Swahili)
 │   ├── demo-fixtures.ts               # Re-exports bundled demo certificate JSON for the four sample batches
 │   ├── style.css                      # CSS custom-property design system (light/dark tokens)
 │   ├── tailwind.css                   # Tailwind CSS 4 entry point
@@ -215,7 +215,7 @@ To maintain total transparency with hackathon judges, our implementation status 
 - **Off-Chain Hashing Module (`src/hashing/`):** RFC 8785 canonical JSON serialization, random 128-bit salts, `keccak256` payload hashing, and HMAC-SHA256 per-batch pseudonym derivation. Browser-safe; no Node-only imports in the main export.
 - **Harvester Certificate Pipeline (`src/certificate/`, `scripts/makeCertificates.ts`):** Builds a portable Version 1 JSON certificate, a 10-character Crockford Base32 short code (SMS-friendly), and a self-verifying QR code PNG.
 - **Public In-Browser Verify Page (`web/`):** React 19 + Vite 8 + TailwindCSS 4 two-page SPA (home at `/`, verification at `/verify/`) built as a fully static site — no backend, no CDN dependency, no login. The in-browser verification engine (`web/main.ts`) runs 5 independent checks against the live blockchain via the public Base Sepolia JSON-RPC endpoint: cryptographic hash recomputation, on-chain event provenance, record supersession audit, mass-balance invariant validation, and payment reference verification. Binds every stage in the certificate directly to its emitted on-chain event log (`payloadHash` and `txHash`), validates `cert.pseudonym` against `batchData.harvesterId`, and presents an amber banner for authentic rejected batches without granting verified status. Certificate data travels entirely in the URL hash fragment (`#c=<base64url>`); no server lookup is required to open a QR-scanned link.
-- **Bilingual UI (`web/i18n.ts`):** Full English and Swahili translations across all UI text, status messages, check labels, and timeline descriptions. Language auto-detected from browser locale and persisted in `localStorage`; overridable via `?lang=en` or `?lang=sw` query parameter.
+- **Bilingual UI (`web/translations.ts`):** Full English and Swahili translations across all UI text, status messages, check labels, and timeline descriptions. Language auto-detected from browser locale and persisted in `localStorage`; overridable via `?lang=en` or `?lang=sw` query parameter.
 - **Simulated SMS Settlement & PROOF Flow (`src/sms/`, `scripts/demoSms.ts`):** Complete two-leg SMS conversation engine with simulated chat gateway, post-acceptance OTP confirmation ("YES <code>"), canonical `SettlementConfirmationPayload` assembly, relayer on-chain `confirmSettlement`, retry handling, "PROOF" short code/link delivery, and strict phone privacy masking.
 - **Duplicate-Evidence Flagging:** On-chain first-use tracking (`evidenceFirstBatch`) and event notification (`EvidenceReused`) that flags reuse of identical field evidence hashes across different batches with an amber notice on the public verify page, without reverting transactions or declaring fraud.
 - **Full Automated Test Suite:** 99 automated tests passing across contract rules, hashing, certificate generation, in-browser verification algorithm, link integrity, and SMS flows.
