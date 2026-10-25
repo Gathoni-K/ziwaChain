@@ -140,10 +140,10 @@ export interface Translations {
 export const translations: Record<Language, Translations> = {
   en: {
     nav: {
-      brandSubtitle: "Records for collected water hyacinth",
+      brandSubtitle: "Tracking lake cleanup from weeds to useful products",
       home: "Home",
       howItWorks: "How it works",
-      checkRecord: "Check a record",
+      checkRecord: "Check a certificate",
       openMenu: "Open navigation menu",
       closeMenu: "Close navigation menu",
       themeLight: "Switch to light mode",
@@ -152,170 +152,170 @@ export const translations: Record<Language, Translations> = {
       langSwahili: "Kiswahili",
     },
     home: {
-      heroBadge: "A clearer record of environmental work",
-      heroTitle: "Follow the journey of collected water hyacinth.",
+      heroBadge: "Open tracking for lake cleanup & beneficial products",
+      heroTitle: "See how invasive lake weeds turn into useful products.",
       heroDesc:
-        "When water hyacinth is collected, different people may handle it before it is put to use. ZiwaChain helps keep a record of what happens along the way, so people can see what has been reported and check the saved information.",
-      heroCtaCheck: "Check a record",
+        "Water hyacinth is a thick weed choking Lake Victoria. Local teams harvest it, inspect it, and turn it into clean cooking fuel, fuel briquettes, woven mats, biochar, or agricultural fertilizer and compost. ZiwaChain records every step on an open, tamper-proof digital ledger so anyone, from climate scientists to curious neighbors, can verify the work is genuine.",
+      heroCtaCheck: "Check a certificate",
       heroCtaHow: "How it works",
-      journeyTitle: "A simple view of a collection record's journey",
-      journeySubtitle: "Select any step to explore what happens at that stage:",
+      journeyTitle: "How a harvest travels from lake to useful products",
+      journeySubtitle: "Click any step to see what happens:",
       journeyDisclaimer:
-        "A simple view of the steps a record may contain. Not a report of a particular collection.",
+        "This is a quick guide to how the system works. To inspect a real harvest, enter its certificate code below.",
       stepPrefix: "Step",
       journeySteps: [
         {
           id: "harvest",
-          label: "Record the collection",
+          label: "Pull weeds from the lake",
           detail:
-            "Record how much water hyacinth is collected, where it comes from, and an anonymous identifier for the harvesting group.",
+            "Harvesters pull the thick weed out of Lake Victoria, bring it ashore, and weigh it. They log how many kilograms were collected and the location, keeping harvester names private.",
         },
         {
           id: "verified",
-          label: "Check the harvest",
+          label: "Check for clean quality",
           detail:
-            "The collected material is inspected for contamination, and the batch is recorded as accepted or rejected.",
+            "An inspector checks the harvest on the beach. It should be clean plant matter, not weighed down with mud, sand, or plastic. Clean batches are approved; dirty ones are rejected.",
         },
         {
           id: "processed",
-          label: "Track the journey",
+          label: "Turn weeds into useful products",
           detail:
-            "Record how much hyacinth is accepted, what it is turned into—such as biogas or biochar—and the intended use of the resulting products.",
+            "Local workshops turn the harvested plants into clean cooking gas (biogas), fuel briquettes, woven mats, biochar, or rich organic fertilizer and compost. The system makes sure the output numbers balance with the fresh plants received.",
         },
         {
           id: "available",
-          label: "Check the record",
+          label: "Anyone can verify the story",
           detail:
-            "Anyone can open a batch's digital certificate to review its recorded journey and check the records against the information stored on the blockchain.",
+            "Anyone with a phone can scan the batch's QR code to see this entire story. The record is permanently locked on a public ledger so no one can secretly alter the numbers.",
         },
       ],
-      whyTitle: "Why keep a record?",
+      whyTitle: "Why keep an open record?",
       whyP1:
-        "Collecting water hyacinth is only one part of the story. Someone may receive it, another person may process it, and someone else may put it to use.",
+        "Cleaning an entire lake takes teamwork: one group pulls the weeds, another inspects the quality, and local workshops turn them into clean cooking fuel, fuel briquettes, woven mats, or plant fertilizer.",
       whyP2:
-        "Without clear records, it can be difficult to follow what happened at each step. ZiwaChain is designed to make those steps easier to follow.",
+        "Without clear records, people might wonder: Did anyone really clean the lake? Did they exaggerate the weight? ZiwaChain gives everyone an unchangeable digital receipt for every single kilogram harvested.",
       howBadge: "How it works",
-      howTitle: "Four simple steps.",
+      howTitle: "Four simple steps from lake to products.",
       howSteps: [
         {
           step: "01",
-          title: "A collection is recorded",
-          summary: "The system records the amount of water hyacinth reported as collected.",
+          title: "Weeds are weighed and logged",
+          summary: "Harvesters weigh the fresh plants at the beach and log the kilograms.",
           detail:
-            "Harvesters submit collection records via lightweight digital tools or SMS co-signing, generating an initial cryptographic batch fingerprint that seals the harvest details.",
+            "Harvesters text or submit their harvest weight right from the lakeshore. A permanent digital record is created immediately so the original numbers cannot be quietly edited.",
         },
         {
           step: "02",
-          title: "The collection is checked",
-          summary: "An authorised person can approve or reject the record.",
+          title: "An inspector checks the quality",
+          summary: "An independent checker approves clean batches and turns away dirty ones.",
           detail:
-            "Field verifiers assess organic purity and scale weight. Batches containing excessive inorganic mud or contaminants are formally rejected and permanently withheld from credit issuance.",
+            "Inspectors make sure the plants are clean and not weighed down with mud or rocks. Only genuine, clean harvests move forward; contaminated batches are permanently marked as rejected.",
         },
         {
           step: "03",
-          title: "The journey is recorded",
-          summary: "The system records how much was accepted, processed, and put to use.",
+          title: "Weeds turn into valuable products",
+          summary: "Workshops turn the harvest into cooking gas, fuel briquettes, woven mats, or compost.",
           detail:
-            "Processors document biogas, briquette, or compost conversion, enforcing strict conservation of mass so reported outputs never exceed authenticated inputs.",
+            "Workshops document the products they make, such as biogas, briquettes, woven mats, biochar, or agricultural fertilizer and compost. The math has to balance: you can't report more finished products than the raw plants you actually took in.",
         },
         {
           step: "04",
-          title: "People can check the record",
-          summary: "A certificate lets someone inspect the saved information about the collection.",
+          title: "Anyone can check the certificate",
+          summary: "Each batch gets a public digital certificate that anyone can open.",
           detail:
-            "Public certificates contain verifiable cryptographic fingerprints, Base Sepolia blockchain transaction links, and exact timestamps that anyone can check without a middleman.",
+            "Every certificate has a unique code and QR link. Anyone with a phone or computer can see the full timeline, dates, and proof without needing special accounts.",
         },
       ],
       readMore: "Learn more",
       readLess: "Show less",
-      valueTitle: "One record. A clearer picture of what happened.",
+      valueTitle: "One simple record. Zero guesswork.",
       valueItems: [
-        "How much was reported as collected.",
-        "How much was accepted and processed.",
-        "How much was recorded as put to use.",
-        "Whether the collection was approved or rejected.",
-        "Whether a payment confirmation was recorded.",
-        "Whether the digital details match saved records.",
+        "Exactly how much weed was pulled from the lake.",
+        "Whether it passed in-person quality inspection.",
+        "What useful products were made (such as cooking fuel, mats, briquettes, or fertilizer).",
+        "Confirmation that harvesters were paid.",
+        "Proof that the record hasn't been altered or faked.",
+        "Open, verifiable proof for scientists, supporters, and the public.",
       ],
-      trustTitle: "What a digital record can and cannot tell you.",
-      canTellTitle: "What it can tell you",
+      trustTitle: "What this record can (and cannot) prove.",
+      canTellTitle: "What it proves",
       canTellDesc:
-        "The system can check whether the information on a certificate matches the digital records saved for it.",
-      cannotProveTitle: "What it cannot prove by itself",
+        "It proves that the information on the certificate matches the exact, tamper-proof record locked in when the work was done. No one can secretly change numbers after the fact.",
+      cannotProveTitle: "What it cannot prove on its own",
       cannotProveDesc:
-        "A matching digital record does not, on its own, prove that every real-world event happened exactly as described.",
-      ctaBannerTitle: "Have a collection certificate?",
+        "A computer record shows what trusted people reported and signed, but a computer cannot physically walk to the lake. That is why human inspectors check the physical weeds on the beach.",
+      ctaBannerTitle: "Have a collection certificate or code?",
       ctaBannerDesc:
-        "Open its certificate or enter its code to see what has been recorded and check the digital details.",
-      ctaBannerBtn: "Check a record",
+        "Scan its QR code or enter the code to see the harvest weight, inspection results, and production journey.",
+      ctaBannerBtn: "Check a certificate",
     },
     verify: {
-      headerTitle: "Check a collection record",
-      headerDesc: "Enter the code on a certificate, or open the certificate link you were given.",
-      openCardTitle: "Open the certificate link",
+      headerTitle: "Check a collection certificate",
+      headerDesc: "Enter the code on a certificate or open your certificate link to see what happened to a batch of harvested weed.",
+      openCardTitle: "Look up a certificate",
       openCardDesc1:
-        "Open the certificate link you received or scan its QR code. The record will open here automatically.",
-      openCardDesc2: "If you are testing or have the certificate file, use the extra options below.",
-      searchPlaceholder: "Enter certificate code (e.g. EHCQJ-3GMNQ) or batch ID…",
-      btnSearch: "Check code",
-      demoExamplesTitle: "Try working demonstration examples (Synthetic test data):",
-      advancedJsonTitle: "Advanced testing: Check with certificate JSON or file",
+        "Scan the QR code on a certificate or enter its short code below to load its full story.",
+      openCardDesc2: "Want to try it out first? Click one of the interactive test examples below.",
+      searchPlaceholder: "Enter code (like EHCQJ-3GMNQ) or batch ID…",
+      btnSearch: "Look up",
+      demoExamplesTitle: "Try these interactive test examples to see how it works:",
+      advancedJsonTitle: "For developers: Upload or paste raw certificate data",
       codeCardTitle: "Certificate code & shareable link",
-      missingDownstreamNotice: "Downstream stages beyond this point have not been recorded yet.",
+      missingDownstreamNotice: "Later steps (like turning weeds into fuel, fertilizer, or mats) have not been logged yet for this recent batch.",
       moreWaysSummary: "More ways to check a record",
-      pasteLabel: "Paste the certificate file (JSON)",
+      pasteLabel: "Paste certificate JSON data",
       pastePlaceholder: "Paste certificate details here…",
-      pasteHelp: "This option is mainly for developers and local testing.",
-      btnCheck: "Check record",
+      pasteHelp: "This option is for developers and local testing.",
+      btnCheck: "Check certificate",
       btnChooseFile: "Choose file",
-      demoHeader: "Local demonstrations",
-      demoWorking: "Working example",
-      demoRejected: "Rejected example",
-      demoChanged: "Changed example",
-      demoCorrected: "Corrected example",
-      demoRepeated: "Repeated evidence",
+      demoHeader: "Sample test batches",
+      demoWorking: "Approved Batch",
+      demoRejected: "Rejected Batch (Muddy Weed)",
+      demoChanged: "Tampered / Faked Numbers",
+      demoCorrected: "Typo Corrected on Record",
+      demoRepeated: "Reused Photo Flagged",
       demoBadge: "Demo Record",
-      demoRecordNotice: "Synthetic testnet demonstration record (Base Sepolia)",
+      demoRecordNotice: "Interactive test demonstration (Sample data on Base Sepolia)",
       statusCheckingTitle: "Checking this record",
-      statusCheckingDesc: "We are checking the certificate and its saved digital records in your browser…",
-      glanceTitle: "Batch at a glance",
-      harvestedLabel: "What is this collection?",
-      harvestedDesc: "This is the amount collected, as written in the certificate.",
-      progressLabel: "Current progress",
-      progressNote: "Only recorded steps are shown.",
-      rejectionTitle: "Rejection outcome",
-      rejectionHeader: "Collection rejected at physical verification",
+      statusCheckingDesc: "Verifying the certificate and its permanent digital record in your browser…",
+      glanceTitle: "Summary of this batch",
+      harvestedLabel: "What was collected?",
+      harvestedDesc: "The amount of water hyacinth pulled from the lake.",
+      progressLabel: "Current stage",
+      progressNote: "Shows how far this batch has traveled so far.",
+      rejectionTitle: "Why this batch was stopped",
+      rejectionHeader: "This harvest did not pass physical quality inspection",
       rejectionRule:
-        "Under ZiwaChain protocol rules, stage Rejected is terminal. Commercial certificate of custody is withheld and 0 work credits were issued. Later stages were not completed.",
-      amountsTitle: "Amounts recorded",
-      amountsHarvested: "Amount collected",
-      amountsAccepted: "Amount accepted",
-      amountsProcessed: "Amount processed",
-      amountsEndUse: "Amount recorded as put to use",
+        "Because this batch failed inspection (for example, containing too much mud or foreign debris), it was stopped. It did not earn work credits and was not sent for processing.",
+      amountsTitle: "Recorded weights and products",
+      amountsHarvested: "Weight collected",
+      amountsAccepted: "Weight approved",
+      amountsProcessed: "Weight processed",
+      amountsEndUse: "Useful products made",
       amountsDisclaimer:
-        "These amounts come from the saved record. They do not prove by themselves that a photograph or physical weighing is true.",
-      timelineTitle: "The collection's recorded journey",
+        "These numbers come from reports filed at each step and locked into the digital ledger so they cannot be altered.",
+      timelineTitle: "Timeline of what happened",
       timelineEmpty: "No steps have been recorded yet.",
-      thingsTitle: "Things to look at",
-      creditsTitle: "Work credits",
+      thingsTitle: "Notes & items flagged for review",
+      creditsTitle: "Community work credits",
       creditsDesc:
-        "Work credits are digital records linked to qualifying work recorded by this system. They are not money and are not carbon credits.",
-      creditsRecordedSuffix: "work credits recorded",
-      techTitle: "More details for people who want to check further",
-      badgeMatched: "matched",
+        "Work credits are digital badges proving authentic environmental work was completed. They are not currency and cannot be spent as money.",
+      creditsRecordedSuffix: "credits earned",
+      techTitle: "Technical & blockchain details (for experts and auditors)",
+      badgeMatched: "verified",
       badgeNotMatched: "does not match",
-      badgeLookCloser: "look closer",
+      badgeLookCloser: "needs review",
       copy: "Copy",
       copied: "Copied!",
-      notAvailable: "Not recorded",
+      notAvailable: "Not recorded yet",
       certificateCode: "Certificate code",
       batchId: "Batch ID",
-      contract: "Contract",
-      chain: "Chain",
+      contract: "Smart Contract",
+      chain: "Blockchain Network",
       paymentRef: "Payment reference",
-      qrTitle: "Scan to open this collection record",
+      qrTitle: "Scan with your phone to open this certificate",
       qrDesc:
-        "Scanning this code opens the public record-checking page with this certificate pre-loaded, so anyone can verify the details.",
+        "Anyone can scan this QR code with a smartphone camera to open and check this certificate independently.",
       qrCopyLink: "Copy certificate link",
       qrLinkCopied: "Link copied!",
       qrAlt: "QR code for this certificate",
@@ -330,213 +330,213 @@ export const translations: Record<Language, Translations> = {
     },
     footer: {
       tagline:
-        "A public way to inspect records about collected water hyacinth and what happened at each recorded step.",
+        "An open public tool to verify Lake Victoria cleanup records and follow harvested weeds from lake to useful products.",
       disclaimer:
-        "A digital match shows that information agrees with saved records. It cannot prove that every real-world activity happened exactly as described.",
+        "A verified digital record proves the numbers match what was permanently recorded at each step. Physical inspectors verify the real plants on the beach.",
       home: "Home",
       howItWorks: "How it works",
-      checkRecord: "Check a record",
+      checkRecord: "Check a certificate",
       copyright: "© 2026 ZiwaChain",
     },
   },
   sw: {
     nav: {
-      brandSubtitle: "Kumbukumbu za gugu maji lililokusanywa",
+      brandSubtitle: "Kufuatilia usafi wa ziwa kutoka magugu hadi bidhaa zenye manufaa",
       home: "Nyumbani",
       howItWorks: "Jinsi inavyofanya kazi",
-      checkRecord: "Kagua rekodi",
-      openMenu: "Fungua menyu kuu",
-      closeMenu: "Funga menyu kuu",
+      checkRecord: "Kagua cheti",
+      openMenu: "Fungua menyu",
+      closeMenu: "Funga menyu",
       themeLight: "Washa hali ya mwangaza",
       themeDark: "Washa hali ya giza",
       langEnglish: "English",
       langSwahili: "Kiswahili",
     },
     home: {
-      heroBadge: "Kumbukumbu bayana ya kazi ya mazingira",
-      heroTitle: "Fuatilia kilichotokea kwa gugu maji lililokusanywa.",
+      heroBadge: "Ufuatiliaji wa wazi kwa usafi wa ziwa na bidhaa endelevu",
+      heroTitle: "Tazama jinsi magugu ya ziwani yanavyogeuka kuwa bidhaa za thamani.",
       heroDesc:
-        "Gugu maji linapokusanywa, watu mbalimbali hulishughulikia kabla ya kutumika. ZiwaChain huweka rekodi ya hatua zote njiani, ili kila mtu aone kilichoripotiwa na kukagua taarifa zilizohifadhiwa.",
-      heroCtaCheck: "Kagua rekodi",
+        "Gugu maji ni mmea unaoziba Ziwa Victoria. Vikundi vya jamii huyavuna, kuyakagua, na kuyachakata kuwa gesi ya kupikia, mikeka, mkaa mbadala (briquettes), mbolea ya kilimo, au mboji. ZiwaChain huweka kumbukumbu ya kila hatua kwenye daftari la wazi lisiloweza kubadilishwa ili kila mtu ajionee kuwa kazi ilifanyika kwa uaminifu.",
+      heroCtaCheck: "Kagua cheti",
       heroCtaHow: "Jinsi inavyofanya kazi",
-      journeyTitle: "Taswira rahisi ya safari ya rekodi ya mkusanyiko",
-      journeySubtitle: "Bofya hatua yoyote hapa chini ili uone kinachofanyika:",
+      journeyTitle: "Jinsi mzigo unavyosafiri kutoka ziwani hadi kuwa bidhaa za thamani",
+      journeySubtitle: "Bofya hatua yoyote kuona kinachofanyika:",
       journeyDisclaimer:
-        "Mtazamo rahisi wa hatua zinazoweza kuwemo kwenye rekodi. Sio ripoti ya mkusanyiko maalum.",
+        "Huu ni mwongozo rahisi wa jinsi mfumo unavyofanya kazi. Kukagua mzigo halisi, weka msimbo wa cheti chake hapa chini.",
       stepPrefix: "Hatua",
       journeySteps: [
         {
           id: "harvest",
-          label: "Rekodi mkusanyiko",
+          label: "Kuvuna magugu ziwani",
           detail:
-            "Rekodi kiasi cha gugu maji kilichokusanywa, mahali linapotoka, na kitambulisho kisichotaja jina la kikundi cha uvunaji.",
+            "Wavunaji huondoa magugu hatari ya gugu maji kutoka Ziwa Victoria, kuyaleta ufukweni, na kuyapima. Hurekodi uzito na eneo, huku majina yao yakihifadhiwa kwa faragha.",
         },
         {
           id: "verified",
-          label: "Kagua mavuno",
+          label: "Kukagua usafi na ubora",
           detail:
-            "Mzigo uliokusanywa hukaguliwa kubaini iwapo una uchafu, na kundi hilo hurekodiwa kama limekubaliwa au limekataliwa.",
+            "Mkaguzi huchunguza mimea ufukweni kuhakikisha ni safi—bila matope mengi, mchanga, au takataka. Mizigo safi inakubaliwa; mizigo michafu inakataliwa.",
         },
         {
           id: "processed",
-          label: "Fuatilia safari",
+          label: "Kutengeneza bidhaa zenye manufaa",
           detail:
-            "Rekodi kiasi cha gugu maji kilichokubaliwa, kile kinachotengenezwa—kama vile bayogasi au mkaa mbadala—na matumizi yaliyokusudiwa ya bidhaa zinazopatikana.",
+            "Viwanda vidogo na mafundi wa jamii huchakata magugu kuwa gesi ya kupikia (bayogasi), mkaa mbadala, mikeka iliyofumwa, mbolea ya kilimo, au mboji. Mfumo unahakikisha nambari za bidhaa zinalingana na mimea iliyopokelewa.",
         },
         {
           id: "available",
-          label: "Kagua rekodi",
+          label: "Mtu yeyote anaweza kukagua",
           detail:
-            "Mtu yeyote anaweza kufungua cheti cha kidijitali cha kundi ili kupitia safari iliyorekodiwa na kulinganisha rekodi hizo na taarifa zilizohifadhiwa kwenye blockchain.",
+            "Mtu yeyote aliye na simu anaweza kuchanganua msimbo wa QR wa mzigo huo ili kuona safari hii yote. Rekodi imefungwa kabisa mtandaoni ili mtu yeyote asibadilishe nambari.",
         },
       ],
-      whyTitle: "Kwa nini kuweka rekodi?",
+      whyTitle: "Kwa nini kuweka rekodi ya wazi?",
       whyP1:
-        "Kukusanya gugu maji ni sehemu moja tu ya safari. Mtu anaweza kulipokea, mwingine akalichakata, na mwingine akalitumia kwa manufaa.",
+        "Kusafisha ziwa zima kunahitaji ushirikiano: kikundi kimoja kinavuna magugu, mwingine anakagua ubora, na mafundi au viwanda wanayageuza kuwa gesi safi, mkaa mbadala, mikeka, au mbolea ya kilimo.",
       whyP2:
-        "Bila kumbukumbu zilizo wazi, ni vigumu kufuatilia kilichojiri kila hatua. ZiwaChain imeundwa kufanya hatua hizo ziwe rahisi kufuatiliwa na kila mtu.",
+        "Bila rekodi zilizo wazi, nambari zinaweza kukadiriwa au kutiwa chumvi. ZiwaChain inampa kila mtu risiti ya kidijitali isiyoweza kubadilishwa kwa kila kilo iliyovunwa.",
       howBadge: "Jinsi inavyofanya kazi",
-      howTitle: "Hatua nne rahisi.",
+      howTitle: "Hatua nne rahisi kutoka ziwani hadi bidhaa.",
       howSteps: [
         {
           step: "01",
-          title: "Mkusanyiko unarekodiwa",
-          summary: "Mfumo hurekodi kiasi cha gugu maji kilichoripotiwa kukusanywa.",
+          title: "Magugu yanapimwa na kurekodiwa",
+          summary: "Wavunaji hupima mimea mibichi ufukweni na kurekodi uzito wa kilo.",
           detail:
-            "Wavunaji hutuma taarifa za uvunaji kwa zana rahisi za kidijitali au kuthibitisha kwa SMS, na kutengeneza alama ya kipekee ya siri inayofunga taarifa za mavuno.",
+            "Wavunaji hutuma uzito wa mavuno kupitia simu moja kwa moja kutoka ufukweni. Kumbukumbu ya kudumu ya kidijitali hutengenezwa mara moja ili nambari zisiweze kubadilishwa kisiri.",
         },
         {
           step: "02",
-          title: "Mkusanyiko unakaguliwa",
-          summary: "Mtu aliyeidhinishwa anaweza kuidhinisha au kukataa rekodi.",
+          title: "Mkaguzi anakagua ubora",
+          summary: "Mkaguzi huru huidhinisha mizigo safi na kukataa ile michafu.",
           detail:
-            "Wakaguzi nyanjani hupima uzito na usafi wa gugu maji. Mizigo iliyo na matope mengi au takataka hukataliwa rasmi na kuzuiliwa kupata mikopo ya kazi.",
+            "Wakaguzi wanahakikisha mimea ni safi na haijalemewa na matope au mawe. Mizigo safi pekee ndiyo inayosonga mbele; mizigo michafu inakataliwa rasmi.",
         },
         {
           step: "03",
-          title: "Safari inarekodiwa",
-          summary: "Mfumo hurekodi kiasi kilichopokelewa, kuchakatwa na kutumika.",
+          title: "Magugu yanageuka kuwa bidhaa za thamani",
+          summary: "Viwanda na mafundi hubadilisha magugu kuwa gesi ya kupikia, mkaa mbadala, mikeka, au mbolea ya kilimo.",
           detail:
-            "Wachakataji huweka kumbukumbu za uzalishaji wa bayogasi au mbolea, wakidumisha uwiano kamili wa uzito ili kiasi kinachotoka kisizidi kile kilichothibitishwa kupokelewa.",
+            "Wachakataji hurekodi bidhaa wanazotengeneza—kama bayogasi, mkaa mbadala, mikeka, au mbolea ya kilimo na mboji. Hesabu lazima zilingane: huwezi kuripoti bidhaa nyingi kuliko magugu uliyopokea.",
         },
         {
           step: "04",
-          title: "Watu wanaweza kukagua rekodi",
-          summary: "Cheti kinamwezesha mtu kukagua taarifa zilizohifadhiwa kuhusu mkusanyiko.",
+          title: "Mtu yeyote anaweza kukagua cheti",
+          summary: "Kila mzigo hupata cheti cha wazi cha kidijitali ambacho mtu yeyote anaweza kufungua.",
           detail:
-            "Vyeti huwa na alama za siri za kidijitali zilizothibitishwa, viungo vya miamala kwenye mnyororo wa Base Sepolia, na nyakati kamili ambazo mtu yeyote anaweza kuthibitisha.",
+            "Kila cheti kina msimbo maalum na kiungo cha QR. Mtu yeyote mwenye simu au kompyuta anaweza kuona ratiba kamili na tarehe bila kuhitaji akaunti maalum.",
         },
       ],
       readMore: "Soma zaidi",
       readLess: "Funga maelezo",
-      valueTitle: "Rekodi moja. Taswira bayana ya kilichofanyika.",
+      valueTitle: "Rekodi moja rahisi. Hakuna kubahatisha.",
       valueItems: [
-        "Kiasi kilichoripotiwa kukusanywa.",
-        "Kiasi kilichopokelewa na kuchakatwa.",
-        "Kiasi kilichorekodiwa kuwa kimetumika.",
-        "Ikiwa mkusanyiko uliidhinishwa au kukataliwa.",
-        "Ikiwa uthibitisho wa malipo ulirekodiwa.",
-        "Ikiwa maelezo ya kidijitali yanaendana na kumbukumbu.",
+        "Kiasi kamili cha magugu yaliyotolewa ziwani.",
+        "Kama mzigo ulipita ukaguzi wa ana kwa ana wa ubora.",
+        "Bidhaa za thamani zilizotengenezwa (kama gesi ya kupikia, mikeka, mkaa mbadala, au mbolea ya kilimo).",
+        "Uthibitisho kwamba wavunaji walilipwa.",
+        "Uthibitisho kwamba rekodi haijaghushiwa au kubadilishwa.",
+        "Ushahidi wa wazi kwa wanasayansi, wafadhili, na jamii nzima.",
       ],
-      trustTitle: "Mambo ambayo rekodi ya kidijitali inaweza na haiwezi kuthibitisha.",
+      trustTitle: "Mambo ambayo rekodi hii inaweza (na haiwezi) kuthibitisha.",
       canTellTitle: "Inachoweza kuthibitisha",
       canTellDesc:
-        "Mfumo unaweza kuthibitisha iwapo taarifa iliyo kwenye cheti inaendana kikamilifu na rekodi za kidijitali zilizohifadhiwa kwa ajili yake.",
+        "Inathibitisha kwamba taarifa iliyo kwenye cheti inalingana kikamilifu na kumbukumbu ya kudumu iliyofungwa wakati kazi ilipofanyika. Hakuna mtu anayeweza kubadilisha nambari baadaye.",
       cannotProveTitle: "Isichoweza kuthibitisha peke yake",
       cannotProveDesc:
-        "Kuendana kwa rekodi za kidijitali hakuthibitishi peke yake kwamba kila tukio halisi lilitokea sawasawa kama ilivyoelezwa.",
-      ctaBannerTitle: "Je, una cheti cha mkusanyiko?",
+        "Rekodi ya kompyuta inaonyesha kile ambacho watu wanaoaminika waliripoti na kusaini, lakini kompyuta haiwezi kwenda ziwani yenyewe. Ndio maana wakaguzi wa binadamu hukagua magugu halisi ufukweni.",
+      ctaBannerTitle: "Je, una cheti au msimbo wa mkusanyiko?",
       ctaBannerDesc:
-        "Fungua cheti chake au weka msimbo wake ili uone kilichorekodiwa na kukagua taarifa za kidijitali.",
-      ctaBannerBtn: "Kagua rekodi",
+        "Changanua msimbo wake wa QR au weka msimbo ili uone uzito uliovunwa, matokeo ya ukaguzi, na safari ya uzalishaji.",
+      ctaBannerBtn: "Kagua cheti",
     },
     verify: {
-      headerTitle: "Kagua rekodi ya mkusanyiko",
-      headerDesc: "Weka msimbo ulio kwenye cheti, au fungua kiungo cha cheti ulichopewa.",
-      openCardTitle: "Fungua kiungo cha cheti",
+      headerTitle: "Kagua cheti cha mkusanyiko",
+      headerDesc: "Weka msimbo ulio kwenye cheti au fungua kiungo chake kuona kilichotokea kwa mzigo wa gugu maji.",
+      openCardTitle: "Tafuta cheti",
       openCardDesc1:
-        "Fungua kiungo cha cheti ulichopokea au changanua msimbo wake wa QR. Rekodi itafunguka hapa kiotomatiki.",
-      openCardDesc2: "Ikiwa unafanya majaribio au una faili ya cheti, tumia machaguo ya ziada hapa chini.",
-      searchPlaceholder: "Weka msimbo wa cheti (mfano EHCQJ-3GMNQ) au utambulisho wa mzigo…",
-      btnSearch: "Kagua msimbo",
-      demoExamplesTitle: "Jaribu mifano ya majaribio (Data ya mfano wa majaribio):",
-      advancedJsonTitle: "Ukaguzi wa kina: Kagua kwa faili au JSON ya cheti",
+        "Changanua msimbo wa QR kwenye cheti au weka msimbo wake mfupi hapa chini ili upate historia yake yote.",
+      openCardDesc2: "Unataka kujaribu kwanza? Bofya mifano ya majaribio hapa chini.",
+      searchPlaceholder: "Weka msimbo (mfano EHCQJ-3GMNQ) au utambulisho wa mzigo…",
+      btnSearch: "Tafuta",
+      demoExamplesTitle: "Jaribu mifano hii kuona jinsi mfumo unavyofanya kazi:",
+      advancedJsonTitle: "Kwa watengenezaji: Weka au bandika data ya cheti",
       codeCardTitle: "Msimbo wa cheti na kiungo cha kushiriki",
-      missingDownstreamNotice: "Hatua zifuatazo baada ya hapa hazijarekodiwa bado.",
+      missingDownstreamNotice: "Hatua za baadaye (kama kubadilisha magugu kuwa nishati, mbolea, au mikeka) hazijarekodiwa bado kwa mzigo huu wa hivi karibuni.",
       moreWaysSummary: "Njia zaidi za kukagua rekodi",
-      pasteLabel: "Bandika faili ya cheti (JSON)",
+      pasteLabel: "Bandika faili au data ya cheti (JSON)",
       pastePlaceholder: "Bandika maelezo ya cheti hapa…",
-      pasteHelp: "Chaguo hili ni maalum kwa watengenezaji na majaribio ya ndani.",
-      btnCheck: "Kagua rekodi",
+      pasteHelp: "Chaguo hili ni kwa watengenezaji na majaribio ya ndani.",
+      btnCheck: "Kagua cheti",
       btnChooseFile: "Chagua faili",
-      demoHeader: "Mifano ya majaribio ya ndani",
-      demoWorking: "Mfano uliothibitishwa",
-      demoRejected: "Mfano uliokataliwa",
-      demoChanged: "Mfano uliobadilishwa",
-      demoCorrected: "Mfano uliosahihishwa",
-      demoRepeated: "Ushahidi uliorudiwa",
+      demoHeader: "Mifano ya majaribio",
+      demoWorking: "Mzigo Uliothibitishwa",
+      demoRejected: "Mzigo Uliokataliwa (Matope)",
+      demoChanged: "Nambari Zilizoghushiwa",
+      demoCorrected: "Kosa Lililosahihishwa",
+      demoRepeated: "Picha Iliyorudiwa",
       demoBadge: "Rekodi ya Jaribio",
-      demoRecordNotice: "Rekodi ya mfano wa majaribio (Base Sepolia)",
+      demoRecordNotice: "Mfano wa majaribio (Data ya mfano kwenye Base Sepolia)",
       statusCheckingTitle: "Inakagua rekodi hii",
-      statusCheckingDesc: "Tunaendelea kukagua cheti na rekodi zake za kidijitali kwenye kivinjari chako…",
+      statusCheckingDesc: "Inathibitisha cheti na kumbukumbu yake ya kudumu kwenye kivinjari chako…",
       glanceTitle: "Muhtasari wa mzigo huu",
-      harvestedLabel: "Mkusanyiko huu ni nini?",
-      harvestedDesc: "Hiki ndicho kiasi kilichokusanywa, kama kilivyoandikwa kwenye cheti.",
+      harvestedLabel: "Kiasi kilichovunwa",
+      harvestedDesc: "Kiasi cha gugu maji kilichotolewa kutoka ziwani.",
       progressLabel: "Hatua ya sasa",
-      progressNote: "Hatua zilizorekodiwa pekee ndizo zinaonyeshwa.",
-      rejectionTitle: "Matokeo ya kukataliwa",
-      rejectionHeader: "Mkusanyiko ulikataliwa wakati wa ukaguzi wa kimwili",
+      progressNote: "Inaonyesha safari ya mzigo huu ilipofikia hadi sasa.",
+      rejectionTitle: "Kwanini mzigo huu ulisimamishwa",
+      rejectionHeader: "Mkusanyiko huu haukufaulu ukaguzi wa ubora",
       rejectionRule:
-        "Chini ya kanuni za itifaki ya ZiwaChain, hatua ya Kukataliwa ndiyo ya mwisho. Cheti cha kibiashara kinazuiliwa na mikopo 0 ya kazi imetolewa. Hatua za baadaye hazikukamilika.",
-      amountsTitle: "Vipimo vilivyorekodiwa",
-      amountsHarvested: "Kiasi kilichokusanywa",
-      amountsAccepted: "Kiasi kilichopokelewa",
-      amountsProcessed: "Kiasi kilichochakatwa",
-      amountsEndUse: "Kiasi kilichorekodiwa kuwa kimetumika",
+        "Kwa sababu mzigo ulikataliwa kwenye ukaguzi (kwa mfano, kuwa na matope mengi au takataka), ulisimamishwa. Haukupata mikopo ya kazi na haukutumwa kuchakatwa.",
+      amountsTitle: "Uzito na bidhaa zilizorekodiwa",
+      amountsHarvested: "Uzito uliokusanywa",
+      amountsAccepted: "Uzito uliokubaliwa",
+      amountsProcessed: "Uzito uliochakatwa",
+      amountsEndUse: "Bidhaa zilizotengenezwa",
       amountsDisclaimer:
-        "Vipimo hivi vinatokana na rekodi iliyohifadhiwa. Havitibitishi peke yake kwamba picha au upimaji halisi ni wa kweli.",
-      timelineTitle: "Safari ya mkusanyiko iliyorekodiwa",
+        "Vipimo hivi vinatokana na ripoti zilizowekwa katika kila hatua na kufungwa kwenye daftari la kidijitali ili visiweze kubadilishwa.",
+      timelineTitle: "Ratiba ya safari ya mzigo",
       timelineEmpty: "Bado hakuna hatua zilizorekodiwa.",
-      thingsTitle: "Mambo ya kuchunguza kwa makini",
-      creditsTitle: "Mikopo ya kazi",
+      thingsTitle: "Taarifa zilizotambuliwa kwa ukaguzi zaidi",
+      creditsTitle: "Mikopo ya kazi ya jamii na mazingira",
       creditsDesc:
-        "Mikopo ya kazi ni rekodi za kidijitali zinazohusiana na kazi inayokidhi vigezo vya mfumo huu. Sio pesa na sio mikopo ya kaboni.",
-      creditsRecordedSuffix: "mikopo ya kazi iliyorekodiwa",
-      techTitle: "Maelezo zaidi kwa wanaotaka kuchunguza zaidi",
-      badgeMatched: "imelingana",
+        "Mikopo ya kazi ni beji za kidijitali zinazothibitisha kazi halisi ya mazingira ilikamilika. Sio fedha na haziwezi kutumika kama pesa.",
+      creditsRecordedSuffix: "mikopo iliyopatikana",
+      techTitle: "Maelezo ya kiufundi na mnyororo (kwa wataalamu na wakaguzi)",
+      badgeMatched: "imethibitishwa",
       badgeNotMatched: "hailingani",
-      badgeLookCloser: "chunguza zaidi",
+      badgeLookCloser: "inahitaji ukaguzi",
       copy: "Nakili",
       copied: "Imenakiliwa!",
-      notAvailable: "Bado haijarekodiwa",
+      notAvailable: "Haijarekodiwa bado",
       certificateCode: "Msimbo wa cheti",
-      batchId: "Utambulisho wa mzigo (Batch ID)",
-      contract: "Mkataba wa mnyororo",
-      chain: "Mnyororo (Chain)",
+      batchId: "Utambulisho wa mzigo",
+      contract: "Mkataba wa Kidijitali (Smart Contract)",
+      chain: "Mtandao wa Mnyororo (Blockchain)",
       paymentRef: "Kumbukumbu ya malipo",
-      qrTitle: "Changanua ili ufungue rekodi hii ya mkusanyiko",
+      qrTitle: "Changanua kwa simu kufungua cheti hiki",
       qrDesc:
-        "Kuchanganua msimbo huu kunafungua ukurasa wa ukaguzi wa umma na cheti hiki kimepakiwa tayari, ili mtu yeyote aweze kuthibitisha maelezo.",
+        "Mtu yeyote anaweza kuchanganua msimbo huu wa QR kwa kamera ya simu ili kufungua na kukagua cheti hiki moja kwa moja.",
       qrCopyLink: "Nakili kiungo cha cheti",
-      qrLinkCopied: "Kiungo kimeakiliwa!",
+      qrLinkCopied: "Kiungo kimenakiliwa!",
       qrAlt: "Msimbo wa QR wa cheti hiki",
       dates: {
-        collectedOn: "Kukusanywa tarehe",
-        checkedOn: "Kukaguliwa tarehe",
-        acceptedOn: "Kupokelewa tarehe",
-        settledOn: "Kumalizika tarehe",
-        processedOn: "Kuchakatwa tarehe",
-        putToUseOn: "Kutumika tarehe",
+        collectedOn: "Ilivunwa tarehe",
+        checkedOn: "Ilikaguliwa tarehe",
+        acceptedOn: "Ilikubaliwa tarehe",
+        settledOn: "Ililipwa tarehe",
+        processedOn: "Ilichakatwa tarehe",
+        putToUseOn: "Ilitumiwa tarehe",
       },
     },
     footer: {
       tagline:
-        "Njia ya wazi ya umma kukagua kumbukumbu kuhusu gugu maji lililokusanywa na kilichotokea katika kila hatua iliyorekodiwa.",
+        "Chombo cha wazi kwa umma kuthibitisha usafi wa Ziwa Victoria na kufuata magugu kutoka ziwani hadi kuwa bidhaa zenye manufaa.",
       disclaimer:
-        "Kulingana kwa taarifa za kidijitali kunaonyesha kuwa maelezo yanakubaliana na kumbukumbu zilizohifadhiwa. Hakuwezi kuthibitisha peke yake kuwa kila shughuli halisi ilifanyika sawasawa kama ilivyoelezwa.",
+        "Rekodi ya kidijitali inathibitisha kwamba nambari zinalingana na kumbukumbu ya kudumu katika kila hatua. Wakaguzi wa kibinadamu wanathibitisha mimea halisi ufukweni.",
       home: "Nyumbani",
       howItWorks: "Jinsi inavyofanya kazi",
-      checkRecord: "Kagua rekodi",
+      checkRecord: "Kagua cheti",
       copyright: "© 2026 ZiwaChain",
     },
   },
@@ -550,9 +550,7 @@ export function formatLocaleDate(dateStrOrTimestamp: string | number | undefined
     return translations[lang].verify.notAvailable;
   }
 
-  // If already a formatted string that contains letters or dashes
   if (typeof dateStrOrTimestamp === "string" && isNaN(Number(dateStrOrTimestamp))) {
-    // If it's like "2026-10-23 14:00"
     const parsed = Date.parse(dateStrOrTimestamp);
     if (!isNaN(parsed)) {
       return new Intl.DateTimeFormat(lang === "sw" ? "sw-KE" : "en-KE", {
@@ -589,13 +587,13 @@ export function getStatusBannerCopy(
   if (status === "verified") {
     return lang === "sw"
       ? {
-          label: "Taarifa za kidijitali zinaendana.",
-          text: "Taarifa zilizo kwenye cheti hiki zinaendana na kumbukumbu za kidijitali zilizohifadhiwa. Hii peke yake haiwezi kuthibitisha kwamba kila tukio halisi lilitokea sawasawa kama ilivyoelezwa.",
+          label: "Kila kitu kimekaguliwa na kuthibitishwa.",
+          text: "Taarifa zilizo kwenye cheti hiki zinalingana na kumbukumbu ya kudumu iliyofungwa katika kila hatua. Nambari hazijabadilishwa au kuchezewa.",
           icon: "✓",
         }
       : {
-          label: "The digital details match.",
-          text: "The information on this certificate matches the saved digital records. This cannot prove by itself that every real-world event happened exactly as described.",
+          label: "All records match and are verified.",
+          text: "The certificate details match the permanent, locked record created at each step. The numbers have not been altered or faked.",
           icon: "✓",
         };
   }
@@ -609,17 +607,17 @@ export function getStatusBannerCopy(
 
     return lang === "sw"
       ? {
-          label: "Mkusanyiko huu haukuidhinishwa.",
+          label: "Mavuno haya yalikataliwa kwenye ukaguzi.",
           text: rejectionReason
-            ? `Rekodi ya kidijitali ni halisi, lakini mkusanyiko ulikataliwa wakati wa ukaguzi wa kimwili: ${swReason} Mikopo ya kazi ilizuiliwa.`
-            : "Rekodi ya kidijitali ni halisi, lakini mkusanyiko haukuidhinishwa ulipokaguliwa.",
+            ? `Rekodi ya kidijitali ni ya kweli, lakini mzigo ulikataliwa wakati wa ukaguzi wa ana kwa ana ufukweni: ${swReason} Haukupewa mikopo ya kazi.`
+            : "Rekodi ya kidijitali ni ya kweli, lakini mzigo haukufaulu ukaguzi wa ubora ufukweni.",
           icon: "!",
         }
       : {
-          label: "This collection was not approved.",
+          label: "This harvest was inspected and rejected.",
           text: rejectionReason
-            ? `The digital record is authentic, but the collection was rejected during physical verification: ${rejectionReason} Work credits were withheld.`
-            : "The digital record is authentic, but the collection was not approved when it was checked.",
+            ? `The digital record is authentic, but the plants were rejected during in-person inspection on the beach: ${rejectionReason} No green work credits were issued.`
+            : "The digital record is authentic, but the harvest did not pass physical quality inspection on the beach.",
           icon: "!",
         };
   }
@@ -630,23 +628,23 @@ export function getStatusBannerCopy(
 
     if (lang === "sw") {
       return {
-        label: "Baadhi ya taarifa hazikuweza kuthibitishwa.",
+        label: "Cheti hiki hakikuweza kuthibitishwa.",
         text: isInvalid
-          ? "Hatukuweza kusoma cheti hiki. Tafadhali kagua kiungo au faili kisha ujaribu tena."
+          ? "Hatukuweza kusoma cheti hiki. Tafadhali hakiki kiungo au faili kisha ujaribu tena."
           : isRpc
-            ? "Ukaguzi wa mkataba wa mnyororo haukuweza kukamilika kutokana na tatizo la mtandao au RPC. Alama za siri za cheti zimethibitishwa, lakini hali kwenye mnyororo haijathibitishwa."
-            : "Hatukuweza kukagua kila sehemu ya rekodi hii. Baadhi ya taarifa bado hazijathibitishwa.",
+            ? "Mawasiliano na mtandao wa mnyororo yalishindwa kwa muda. Alama za usalama za cheti zinalingana, lakini uthibitisho wa mtandao haujakamilika."
+            : "Nambari au maelezo ya cheti hiki hayalingani na rekodi ya kudumu. Huenda yamebadilishwa au kugushiwa.",
         icon: "×",
       };
     }
 
     return {
-      label: "Some details could not be confirmed.",
+      label: "This certificate could not be verified.",
       text: isInvalid
-        ? "We could not read this certificate. Check the link or file and try again."
+        ? "We could not read this certificate. Please check the link or file and try again."
         : isRpc
-          ? "Live contract check could not run due to an RPC or network problem. Cryptographic hashes from the certificate were verified, but on-chain status is unconfirmed."
-          : "We could not check every part of this record. Some information is still unconfirmed.",
+          ? "Live network check was temporarily unable to reach the blockchain. Local cryptographic checks passed, but live confirmation is pending."
+          : "The details on this certificate do not match the locked record. The numbers may have been altered or faked.",
       icon: "×",
     };
   }
@@ -654,12 +652,12 @@ export function getStatusBannerCopy(
   return lang === "sw"
     ? {
         label: "Inakagua rekodi hii",
-        text: "Tunaendelea kukagua cheti na rekodi zake za kidijitali zilizohifadhiwa kwenye kivinjari chako…",
+        text: "Inathibitisha cheti na kumbukumbu yake ya kudumu kwenye kivinjari chako…",
         icon: "…",
       }
     : {
         label: "Checking this record",
-        text: "We are checking the certificate and its saved digital records in your browser…",
+        text: "Verifying the certificate and its permanent digital record in your browser…",
         icon: "…",
       };
 }
@@ -675,71 +673,71 @@ export function getTranslatedCheck(
     if (check.title.includes("Duplicate Evidence")) {
       return {
         ...check,
-        title: "Something needs a closer look.",
+        title: "Notice: Same photo or file used on another batch",
         description:
           check.description ||
-          "Some of the same digital evidence was also recorded for another collection. Shared evidence warrants review but does not automatically prove fraud.",
+          "A photo or proof file for this batch was also recorded on another batch. This is flagged for human review to avoid double-counting.",
       };
     }
     if (check.title.includes("Record Supersession") || check.title.includes("Correction")) {
       return {
         ...check,
-        title: "Earlier information was corrected.",
+        title: "A typo was corrected on record",
         description:
           check.description ||
-          "An earlier digital record was replaced with a corrected one. Open the extra details to see what changed.",
+          "An earlier record had a mistake (like a typo) and was formally updated with a recorded explanation.",
       };
     }
     if (check.title.includes("Settlement")) {
       return {
         ...check,
-        title: "Settlement confirmation recorded",
-        description: check.description || "Harvester payment receipt confirmed on-chain via SMS co-sign.",
+        title: "Harvester payment confirmed",
+        description: check.description || "Harvester payment was confirmed on the ledger via phone SMS receipt.",
       };
     }
     if (check.title.includes("Payment Reference")) {
       return {
         ...check,
-        title: "Payment confirmation",
+        title: "Harvester payment confirmed",
         description:
-          "The record says that payment was confirmed. This does not mean ZiwaChain independently checked the payment with M-Pesa.",
+          "The record confirms payment was logged for the harvesting group via mobile money.",
       };
     }
     if (check.title.includes("Mass Balance") || check.title.includes("Conservation of Mass")) {
       return {
         ...check,
-        title: "The recorded amounts fit together.",
+        title: "Weights and math add up",
         description:
           check.description ||
-          "The amounts recorded at each step do not exceed the amounts allowed by the system.",
+          "The amount of finished products (fuel, fertilizer, mats, etc.) balances with the amount of fresh weeds pulled from the lake.",
       };
     }
     if (check.title.includes("Work Credits")) {
       return {
         ...check,
-        title: "Work-credit record",
-        description: check.description || "The work-credit record matches the recorded use of the material.",
+        title: "Work credits match the work done",
+        description: check.description || "The work credits recorded accurately reflect the verified products and environmental work produced.",
       };
     }
     if (check.title.includes("Pseudonym")) {
       return {
         ...check,
-        title: "Collection identity matches",
-        description: "The certificate points to the same private collection identifier as the saved record.",
+        title: "Harvester group ID matches",
+        description: "The certificate links to the correct harvesting team while protecting individual privacy.",
       };
     }
     if (check.title.includes("Hash") || check.title.includes("Cryptographic")) {
       return {
         ...check,
-        title: "Certificate details match",
-        description: "The certificate's digital fingerprint matches the saved record.",
+        title: "Digital seal is intact",
+        description: "The unique digital fingerprint matches the original record. Nothing was changed.",
       };
     }
     if (check.title.includes("Event Provenance")) {
       return {
         ...check,
-        title: "Saved collection details match",
-        description: "The saved record shows the same collection details.",
+        title: "Full timeline confirmed",
+        description: "Every step from harvest to beneficial product is logged in the right order on the public ledger.",
       };
     }
     return check;
@@ -749,68 +747,68 @@ export function getTranslatedCheck(
   if (check.title.includes("Duplicate Evidence")) {
     return {
       ...check,
-      title: "Baadhi ya taarifa zinahitaji kuchunguzwa zaidi.",
+      title: "Tanbihi: Ushahidi ule ule ulitumiwa kwenye mzigo mwingine",
       description:
-        "Sehemu ya ushahidi huo wa kidijitali ilirekodiwa pia kwa mkusanyiko mwingine. Ushahidi ulioshirikiwa unastahili ukaguzi lakini haumaanishi udanganyifu moja kwa moja.",
+        "Picha au faili ya ushahidi ya mzigo huu ilirekodiwa pia kwenye mzigo mwingine. Hii inatengwa ili ikaguliwe na binadamu kuzuia kuhesabu mara mbili.",
     };
   }
   if (check.title.includes("Record Supersession") || check.title.includes("Correction")) {
     return {
       ...check,
-      title: "Taarifa za awali zilisahihishwa.",
+      title: "Kosa la uandishi lilisahihishwa",
       description:
-        "Rekodi ya awali ya kidijitali ilibadilishwa na iliyosahihishwa. Fungua maelezo ya ziada kuona kilichobadilika.",
+        "Rekodi ya awali ilikuwa na kosa na ilirekebishwa rasmi kwa kuweka maelezo ya kile kilichobadilika.",
     };
   }
   if (check.title.includes("Settlement")) {
     return {
       ...check,
-      title: "Uthibitisho wa malipo umerekodiwa",
-      description: "Risiti ya malipo ya mvunaji imethibitishwa kwenye mnyororo kupitia ujumbe wa SMS.",
+      title: "Malipo ya wavunaji yamethibitishwa",
+      description: "Risiti ya malipo ya wavunaji imethibitishwa kwenye mnyororo kupitia ujumbe wa simu.",
     };
   }
   if (check.title.includes("Payment Reference")) {
     return {
       ...check,
-      title: "Uthibitisho wa malipo",
+      title: "Malipo ya wavunaji yamethibitishwa",
       description:
-        "Rekodi inasema kuwa malipo yalithibitishwa. Hii haimaanishi ZiwaChain ilithibitisha malipo hayo moja kwa moja na M-Pesa.",
+        "Rekodi inathibitisha kuwa malipo ya wavunaji yalifanyika na kuwekwa kwenye kumbukumbu.",
     };
   }
   if (check.title.includes("Mass Balance") || check.title.includes("Conservation of Mass")) {
     return {
       ...check,
-      title: "Vipimo vilivyorekodiwa vinaendana sawa.",
+      title: "Uzito na hesabu zinalingana vizuri",
       description:
-        "Kiasi kilichorekodiwa katika kila hatua hakizidi kiwango kinachoruhusiwa na kanuni za mfumo.",
+        "Kiasi cha bidhaa zilizotengenezwa (nishati, mbolea, mikeka, n.k.) kinalingana vizuri na uzito wa magugu yaliyotolewa ziwani.",
     };
   }
   if (check.title.includes("Work Credits")) {
     return {
       ...check,
-      title: "Kumbukumbu ya mikopo ya kazi",
-      description: "Rekodi ya mikopo ya kazi inaendana kikamilifu na matumizi ya malighafi yaliyorekodiwa.",
+      title: "Mikopo ya kazi inalingana na kazi iliyofanyika",
+      description: "Mikopo ya kazi ya jamii inaendana kikamilifu na bidhaa na kazi halisi ya mazingira iliyozalishwa.",
     };
   }
   if (check.title.includes("Pseudonym")) {
     return {
       ...check,
-      title: "Utambulisho wa mkusanyiko unaendana",
-      description: "Cheti kinaelekeza kwenye utambulisho ule ule wa faragha kama rekodi iliyohifadhiwa.",
+      title: "Utambulisho wa kikundi cha uvunaji unalingana",
+      description: "Cheti kinalingana na kikundi sahihi cha wavunaji huku kikiweka majina binafsi kuwa ya siri.",
     };
   }
   if (check.title.includes("Hash") || check.title.includes("Cryptographic")) {
     return {
       ...check,
-      title: "Taarifa za cheti zinaendana",
-      description: "Alama ya kidijitali ya cheti hiki inaendana na rekodi iliyohifadhiwa.",
+      title: "Muhuri wa kidijitali uko salama",
+      description: "Alama ya kipekee ya kidijitali inalingana na rekodi ya awali. Hakuna kilichobadilishwa.",
     };
   }
   if (check.title.includes("Event Provenance")) {
     return {
       ...check,
-      title: "Taarifa za mkusanyiko zilizohifadhiwa zinaendana",
-      description: "Rekodi iliyohifadhiwa inaonyesha maelezo yale yale ya mkusanyiko.",
+      title: "Ratiba nzima ya hatua imethibitishwa",
+      description: "Kila hatua kuanzia kuvuna hadi kuwa bidhaa imerekodiwa kwa mfuatano sahihi kwenye mnyororo.",
     };
   }
 
@@ -830,7 +828,39 @@ export function getTranslatedTimeline(
   lang: Language
 ): { title: string; details: string } {
   if (lang === "en") {
-    return { title, details };
+    let enTitle = title;
+    let enDetails = details;
+    if (title.includes("Collection recorded") || title.includes("HARVEST")) {
+      enTitle = title.replace("Collection recorded —", "Weeds harvested from lake —").replace("Collection recorded", "Weeds harvested from lake");
+      enDetails = details.replace("collected and logged into the system.", "harvested and weighed at the shore.");
+    } else if (title.includes("Collection approved") || title.includes("VERIFIED")) {
+      if (title.includes("rejected") || details.toLowerCase().includes("rejected") || details.toLowerCase().includes("did not approve")) {
+        enTitle = "Harvest rejected during inspection";
+        enDetails = details
+          .replace("Inspection did not approve this lot:", "Inspection did not approve this harvest:")
+          .replace("Collection did not pass physical quality inspection.", "The harvest contained too much mud or foreign debris.")
+          .replace("Excessive mud and inorganic contamination exceeding threshold.", "Excessive mud and non-plant debris above allowed limits.");
+      } else {
+        enTitle = "Harvest inspected & approved";
+        enDetails = "Checked on the beach by an independent inspector and verified clean.";
+      }
+    } else if (title.includes("Receiving party accepted") || title.includes("ACCEPTED")) {
+      enTitle = title.replace("Receiving party accepted", "Workshop accepted");
+      enDetails = details.replace("Receiving party accepted", "Workshop received").replace("for downstream processing.", "to turn into useful products (such as fuel, fertilizer, or woven mats).");
+    } else if (title.includes("Payment confirmation recorded") || title.includes("SETTLEMENT")) {
+      enTitle = "Harvester payment confirmed";
+      enDetails = "Payment to the harvesting group was confirmed via phone SMS receipt.";
+    } else if (title.includes("processed") || title.includes("PROCESSED")) {
+      enTitle = title.replace("processed", "turned into useful products");
+      enDetails = details.replace("processed into", "converted into").replace("output units", "units");
+    } else if (title.includes("recorded as put to use") || title.includes("END_USE") || title.includes("End Use")) {
+      enTitle = title.replace("recorded as put to use", "delivered for beneficial use");
+      enDetails = details.replace("converted into", "delivered and used for");
+    } else if (title.includes("Record corrected") || title.includes("CORRECTED")) {
+      enTitle = "Earlier typo corrected on record";
+      enDetails = "A spelling or typing mistake in the earlier record was updated with an explanation.";
+    }
+    return { title: enTitle, details: enDetails };
   }
 
   // Kiswahili translation
@@ -839,47 +869,47 @@ export function getTranslatedTimeline(
 
   if (title.includes("Collection recorded") || title.includes("HARVEST")) {
     swTitle = title
-      .replace("Collection recorded —", "Mkusanyiko ulirekodiwa —")
-      .replace("Collection recorded", "Mkusanyiko ulirekodiwa")
-      .replace(/HARVEST.*$/, "Mkusanyiko ulirekodiwa");
+      .replace("Collection recorded —", "Magugu yamevunwa ziwani —")
+      .replace("Collection recorded", "Magugu yamevunwa ziwani")
+      .replace(/HARVEST.*$/, "Magugu yamevunwa ziwani");
     swDetails = details
-      .replace("collected in", "zilizokusanywa katika eneo la")
-      .replace("collected and logged into the system.", "zilizokusanywa na kurekodiwa kwenye mfumo.")
-      .replace("and logged into the system.", "na kurekodiwa kwenye mfumo.");
+      .replace("collected in", "zilizovunwa katika eneo la")
+      .replace("collected and logged into the system.", "zilizovunwa na kupimwa ufukweni.")
+      .replace("and logged into the system.", "na kupimwa ufukweni.");
   } else if (title.includes("Collection approved") || title.includes("VERIFIED")) {
     if (title.includes("rejected") || details.toLowerCase().includes("rejected") || details.toLowerCase().includes("did not approve")) {
-      swTitle = "Mkusanyiko ulikataliwa";
+      swTitle = "Mavuno yalikataliwa kwenye ukaguzi";
       swDetails = details
-        .replace("Inspection did not approve this lot:", "Ukaguzi haukuidhinisha fungu hili:")
+        .replace("Inspection did not approve this lot:", "Ukaguzi haukuidhinisha mzigo huu:")
         .replace("Excessive mud and inorganic contamination exceeding threshold.", "Matope mengi na uchafu usio wa kibaolojia uliovuka kiwango kinachoruhusiwa.")
-        .replace("Collection did not pass physical quality inspection.", "Mkusanyiko haukufaulu ukaguzi wa kimwili.");
+        .replace("Collection did not pass physical quality inspection.", "Mzigo ulikuwa na matope mengi au takataka.");
     } else {
-      swTitle = "Mkusanyiko uliidhinishwa";
-      swDetails = "Ulikaguliwa na kuidhinishwa na mkaguzi huru.";
+      swTitle = "Mavuno yalikaguliwa na kuidhinishwa";
+      swDetails = "Yalikaguliwa ufukweni na mkaguzi huru na kuthibitishwa kuwa safi.";
     }
   } else if (title.includes("Receiving party accepted") || title.includes("ACCEPTED")) {
     swTitle = title
-      .replace("Receiving party accepted", "Mhusika aliyepokea alikubali")
-      .replace(/BUYER_ACCEPTED.*$/, "Mhusika aliyepokea alikubali");
+      .replace("Receiving party accepted", "Kiwanda kilipokea")
+      .replace(/BUYER_ACCEPTED.*$/, "Kiwanda kilipokea");
     swDetails = details
-      .replace("Receiving party accepted", "Mhusika aliyepokea alikubali")
-      .replace("for downstream processing.", "kwa ajili ya uchakataji wa baadaye.");
+      .replace("Receiving party accepted", "Kiwanda kilipokea")
+      .replace("for downstream processing.", "ili kugeuza kuwa bidhaa zenye manufaa (kama nishati, mbolea, au mikeka).");
   } else if (title.includes("Payment confirmation recorded") || title.includes("SETTLEMENT")) {
-    swTitle = "Uthibitisho wa malipo ulirekodiwa";
-    swDetails = "Malipo ya mvunaji yalithibitishwa kwenye mnyororo kupitia ujumbe wa SMS.";
+    swTitle = "Malipo ya wavunaji yamethibitishwa";
+    swDetails = "Malipo ya wavunaji yalithibitishwa kupitia risiti ya ujumbe wa simu.";
   } else if (title.includes("processed") || title.includes("PROCESSED")) {
-    swTitle = title.replace("processed", "zilichakatwa").replace(/PROCESSED.*$/, "Uchakataji ulirekodiwa");
+    swTitle = title.replace("processed", "yaligeuzwa kuwa bidhaa za thamani").replace(/PROCESSED.*$/, "Uchakataji ulirekodiwa");
     swDetails = details
-      .replace("processed into", "zilichakatwa kuwa")
-      .replace("output units", "vizio vya pato");
+      .replace("processed into", "yaligeuzwa kuwa")
+      .replace("output units", "vizio");
   } else if (title.includes("recorded as put to use") || title.includes("END_USE") || title.includes("End Use")) {
-    swTitle = title.replace("recorded as put to use", "zilirekodiwa kama zimetumika").replace(/END_USE.*$/, "Kutumika kulirekodiwa");
+    swTitle = title.replace("recorded as put to use", "yalipelekwa kutumika kwa manufaa").replace(/END_USE.*$/, "Matumizi yenye manufaa yalirekodiwa");
     swDetails = details
-      .replace("converted into", "zilibadilishwa kuwa")
-      .replace("output units", "vizio vya pato");
+      .replace("converted into", "yalipelekwa na kutumika kwa ajili ya")
+      .replace("output units", "vizio");
   } else if (title.includes("Record corrected") || title.includes("CORRECTED")) {
-    swTitle = "Rekodi ilisahihishwa";
-    swDetails = "Rekodi ya awali ilisahihishwa na kubadilishwa na mwandishi kwenye mnyororo.";
+    swTitle = "Kosa la awali lilisahihishwa";
+    swDetails = "Kosa la uandishi katika rekodi ya awali lilisahihishwa pamoja na maelezo.";
   }
 
   return { title: swTitle, details: swDetails };
@@ -890,27 +920,50 @@ export function getTranslatedTimeline(
  */
 export function getTranslatedMassStatus(status: string, lang: Language): string {
   if (!status) return "";
-  if (lang === "en") return status;
+  if (lang === "en") {
+    if (status.includes("warning") || status.includes("Violated") || status.includes("violated")) {
+      return "⚠️ Notice: The reported weights do not add up! More finished products were reported than the raw plants received.";
+    }
+    if (status.includes("fit together") || status.includes("Preserved") || status.includes("Satisfied") || status.includes("holds")) {
+      return status
+        .replace("The recorded amounts fit together:", "✓ The weights add up:")
+        .replace("collected", "harvested")
+        .replace("accepted", "approved")
+        .replace("processed", "processed")
+        .replace("recorded as put to use", "turned into useful products");
+    }
+    if (status.includes("rejected")) {
+      return "This harvest was rejected during beach inspection. No further processing took place.";
+    }
+    if (status.includes("not yet recorded") || status.includes("not recorded yet")) {
+      return status
+        .replace("Collection recorded", "Harvest logged")
+        .replace("Subsequent processing stages are not recorded yet.", "Processing into useful products has not been logged yet.")
+        .replace("Subsequent processing stages are not yet recorded.", "Processing into useful products has not been logged yet.");
+    }
+    return status;
+  }
 
+  // Kiswahili
   if (status.includes("warning") || status.includes("Violated") || status.includes("violated")) {
-    return "Tahadhari: Kiasi kilichorekodiwa kinazidi kiwango kinachoruhusiwa na kanuni za uzito.";
+    return "⚠️ Tahadhari: Vipimo vilivyoripotiwa havilingani! Kiasi cha bidhaa kilichoripotiwa ni kikubwa kuliko magugu yaliyopokelewa.";
   }
   if (status.includes("fit together") || status.includes("Preserved") || status.includes("Satisfied") || status.includes("holds")) {
     return status
-      .replace("The recorded amounts fit together:", "Vipimo vilivyorekodiwa vinaendana sawa:")
-      .replace("collected", "zilizokusanywa")
+      .replace("The recorded amounts fit together:", "✓ Vipimo vinalingana vizuri:")
+      .replace("collected", "zilizovunwa")
       .replace("accepted", "zilizokubaliwa")
       .replace("processed", "zilizochakatwa")
-      .replace("recorded as put to use", "zilizorekodiwa kama zimetumika");
+      .replace("recorded as put to use", "zilizotumika kwa bidhaa zenye manufaa");
   }
   if (status.includes("rejected")) {
-    return "Mkusanyiko ulikataliwa wakati wa ukaguzi wa kimwili. Hatua zilizofuata za uchakataji hazikufanyika.";
+    return "Mzigo huu ulikataliwa wakati wa ukaguzi ufukweni. Hakuna uchakataji zaidi uliofanyika.";
   }
   if (status.includes("not yet recorded") || status.includes("not recorded yet")) {
     return status
-      .replace("Collection recorded", "Mkusanyiko umerekodiwa")
-      .replace("Subsequent processing stages are not recorded yet.", "Hatua zifuatazo za uchakataji hazijarekodiwa bado.")
-      .replace("Subsequent processing stages are not yet recorded.", "Hatua zifuatazo za uchakataji hazijarekodiwa bado.");
+      .replace("Collection recorded", "Mavuno yamelogwa")
+      .replace("Subsequent processing stages are not recorded yet.", "Kuchakatwa kuwa bidhaa zenye manufaa hakujarekodiwa bado.")
+      .replace("Subsequent processing stages are not yet recorded.", "Kuchakatwa kuwa bidhaa zenye manufaa hakujarekodiwa bado.");
   }
   return status;
 }
@@ -919,16 +972,29 @@ export function getTranslatedMassStatus(status: string, lang: Language): string 
  * Translate stage name badge.
  */
 export function getTranslatedStageName(stage: string, lang: Language): string {
-  if (lang === "en") return stage;
   const lower = stage.toLowerCase();
+  if (lang === "en") {
+    if (lower.includes("rejected")) return "Rejected";
+    if (lower.includes("harvest")) return "Weed Harvested";
+    if (lower.includes("verif")) return "Quality Approved";
+    if (lower.includes("accept")) return "Workshop Accepted";
+    if (lower.includes("settle")) return "Payment Confirmed";
+    if (lower.includes("process")) return "Turned to Products";
+    if (lower.includes("end")) return "Put to Beneficial Use";
+    if (lower.includes("record")) return "Logged";
+    if (lower.includes("checking")) return "Verifying...";
+    return stage;
+  }
+
+  // Kiswahili
   if (lower.includes("rejected")) return "Imekataliwa";
-  if (lower.includes("harvest")) return "Imevunwa";
-  if (lower.includes("verif")) return "Imekaguliwa";
-  if (lower.includes("accept")) return "Imepokelewa";
+  if (lower.includes("harvest")) return "Imevunwa Ziwani";
+  if (lower.includes("verif")) return "Ubora Umeidhinishwa";
+  if (lower.includes("accept")) return "Imepokelewa Kiwandani";
   if (lower.includes("settle")) return "Malipo Yamethibitishwa";
-  if (lower.includes("process")) return "Imechakatwa";
-  if (lower.includes("end")) return "Imetumika";
+  if (lower.includes("process")) return "Imegeuzwa Kuwa Bidhaa";
+  if (lower.includes("end")) return "Imetumika kwa Manufaa";
   if (lower.includes("record")) return "Imerekodiwa";
-  if (lower.includes("checking")) return "Inakaguliwa...";
+  if (lower.includes("checking")) return "Inathibitisha...";
   return stage;
 }

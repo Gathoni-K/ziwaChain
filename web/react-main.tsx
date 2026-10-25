@@ -1380,7 +1380,9 @@ function VerifyPage() {
                               ? "Matope mengi na uchafu usio wa kibaolojia uliovuka kiwango kinachoruhusiwa."
                               : results.rejectionReason
                           }`
-                        : "Quality inspection threshold was not met."}
+                        : (language === "sw"
+                            ? "Mzigo haukukidhi vigezo vya usafi (k.m. matope mengi au takataka)."
+                            : "The batch did not meet quality standards (e.g. too much mud or foreign debris).")}
                     </p>
                     <p className="mt-3 text-xs leading-5 font-semibold opacity-90">
                       {t.verify.rejectionRule}
@@ -1488,8 +1490,8 @@ function VerifyPage() {
                     <div>
                       <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
                         {language === "sw"
-                          ? "Ukaguzi wa Kriptografia na Kanuni za Mnyororo"
-                          : "Cryptographic & Protocol Verification Checklist"}
+                          ? "Orodha ya Ukaguzi wa Usalama na Kanuni"
+                          : "Security & Rule Checklist"}
                       </h4>
                       <ul className="space-y-3">
                         {results.checks.map((check, index) => {
@@ -1532,8 +1534,8 @@ function VerifyPage() {
                     <div>
                       <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">
                         {language === "sw"
-                          ? "Kumbukumbu za Hatua kwenye Mnyororo"
-                          : "On-Chain Stage References"}
+                          ? "Kumbukumbu za Miamala ya Mnyororo (Blockchain)"
+                          : "Blockchain Transaction Records"}
                       </h4>
                       <div className="space-y-2">
                         {results.timeline.map((ev, idx) => (

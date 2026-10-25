@@ -1,0 +1,1 @@
+import{t as e}from"./react-main-Boh-X-P1.js";e();
