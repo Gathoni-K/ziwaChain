@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZiwaChain, Check a Collection Record</title>
   <meta name="description" content="Check the saved digital details for a ZiwaChain water hyacinth collection record.">
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var urlTheme = params.get("theme");
+        var theme = (urlTheme === "light" || urlTheme === "dark") ? urlTheme : (localStorage.getItem("ziwachain_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+        document.documentElement.setAttribute("data-theme", theme);
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+        var urlLang = params.get("lang");
+        var lang = (urlLang === "en" || urlLang === "sw") ? urlLang : (localStorage.getItem("ziwachain_lang") || (navigator.language && navigator.language.startsWith("sw") ? "sw" : "en"));
+        document.documentElement.setAttribute("lang", lang);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="root"></div>

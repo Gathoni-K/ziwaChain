@@ -343,7 +343,7 @@ describe("Client-Side Verification Algorithm", () => {
     expect(noticeMessage).to.include("It is flagged for human review. This is not a finding of fraud.");
 
     // The status for this check is 'notice' (amber), NOT 'fail' (red)
-    const checkStatus = "notice";
+    const checkStatus: string = "notice";
     let hasFailures = false;
     if (checkStatus === "fail") {
       hasFailures = true;
