@@ -51,6 +51,16 @@ Without a consistent record, different participants may maintain separate accoun
 
 ZiwaChain explores whether a shared, independently inspectable record can improve the traceability of those activities.
 
+### Climate Impact Pathway
+
+ZiwaChain addresses the traceability layer of water-hyacinth management. By documenting reported collection, verified acceptance, processing and intended end use, the prototype explores how environmental work could become easier to inspect and account for across a fragmented biomass supply chain.
+
+This traceability could support future assessments of environmental outcomes, including the potential climate benefits of biomass utilisation. Depending on the baseline scenario and management pathway, these could include avoided methane emissions or displacement of conventional energy and products. Neither benefit can be assumed from harvesting alone.
+
+The current prototype does not measure greenhouse-gas emissions, calculate verified methane avoidance, or establish net climate benefits. Its demonstration uses synthetic batches, and the corresponding physical activities have not been validated. Establishing climate impact would require reliable field measurements, a defensible baseline, evidence of actual downstream utilisation, and an appropriate methodology for estimating net emissions.
+
+ZiwaChain's current contribution is therefore a prototype for traceability and environmental accountability, with climate-impact assessment identified as a future validation step.
+
 ### The field context
 
 Informal fieldwork around Dunga, Homa Bay and Kendu Bay on Lake Victoria on 18–19 October 2026 helped refine the problem framing.
