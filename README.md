@@ -2,7 +2,7 @@
 
 **Verifiable chain of custody for environmental work on Lake Victoria.**
 
-ZiwaChain is a blockchain-based traceability prototype for documenting the journey of harvested water hyacinth biomass—from collection and verification through acceptance, processing, and intended end use.
+ZiwaChain is a blockchain-based traceability prototype for documenting the journey of harvested water hyacinth biomass, from collection and verification through acceptance, processing, and intended end use.
 
 Developed by Gathoni Karume for the IEEE Global ClimateChain Hackathon 2026, Track 3: Sustainable Supply Chains, ZiwaChain explores a practical question: **How can environmental work be recorded and independently checked when multiple parties must trust the same delivery record?**
 
